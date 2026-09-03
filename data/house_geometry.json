@@ -1,0 +1,287 @@
+{
+  "_about": "Every parameter the seat model depends on. 'source' says where a value comes from; 'confidence' is high (published), medium (derived from published values plus seat counts), low (estimate to be checked against photos or the virtual tour). Edit values here and rerun scripts/build_seats.py.",
+  "units": "feet; x = across the house (+ toward the even-numbered / Carriage Lobby side), y = up (0 = orchestra floor at row A), z = toward the rear (0 = curtain line)",
+  "published": {
+    "auditorium_breadth_ft": {
+      "value": 113,
+      "source": "War Memorial technical specifications",
+      "confidence": "high"
+    },
+    "auditorium_height_ft": {
+      "value": 74,
+      "source": "War Memorial technical specifications",
+      "confidence": "high"
+    },
+    "depth_orchestra_level_ft": {
+      "value": 116,
+      "source": "War Memorial technical specifications",
+      "confidence": "high"
+    },
+    "depth_balcony_level_ft": {
+      "value": 161,
+      "source": "War Memorial technical specifications",
+      "confidence": "high"
+    },
+    "proscenium_width_ft": {
+      "value": 52,
+      "source": "War Memorial technical specifications",
+      "confidence": "high"
+    },
+    "proscenium_valence_height_ft": {
+      "value": 31.5,
+      "source": "War Memorial technical specifications",
+      "confidence": "high"
+    },
+    "stage_height_above_house_ft": {
+      "value": 3.5,
+      "source": "War Memorial technical specifications",
+      "confidence": "high"
+    },
+    "curtain_to_pit_apron_ft": {
+      "value": 4.33,
+      "source": "War Memorial technical specifications",
+      "confidence": "high"
+    },
+    "curtain_to_back_wall_ft": {
+      "value": 64,
+      "source": "War Memorial technical specifications",
+      "confidence": "high"
+    },
+    "pit_depth_at_centerline_ft": {
+      "value": 19.83,
+      "source": "War Memorial technical specifications (pit 'width at center line')",
+      "confidence": "high"
+    },
+    "pit_floor_below_stage_ft": {
+      "value": 7.5,
+      "source": "War Memorial technical specifications (positions 6'8\" / 7'11\" / 8'2\")",
+      "confidence": "high"
+    },
+    "pit_capacity": {
+      "value": 90,
+      "source": "War Memorial technical specifications",
+      "confidence": "high"
+    },
+    "seat_counts": {
+      "value": {
+        "orchestra": 1174,
+        "boxes": 192,
+        "grand_tier": 274,
+        "dress_circle": 598,
+        "balcony_circle": 278,
+        "balcony": 610
+      },
+      "source": "War Memorial technical specifications; orchestra figure predates the current chart",
+      "confidence": "medium"
+    }
+  },
+  "seating": {
+    "seat_width_ft": {
+      "value": 1.75,
+      "source": "Fits the 113 ft breadth with the 56-seat Balcony Circle rows; typical 21 in seat",
+      "confidence": "medium"
+    },
+    "balcony_seat_width_ft": {
+      "value": 1.7,
+      "source": "Balcony rows are 66 seats wide; must fit 113 ft",
+      "confidence": "medium"
+    },
+    "row_pitch_ft": {
+      "value": 2.9,
+      "source": "Estimate (35 in). Orchestra A..ZZ then fills 116 ft depth with ~20 ft of rear standing/cross-aisle",
+      "confidence": "low"
+    },
+    "tier_row_pitch_ft": {
+      "value": 2.85,
+      "source": "Estimate",
+      "confidence": "low"
+    },
+    "box_row_pitch_ft": {
+      "value": 3.0,
+      "source": "Estimate",
+      "confidence": "low"
+    },
+    "aisle_width_ft": {
+      "value": 3.5,
+      "source": "Estimate; side aisles are the wheelchair ramps",
+      "confidence": "low"
+    },
+    "center_aisle_half_ft": {
+      "value": 2.0,
+      "source": "Estimate (orchestra has a center aisle between 101 and 102)",
+      "confidence": "low"
+    },
+    "cross_aisle_ft": {
+      "value": 4.0,
+      "source": "Estimate; gap between EE and A on both tiers",
+      "confidence": "low"
+    },
+    "eye_height_seated_ft": {
+      "value": 3.9,
+      "source": "Standard 46-47 in seated eye height",
+      "confidence": "high"
+    }
+  },
+  "orchestra": {
+    "row_a_z_ft": {
+      "value": 25.5,
+      "source": "Curtain to apron 4.33 + pit 19.83 + ~1.3 ft rail",
+      "confidence": "medium"
+    },
+    "rise_total_ft": {
+      "value": 4.0,
+      "source": "Estimate; the 1932 parterre is gently raked (rear rows known for head-blocking)",
+      "confidence": "low"
+    },
+    "rise_exponent": {
+      "value": 1.5,
+      "source": "Rake steepens toward the rear",
+      "confidence": "low"
+    },
+    "curve_center_z_ft": {
+      "value": -45,
+      "source": "Rows are gentle arcs on the seat map",
+      "confidence": "low"
+    },
+    "pit_rail_height_ft": {
+      "value": 3.5,
+      "source": "Rail at stage height",
+      "confidence": "low"
+    }
+  },
+  "boxes": {
+    "floor_y_ft": {
+      "value": 11.5,
+      "source": "Box level is roughly 8 ft above the rear orchestra floor; estimate",
+      "confidence": "low"
+    },
+    "rail_radius_x_ft": {
+      "value": 46,
+      "source": "Ring inside the 113 ft breadth with 8 ft deep boxes",
+      "confidence": "low"
+    },
+    "rail_radius_z_ft": {
+      "value": 30,
+      "source": "Rear-center box rail lands above orchestra row V (last ~6 center rows under the ring)",
+      "confidence": "low"
+    },
+    "ring_center_z_ft": {
+      "value": 50,
+      "source": "Estimate",
+      "confidence": "low"
+    },
+    "leg_front_z_ft": {
+      "value": 28,
+      "source": "Box A/Z near the proscenium",
+      "confidence": "low"
+    },
+    "soffit_drop_ft": {
+      "value": 2.0,
+      "source": "Structure below the box floor",
+      "confidence": "low"
+    }
+  },
+  "lower_tier": {
+    "_note": "Grand Tier rows AA-EE and Dress Circle rows A-L are one continuous raked tier (SF Opera map: '2nd and 3rd Floor'; cross-aisle at the 2nd floor doors between EE and A; Dress Circle L at the 3rd floor elevator).",
+    "front_z_ft": {
+      "value": 90,
+      "source": "Front rail above orchestra row Y/Z, just behind the rear boxes",
+      "confidence": "low"
+    },
+    "curve_center_z_ft": {
+      "value": -10,
+      "source": "Estimate; tier rows are shallow arcs",
+      "confidence": "low"
+    },
+    "front_y_ft": {
+      "value": 15.5,
+      "source": "Just above the rear boxes; estimate",
+      "confidence": "low"
+    },
+    "grand_tier_rise_per_row_ft": {
+      "value": 1.15,
+      "source": "Estimate",
+      "confidence": "low"
+    },
+    "cross_aisle_y_ft": {
+      "value": 21.5,
+      "source": "2nd floor level; estimate",
+      "confidence": "low"
+    },
+    "dress_circle_rise_per_row_ft": {
+      "value": 1.45,
+      "source": "Row L must reach the 3rd floor (~37 ft)",
+      "confidence": "low"
+    },
+    "soffit_drop_ft": {
+      "value": 2.5,
+      "source": "Estimate",
+      "confidence": "low"
+    }
+  },
+  "upper_tier": {
+    "_note": "Balcony Circle rows AA-EE and Balcony rows A-L are one continuous raked tier (SF Opera map: '4th and 5th Floor'). Standing room behind row L to the 161 ft rear wall.",
+    "front_z_ft": {
+      "value": 96,
+      "source": "Front rail 6 ft behind the lower tier's, above Grand Tier row CC",
+      "confidence": "low"
+    },
+    "curve_center_z_ft": {
+      "value": -10,
+      "source": "Estimate",
+      "confidence": "low"
+    },
+    "front_y_ft": {
+      "value": 41.5,
+      "source": "Estimate",
+      "confidence": "low"
+    },
+    "balcony_circle_rise_per_row_ft": {
+      "value": 1.4,
+      "source": "Estimate; balcony is steep",
+      "confidence": "low"
+    },
+    "cross_aisle_y_ft": {
+      "value": 49.5,
+      "source": "4th floor level; estimate",
+      "confidence": "low"
+    },
+    "balcony_rise_per_row_ft": {
+      "value": 1.4,
+      "source": "Row L near the 5th floor (~65 ft) leaving standing-room headroom under the 74 ft ceiling",
+      "confidence": "low"
+    },
+    "soffit_drop_ft": {
+      "value": 2.5,
+      "source": "Estimate",
+      "confidence": "low"
+    }
+  },
+  "stage_picture": {
+    "singer_z_ft": {
+      "value": -8,
+      "source": "Typical downstage singing position",
+      "confidence": "medium"
+    },
+    "singer_mouth_height_above_stage_ft": {
+      "value": 5.3,
+      "source": "Standing singer",
+      "confidence": "high"
+    },
+    "pit_source_z_ft": {
+      "value": 14,
+      "source": "Middle of the pit",
+      "confidence": "medium"
+    },
+    "upstage_reference_z_ft": {
+      "value": -25,
+      "source": "Depth used for the 'how much of the stage width can I see' check",
+      "confidence": "medium"
+    },
+    "walkure_rock_top_height_above_stage_ft": {
+      "value": 18,
+      "source": "Act III mountaintop set piece height, generic",
+      "confidence": "low"
+    }
+  }
+}
