@@ -165,7 +165,7 @@
       <div id="valueList" style="margin-top:8px"></div>
     </div>
 
-    <p class="note">Prices are placeholders per zone. Vertical stack, row pitch and overhang positions are estimates awaiting the virtual tour; see the repository README for what is published versus assumed.</p>
+    <p class="note">Prices are placeholders per zone. Tier order and the Grand Tier rail distance are from the War Memorial spec sheet and the virtual tour; row pitch and tier heights are estimates fitted to seat photos. See the repository README.</p>
   </aside>
 
   <main id="stage">
@@ -306,11 +306,9 @@ function init3D(){
   function buildHouse(){
     const st = SHELL.stage, pit = SHELL.pit;
     addMesh(stripFromRows(SHELL.orchestra.rows, r=>r.y - 0.05, SHELL.depth_orchestra - SHELL.orchestra.rows[SHELL.orchestra.rows.length-1].z), M.floor);
-    for (const key of ["lower_tier","upper_tier"]){
-      const t = SHELL[key];
-      addMesh(stripFromRows(t.rows, r=>r.y, 6), M.tier);
-      const front = t.rows[0];
-      addMesh(wallFromArc(front.arc, t.soffit_lip_y, front.y + 3.0), M.rail);
+    for (const t of SHELL.tiers){
+      addMesh(stripFromRows([t.rail, ...t.rows], r=>r.y, 6), M.tier);
+      addMesh(wallFromArc(t.rail.arc, t.soffit_lip_y, t.rail.y + 3.0), M.rail);
     }
     const b = SHELL.boxes;
     addMesh(stripFromRows([{arc:b.rail, y:b.floor_y},{arc:b.outer, y:b.floor_y+1}], r=>r.y), M.tier);
@@ -484,7 +482,7 @@ function verdict(s){
   if (s.overhang==="none"){
     bits.push("Nothing above you but the ceiling.");
   } else {
-    const what = {boxes:"the box ring", lower_tier:"the Grand Tier / Dress Circle", upper_tier:"the Balcony Circle / Balcony"}[s.overhang];
+    const what = {boxes:"the box ring", grand_tier:"the Grand Tier", dress_circle:"the Dress Circle", upper_tier:"the Balcony Circle / Balcony"}[s.overhang];
     bits.push(`Under ${what}: lip ${s.overhang_depth_ft.toFixed(0)} ft in front, ${s.headroom_ft.toFixed(0)} ft over your head.`);
     if (s.opening_angle_deg < 15){ cls="bad"; bits.push(`Only ${s.opening_angle_deg.toFixed(0)}° of open air between the singer and the lip; the room above is cut off.`); }
     else if (s.opening_angle_deg < 30){ cls="warn"; bits.push(`${s.opening_angle_deg.toFixed(0)}° of opening; ceiling reflections are mostly gone.`); }

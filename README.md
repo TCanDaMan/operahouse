@@ -9,58 +9,85 @@ fall 2027; full Ring cycles June 2028).
 
 Open `web/index.html` in a browser. It is self-contained.
 
+## How the house is stacked
+
+Four tiers sit above the rear of the orchestra, each on its own slab:
+
+| Level | Rows | What is above it |
+|---|---|---|
+| Orchestra | A–ZZ | box ring over roughly rows W–ZZ and the standing room |
+| Boxes | ring A–Z | Grand Tier over the rear-centre boxes |
+| Grand Tier | AA–EE | Dress Circle, a low flat soffit from row BB back |
+| Dress Circle | A–L | Balcony from row B back |
+| Balcony Circle + Balcony | AA–EE, A–L | nothing but the dome |
+
+The Grand Tier and Dress Circle are separate floors about ten feet apart
+(spec sheet: 2nd and 3rd floor; tour panorama from the Grand Tier shows five
+rows rising to a rear wall under the Dress Circle's soffit). The Balcony
+Circle and Balcony are one continuous open tier. Evidence for all of this is
+in `sources/CALIBRATION.md`.
+
 ## What the model says about Grand Tier vs Dress Circle
 
-The two are **one continuous balcony**, not two stacked levels. The Grand
-Tier is rows AA–EE at the front, entered by walking down from the 2nd-floor
-doors; the Dress Circle is rows A–L behind the cross-aisle, rising to the
-3rd-floor doors at row L. SF Opera's own map labels them "2nd and 3rd Floor"
-on one drawing, and its accessibility notes describe exactly that stair
-pattern. The Balcony Circle (AA–EE) and Balcony (A–L) are the same
-arrangement one level up.
+The two are different animals, and the price map does not follow the
+geometry:
 
-So a price cliff at the Grand Tier / Dress Circle boundary, or at the Dress
-Circle Premium / Dress Circle boundary a row or two later, is a demand
-boundary on a continuous rake. The acoustic boundary is somewhere else: it is
-the Balcony's front lip, which in this model sits above Grand Tier row CC.
-Everything behind it is under the Balcony, and the question for each row is
-how much open air is left between you and the stage.
+- **Grand Tier AA** is the best seat on the level: open to the ceiling, 96 ft
+  from a downstage singer, a partial view into the pit. It is priced the same
+  as every other Grand Tier centre seat.
+- **Grand Tier BB–EE** sit under the Dress Circle with 3.5–4 ft of soffit
+  above eye level. By row EE the opening between the singer and the lip is
+  down to 17° and the ceiling reflection is gone. Same price as AA.
+- **Dress Circle A** is open to the ceiling, one floor up and 6 ft further
+  back than Grand Tier EE. Its view score is higher than Grand Tier EE's, at
+  a lower zone price.
+- **Dress Circle B–D** are under the Balcony but close to its lip: the
+  opening angle is still 50–100°, the top of the proscenium is intact.
+- **Dress Circle E–G** lose most of the room above (opening 20–30°, no ceiling
+  reflection). **J–L** are deep under the Balcony: opening 10–13°, depth to
+  opening ratio over 2, and row L starts to lose the top of the proscenium.
 
-Model output for the center of the lower tier (all geometry estimated, see
-below):
+Model output for the centre seats:
 
-| Seat | Opening angle to the lip | Depth ÷ opening | Proscenium visible |
-|---|---|---|---|
-| Grand Tier AA | open to ceiling | – | 31.5 ft |
-| Grand Tier EE | 77° | 0.25 | 31.5 ft |
-| Dress Circle A | 53° | 0.58 | 31.5 ft |
-| Dress Circle C | 36° | 0.85 | 31.5 ft |
-| Dress Circle G | 17° | 1.38 | 31.5 ft |
-| Dress Circle L | 9° | 1.92 | 28.3 ft (top clipped) |
+| Seat | Above you | Headroom over eyes | Opening angle | Depth ÷ opening | Score |
+|---|---|---|---|---|---|
+| Grand Tier AA | open | – | open | – | 73 |
+| Grand Tier CC | Dress Circle | 3.5 ft | 42° | 0.5 | 58 |
+| Grand Tier EE | Dress Circle | 4.1 ft | 17° | 1.3 | 46 |
+| Dress Circle A | open | – | open | – | 72 |
+| Dress Circle B | Balcony | 6.0 ft | 98° | 0.1 | 70 |
+| Dress Circle C | Balcony | 6.3 ft | 68° | 0.4 | 68 |
+| Dress Circle E | Balcony | 6.9 ft | 32° | 1.0 | 59 |
+| Dress Circle G | Balcony | 7.5 ft | 19° | 1.5 | 49 |
+| Dress Circle J | Balcony | 8.2 ft | 13° | 2.1 | 39 |
+| Dress Circle L | Balcony | 8.7 ft | 10° | 2.7 | 25 |
 
-Beranek's rule of thumb for opera houses is depth ÷ opening below about 2
-and a generous opening angle. Rows A–D of the Dress Circle are fine on both
-counts; from about row G back the room above is gone and the ceiling
-reflection is blocked; the last rows start to lose the top of the
-proscenium. The top of the proscenium matters more for *Walküre* than for
-most operas because of the Act III mountaintop and the projected fire.
+Beranek's rule of thumb for opera houses is depth ÷ opening below about 2.
 
-Conclusion for "one row back, half the price": if the two rows are both in
-the front half of the Dress Circle, take the cheaper one. If the cheaper row
-is H or further back, you are paying less for a real loss.
+Conclusion for "one row back, half the price":
+
+- Grand Tier EE at full price versus Dress Circle A or B at a lower zone
+  price: take the Dress Circle. You gain the ceiling and lose nothing.
+- Dress Circle B (Premium) versus C (standard): take C. Same conditions, one
+  row further.
+- Dress Circle D versus E, or anything from G back: the discount is paying
+  for a real loss. Row G is where the room above disappears.
+- If you want the sound the whole house is famous for, the Balcony Circle
+  front rows are open to the dome, 117 ft from the singer, with the pit
+  fully visible, at a third of the Grand Tier price.
 
 The far side blocks are a separate story: Grand Tier 29–40 and Dress Circle
-seats above about 20 lose part of the stage width behind the proscenium
-edge, which the model reports as "stage width visible".
+seats past about 20 lose part of the stage width behind the proscenium
+edge, reported as "stage width visible".
 
-## What is published and what is guessed
+## What is published and what is fitted
 
-Published (War Memorial technical specifications): auditorium 113 ft wide,
-74 ft high, 116 ft deep at orchestra level and 161 ft deep at balcony level;
-proscenium 52 ft wide, valence 31 ft 6 in; stage 3 ft 6 in above the house
-floor; curtain line to pit apron 4 ft 4 in; pit 19 ft 10 in front to back at
-the centerline with the floor 6 ft 8 in to 8 ft 2 in below the stage; pit
-capacity 90.
+Published (War Memorial technical specifications, `sources/`): auditorium
+113 ft wide, 74 ft high, 116 ft deep at orchestra level and 161 ft at balcony
+level; proscenium 52 ft wide, valence 31 ft 6 in; stage 3 ft 6 in above the
+house floor; curtain line to pit apron 4 ft 4 in; pit 19 ft 10 in front to
+back with the floor 6 ft 8 in to 8 ft 2 in below the stage; pit capacity 90;
+**Grand Tier lighting rail 80 ft from the footlights**.
 
 Transcribed (seat charts): every row and seat number on every level,
 including wheelchair platforms, companion and transfer seats, the sound
@@ -68,14 +95,13 @@ position in Dress Circle row K and the followspot gap in Balcony rows A–B.
 Total 3,006 seats. The published orchestra count (1,174) is larger than the
 current chart (1,078); the chart is what SF Opera sells today.
 
-Estimated (marked `confidence: low` in `data/house_geometry.json`): row
-pitch, floor rise on each level, the height of each tier, and where each
-tier's front lip sits in plan. The overall stack is constrained by the
-published height and depths and by the seat counts fitting the width, but
-the lip positions could easily be off by a few rows. The War Memorial
-virtual tour (blocked from the build environment) is the way to pin them
-down: a photo from Dress Circle L toward the stage shows how much of the
-proscenium the Balcony lip takes.
+Fitted to photographs (`sources/CALIBRATION.md`): the order and count of the
+tiers, which rows each tier covers, and the tier heights, chosen so that the
+seven SF Opera seat photos and the tour panoramas come out right (Dress
+Circle J keeps the full proscenium arch; the rear boxes and the Grand Tier
+rear rows keep about 8 ft floor-to-soffit; standing room fits under the box
+ring). Row pitch and the plan offset between successive tier rails remain
+estimates, each marked `confidence: low` in `data/house_geometry.json`.
 
 Price zones follow SF Opera's zone map. Zone prices in
 `data/seating_spec.py` are placeholders inside the ranges SF Opera showed
@@ -88,9 +114,9 @@ Computed by `scripts/build_seats.py` into `data/seats.json` and
 `data/seats.csv`:
 
 - distance to a downstage singer and to the pit; off-axis angle; elevation
-- the lowest overhang above the seat, its lip distance, headroom, opening
-  height at the lip, depth ÷ opening, and the opening angle between the
-  singer and the lip
+- the lowest overhang above the seat, its lip distance, headroom over the
+  eyes, opening height at the lip, depth ÷ opening, and the opening angle
+  between the singer and the lip
 - whether the lip clips the top of the proscenium and how much remains
 - stage width visible through the proscenium at 25 ft upstage
 - fraction of the pit floor visible over the pit rail
@@ -103,7 +129,8 @@ The score weights are opinions, written in `view_score()`.
 
 ## Layout of the repository
 
-- `sources/` the two PDFs the model is built from
+- `sources/` the spec sheet, the two seat-chart PDFs, and `calibration/`
+  with the tour and seat-view photographs the geometry was fitted to
 - `data/house_geometry.json` every dimension with its source and confidence
 - `data/seating_spec.py` the seat inventory and price zones
 - `scripts/build_seats.py` placement, metrics, and viewer build
@@ -118,4 +145,6 @@ in that seat looking at the stage. Views: `overview`, `top`, `section`,
 Wave acoustics. The geometric checks above (direct level, overhang, ceiling
 reflection) are the part of acoustics that seat choice actually changes; the
 hall's reverberation is the same for everyone. Heads in the row in front are
-not modelled because the row-to-row rise is not published.
+not modelled because the row-to-row rise is not published. The ceiling is a
+flat plane at the dome height; the lower cove over the rear Balcony rows is
+not drawn.
