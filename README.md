@@ -17,59 +17,64 @@ Three tiers sit above the rear of the orchestra:
 |---|---|---|
 | Orchestra | A–ZZ | box ring over about the last ten rows (S–ZZ at centre, R–ZZ at the sides) and the standing room |
 | Boxes | ring A–Z | the Grand Tier slab, set just behind the rear boxes |
-| Grand Tier | AA–EE | nothing: open to the ceiling |
-| Dress Circle | A–L | Balcony, whose lip lands over row A |
+| Grand Tier | AA–EE | open to the ceiling except row EE, where the Balcony lip lands |
+| Dress Circle | A–L | Balcony |
 | Balcony Circle + Balcony | AA–EE, A–L | nothing but the dome |
 
 Grand Tier and Dress Circle are one continuous slab: five rows along the
 front rail, the cross-aisle at the 2nd-floor doors, then eleven rows rising
-to the 3rd-floor doors, with the Balcony overhang beginning right at the
-first Dress Circle row. Balcony Circle and Balcony are the same arrangement
+to the 3rd-floor doors, with the Balcony overhang beginning about 8 ft behind
+the Grand Tier rail (Beranek's 1931 section), i.e. over row EE. Balcony Circle and Balcony are the same arrangement
 one level up, with no overhang at all. Evidence for all of this is in
 `sources/CALIBRATION.md`.
 
 ## What the model says about Grand Tier vs Dress Circle
 
-The overhang line and the price line coincide here, which is unusual: every
-Grand Tier row is open to the ceiling, and the Balcony lip starts at Dress
-Circle A. So "one row back" from Grand Tier EE into Dress Circle A is the one
-step that actually changes what is above you. Within the Dress Circle the
-premium/standard boundary at rows B/C changes nothing.
+The overhang line and the price line nearly coincide: Grand Tier AA–DD are open
+to the ceiling, the Balcony lip lands over Grand Tier EE, and from Dress Circle
+A back the opening closes quickly. So the last Grand Tier row is already under
+the lip, and "one row back" into Dress Circle A roughly halves the opening angle
+again. Within the Dress Circle the premium/standard boundary at rows B/C changes
+little.
 
 Model output for the centre seats:
 
 | Seat | Above you | Opening angle | Depth ÷ opening | Score |
 |---|---|---|---|---|
-| Grand Tier AA | open | open | – | 73 |
-| Grand Tier EE | open | open | – | 67 |
-| Dress Circle A | Balcony, lip 4 ft in front | 81° | 0.3 | 63 |
-| Dress Circle C | Balcony | 56° | 0.6 | 60 |
-| Dress Circle E | Balcony | 37° | 0.9 | 52 |
-| Dress Circle G | Balcony | 25° | 1.3 | 49 |
-| Dress Circle J | Balcony | 18° | 1.6 | 39 |
-| Dress Circle L | Balcony | 13° | 1.9 | 31 |
+| Grand Tier AA | open | open | – | 74 |
+| Grand Tier EE | Balcony, lip 5.7 ft in front | 79° | 0.3 | 67 |
+| Dress Circle A | Balcony, lip 12.6 ft in front | 54° | 0.7 | 58 |
+| Dress Circle C | Balcony | 38° | 1.0 | 55 |
+| Dress Circle E | Balcony | 28° | 1.3 | 52 |
+| Dress Circle G | Balcony | 21° | 1.7 | 44 |
+| Dress Circle J | Balcony | 16° | 2.0 | 37 |
+| Dress Circle L | Balcony | 13° | 2.3 | 37 |
 
 Beranek's rule of thumb for opera houses is depth ÷ opening below about 2
-and an opening angle that keeps the ceiling in play. Under this model the
-Balcony soffit is high (about 14 ft over the eyes), so the front half of the
-Dress Circle keeps a wide opening; the loss is gradual and becomes real
-around row G, where the opening drops below 25° and the ceiling reflection
-is gone. No Dress Circle row loses the top of the proscenium.
+and an opening angle that keeps the ceiling in play. With the section-derived heights the
+Balcony soffit is about 9 ft over the eyes at Dress Circle A and the lip is 8 ft
+behind the Grand Tier rail, so the opening closes faster than the earlier
+photo-fitted model said: 54° at row A, 38° at C, under 25° from row G, and
+depth ÷ opening passes 2 at row J. No Dress Circle row loses the top of the
+proscenium, which matches the row J seat photo.
 
 Conclusion for "one row back, half the price":
 
-- Grand Tier EE versus Dress Circle A or B at a much lower price: the
-  Dress Circle seat is 7 ft further back and gains a lip 4 ft in front of
-  it, but the lip is high and the opening is still 80°. For most operas that
-  is a good trade. For Walküre, where the top of the picture matters, both
+- Grand Tier EE versus Dress Circle A or B at a much lower price: EE is
+  already under the lip with a 79° opening; Dress Circle A is 7 ft further
+  back with a 54° opening. Still a fair trade for most operas, but it is no
+  longer a free one. For Walküre, where the top of the picture matters, both
   keep the full proscenium.
-- Dress Circle B (premium) versus C (standard): take C. Same conditions.
+- Dress Circle B (premium) versus C (standard): take C. Nearly the same conditions.
 - Dress Circle D versus E, and anything from G back: the discount is paying
   for a real loss.
-- The rear orchestra under the box ring (about W–ZZ) is the most compromised
-  seating in the house for its price: 4 ft of soffit over the eyes, an
-  opening under 20°, and from row Y back the model predicts the top of the
-  proscenium is hidden. That last prediction is unverified.
+- The rear orchestra under the box ring (about W–ZZ) is still compromised
+  for its price, but less than the earlier model said: the box soffit is
+  about 16 ft up (1931 section), giving a 33° opening at W and 17° at ZZ.
+  At centre the top of the proscenium stays visible, which the SF Opera
+  seat photo for the centre rear block confirms; the side rear blocks'
+  photos show the soffit clipping the arch, which the model does not yet
+  capture (the ring is lower toward the sides).
 - If sound is the priority, the Balcony Circle front rows are open to the
   dome, 110 ft from the singer, with the pit fully visible, at a third of
   the Grand Tier price.

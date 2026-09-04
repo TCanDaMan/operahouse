@@ -94,3 +94,17 @@ open web/index.html
 
 Prices: edit `ZONE_PRICES` in `data/seating_spec.py` to the listing you are
 pricing, rebuild, and the value list updates.
+
+## Update, 2026-09-03 late: calibration from the 1931 section and the tour panoramas
+
+`sources/DATA_ACQUISITION.md` has the full log. Short version: the SmartSeat API gave all
+3,006 seats with live prices and 47 seat-view photos; the virtual tour gave eleven full
+equirectangular panoramas (five at 13k px); a research pass found the Brown/Lansburgh
+longitudinal section (Architect and Engineer, Nov 1932) and Beranek's redrawn version with a
+scale bar (1996, p. 159). Tier heights in `data/house_geometry.json` are now from that section
+(box floor 17.5, Grand Tier rail 27.6, Balcony rail 50 at z=92, rear balcony ~80, orchestra rake
+4.6) and agree with a pose solve of the panoramas (`scripts/solve_pano_poses.py`) to within a
+tripod height. Rebuilt; README table and conclusions updated. Open items: the upper cross-aisle
+panoramas solve ~9 ft below the drawing; the box ring is lower toward the sides than the model
+draws (side rear-orchestra seat photos show the arch clipped); per-row rises on the upper tier
+are averages, not measured.

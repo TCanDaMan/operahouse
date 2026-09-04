@@ -134,9 +134,10 @@
       "confidence": "medium"
     },
     "rise_total_ft": {
-      "value": 2.5,
-      "source": "Gentle 1932 parterre rake; standing room behind ZZ needs 7.5 ft under the box ring",
-      "confidence": "medium"
+      "value": 4.6,
+      "source": "Beranek 1996 p.159 section (redrawn 1931 Brown/Lansburgh section), scaled from its feet bar; cross-checked against the 2023 tour panorama pose solve (sources/DATA_ACQUISITION.md) \u2014 floor 0 at row A, ~4.6 ft under the box soffit; rear promenade flat at ~4.5",
+      "confidence": "medium",
+      "previous_value": 2.5
     },
     "rise_exponent": {
       "value": 1.3,
@@ -156,9 +157,10 @@
   },
   "boxes": {
     "floor_y_ft": {
-      "value": 13.0,
-      "source": "Soffit with octagonal lights over the orchestra standing room (tour 01c/05c) at ~10.5 ft; floor = soffit + 2.5",
-      "confidence": "medium"
+      "value": 17.5,
+      "source": "Beranek 1996 p.159 section (redrawn 1931 Brown/Lansburgh section), scaled from its feet bar; cross-checked against the 2023 tour panorama pose solve (sources/DATA_ACQUISITION.md) \u2014 box floor 17-18.5 ft; soffit over the rear orchestra 16.3 ft",
+      "confidence": "medium",
+      "previous_value": 13.0
     },
     "rail_radius_x_ft": {
       "value": 46,
@@ -181,17 +183,19 @@
       "confidence": "low"
     },
     "soffit_drop_ft": {
-      "value": 2.5,
-      "source": "Structure below the box floor",
-      "confidence": "low"
+      "value": 1.5,
+      "source": "Beranek 1996 p.159 section (redrawn 1931 Brown/Lansburgh section), scaled from its feet bar; cross-checked against the 2023 tour panorama pose solve (sources/DATA_ACQUISITION.md) \u2014 floor 17.5 minus soffit 16.3",
+      "confidence": "medium",
+      "previous_value": 2.5
     }
   },
   "upper_tier": {
     "_note": "Balcony Circle rows AA-EE and Balcony rows A-L, one continuous open tier under the dome (tour 04a/04c). Its front lip sits over Dress Circle row A (owner observation, tour frame from the Grand Tier cross-aisle).",
     "rail_z_ft": {
-      "value": 100.0,
-      "source": "Lip above Dress Circle row A (z~104) allowing for the rail-to-row offset",
-      "confidence": "medium"
+      "value": 92.0,
+      "source": "Beranek 1996 p.159 section (redrawn 1931 Brown/Lansburgh section), scaled from its feet bar; cross-checked against the 2023 tour panorama pose solve (sources/DATA_ACQUISITION.md) \u2014 Balcony rail 8 ft behind the Grand Tier rail in section (drawn 78 vs 70 ft from the proscenium wall)",
+      "confidence": "medium",
+      "previous_value": 100.0
     },
     "first_row_offset_ft": {
       "value": 2.0,
@@ -204,14 +208,16 @@
       "confidence": "low"
     },
     "floor_y_ft": {
-      "value": 46.0,
-      "source": "Set so Dress Circle J keeps the full proscenium arch (SF Opera seat photo J-116) with ~9 ft floor-to-soffit at Dress Circle A",
-      "confidence": "medium"
+      "value": 50.0,
+      "source": "Beranek 1996 p.159 section (redrawn 1931 Brown/Lansburgh section), scaled from its feet bar; cross-checked against the 2023 tour panorama pose solve (sources/DATA_ACQUISITION.md) \u2014 Balcony rail floor 50 ft in section",
+      "confidence": "medium",
+      "previous_value": 46.0
     },
     "balcony_circle_rise_per_row_ft": {
-      "value": 1.3,
-      "source": "Estimate",
-      "confidence": "low"
+      "value": 1.8,
+      "source": "Beranek 1996 p.159 section (redrawn 1931 Brown/Lansburgh section), scaled from its feet bar; cross-checked against the 2023 tour panorama pose solve (sources/DATA_ACQUISITION.md) \u2014 rail 50 ft to rear row 80 ft over 16 rows + cross-aisle; the redrawn section does not preserve row counts",
+      "confidence": "low",
+      "previous_value": 1.3
     },
     "cross_aisle_rise_ft": {
       "value": 2.0,
@@ -219,9 +225,10 @@
       "confidence": "low"
     },
     "balcony_rise_per_row_ft": {
-      "value": 1.2,
-      "source": "Row L must stay under the ceiling",
-      "confidence": "low"
+      "value": 1.8,
+      "source": "Beranek 1996 p.159 section (redrawn 1931 Brown/Lansburgh section), scaled from its feet bar; cross-checked against the 2023 tour panorama pose solve (sources/DATA_ACQUISITION.md) \u2014 rear row L 80 ft in section; panorama at row L solves 86 ft camera",
+      "confidence": "low",
+      "previous_value": 1.2
     },
     "soffit_drop_ft": {
       "value": 2.5,
@@ -275,14 +282,16 @@
       "confidence": "low"
     },
     "floor_y_ft": {
-      "value": 22.0,
-      "source": "About 8 ft over the box level plus slab",
-      "confidence": "medium"
+      "value": 27.6,
+      "source": "Beranek 1996 p.159 section (redrawn 1931 Brown/Lansburgh section), scaled from its feet bar; cross-checked against the 2023 tour panorama pose solve (sources/DATA_ACQUISITION.md) \u2014 Grand Tier rail floor; panoramas give 36-38 ft camera two rows back with a ~7 ft tripod",
+      "confidence": "medium",
+      "previous_value": 22.0
     },
     "grand_tier_rise_per_row_ft": {
-      "value": 0.9,
-      "source": "Estimate",
-      "confidence": "low"
+      "value": 1.0,
+      "source": "Beranek 1996 p.159 section (redrawn 1931 Brown/Lansburgh section), scaled from its feet bar; cross-checked against the 2023 tour panorama pose solve (sources/DATA_ACQUISITION.md) \u2014 section draws the GT rows nearly flat to ~1.2 ft/row; 1.0 with DC 1.3 reaches the drawn rear row at 46 ft",
+      "confidence": "low",
+      "previous_value": 0.9
     },
     "cross_aisle_rise_ft": {
       "value": 1.5,
@@ -291,8 +300,9 @@
     },
     "dress_circle_rise_per_row_ft": {
       "value": 1.3,
-      "source": "Row L must reach the 3rd-floor doors",
-      "confidence": "low"
+      "source": "Beranek 1996 p.159 section (redrawn 1931 Brown/Lansburgh section), scaled from its feet bar; cross-checked against the 2023 tour panorama pose solve (sources/DATA_ACQUISITION.md) \u2014 Dress Circle rear row 46 ft in section",
+      "confidence": "medium",
+      "previous_value": 1.3
     },
     "soffit_drop_ft": {
       "value": 2.5,
