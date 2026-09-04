@@ -134,8 +134,8 @@
       "confidence": "medium"
     },
     "rise_total_ft": {
-      "value": 3.5,
-      "source": "Tour panoramas: gentle 1932 parterre rake; standing room under the box ring needs 7.5 ft",
+      "value": 2.5,
+      "source": "Gentle 1932 parterre rake; standing room behind ZZ needs 7.5 ft under the box ring",
       "confidence": "medium"
     },
     "rise_exponent": {
@@ -156,8 +156,8 @@
   },
   "boxes": {
     "floor_y_ft": {
-      "value": 13.5,
-      "source": "Soffit with octagonal lights over the orchestra standing room (tour 01c/05c) needs ~7.5 ft; floor = soffit + 2.5",
+      "value": 13.0,
+      "source": "Soffit with octagonal lights over the orchestra standing room (tour 01c/05c) at ~10.5 ft; floor = soffit + 2.5",
       "confidence": "medium"
     },
     "rail_radius_x_ft": {
@@ -167,12 +167,12 @@
     },
     "rail_radius_z_ft": {
       "value": 30,
-      "source": "Rear-center box rail directly below the Grand Tier rail (tour 02c shows no boxes in front of the Grand Tier rail)",
+      "source": "Rear rail at z=71 with the ring centred at z=41",
       "confidence": "medium"
     },
     "ring_center_z_ft": {
-      "value": 54,
-      "source": "Rear rail lands at z=84, above orchestra row W",
+      "value": 41,
+      "source": "Owner observation: box ring covers about the last ten orchestra rows; rear rail lands between rows R and S (z=71), where the side blocks narrow to two seats",
       "confidence": "medium"
     },
     "leg_front_z_ft": {
@@ -187,11 +187,11 @@
     }
   },
   "upper_tier": {
-    "_note": "Balcony Circle rows AA-EE and Balcony rows A-L are one continuous open tier (4th floor; standing room at the 5th-floor doors). Nothing above but the dome (tour 04a/04c).",
+    "_note": "Balcony Circle rows AA-EE and Balcony rows A-L, one continuous open tier under the dome (tour 04a/04c). Its front lip sits over Dress Circle row A (owner observation, tour frame from the Grand Tier cross-aisle).",
     "rail_z_ft": {
-      "value": 92.33,
-      "source": "Stepped 4 ft behind the Dress Circle rail",
-      "confidence": "low"
+      "value": 100.0,
+      "source": "Lip above Dress Circle row A (z~104) allowing for the rail-to-row offset",
+      "confidence": "medium"
     },
     "first_row_offset_ft": {
       "value": 2.0,
@@ -204,8 +204,8 @@
       "confidence": "low"
     },
     "floor_y_ft": {
-      "value": 47.0,
-      "source": "Set so the Balcony lip does not clip the proscenium top from Dress Circle J (SF Opera seat photo J-116 shows the full arch)",
+      "value": 46.0,
+      "source": "Set so Dress Circle J keeps the full proscenium arch (SF Opera seat photo J-116) with ~9 ft floor-to-soffit at Dress Circle A",
       "confidence": "medium"
     },
     "balcony_circle_rise_per_row_ft": {
@@ -256,11 +256,12 @@
       "confidence": "low"
     }
   },
-  "grand_tier": {
-    "_note": "Five rows AA-EE on their own slab (2nd floor). The Dress Circle sits directly above with a low flat soffit (tour 02a/02b); the front rail is the FOH lighting rail.",
+  "_calibration": "Tier topology and the 80 ft rail distance are from sources/wmoh-technical-specs.pdf and the tour/seat-photo captures in sources/calibration; see sources/CALIBRATION.md.",
+  "lower_tier": {
+    "_note": "Grand Tier rows AA-EE, a cross-aisle at the 2nd-floor doors, then Dress Circle rows A-L rising to the 3rd-floor doors: one continuous slab (tour frame from the cross-aisle shows both blocks and the Balcony lip over Dress Circle row A).",
     "rail_z_ft": {
       "value": 84.33,
-      "source": "Published: balcony rail to footlights 80 ft; footlights at the apron edge 4.33 ft behind the curtain line",
+      "source": "Published: balcony rail (FOH lighting rail, on this tier's front) to footlights 80 ft; footlights 4.33 ft behind the curtain line",
       "confidence": "high"
     },
     "first_row_offset_ft": {
@@ -274,53 +275,34 @@
       "confidence": "low"
     },
     "floor_y_ft": {
-      "value": 24.0,
-      "source": "8 ft clear over the front row of the rear-center boxes (floor 13.5) plus 2.5 ft slab",
+      "value": 22.0,
+      "source": "About 8 ft over the box level plus slab",
       "confidence": "medium"
     },
-    "rise_per_row_ft": {
-      "value": 0.7,
-      "source": "Shallow rake under a low ceiling (tour 02b)",
+    "grand_tier_rise_per_row_ft": {
+      "value": 0.9,
+      "source": "Estimate",
+      "confidence": "low"
+    },
+    "cross_aisle_rise_ft": {
+      "value": 1.5,
+      "source": "Skirted step up from the aisle into Dress Circle A (tour frame)",
+      "confidence": "medium"
+    },
+    "dress_circle_rise_per_row_ft": {
+      "value": 1.3,
+      "source": "Row L must reach the 3rd-floor doors",
       "confidence": "low"
     },
     "soffit_drop_ft": {
       "value": 2.5,
       "source": "Estimate",
       "confidence": "low"
-    }
-  },
-  "dress_circle": {
-    "_note": "Eleven rows A-L on their own slab (3rd floor), about 11 ft above the Grand Tier. Row A is just in front of the Balcony lip; B-L are under the Balcony.",
-    "rail_z_ft": {
-      "value": 88.33,
-      "source": "Stepped 4 ft behind the Grand Tier rail (tour 01c/05c show the fronts nearly aligned)",
-      "confidence": "low"
     },
-    "first_row_offset_ft": {
-      "value": 2.0,
-      "source": "Rail to row A",
-      "confidence": "medium"
-    },
-    "curve_center_z_ft": {
-      "value": -10,
-      "source": "Estimate",
-      "confidence": "low"
-    },
-    "floor_y_ft": {
-      "value": 34.0,
-      "source": "Leaves ~8 ft floor-to-soffit at Grand Tier EE, matching the door height at the rear wall in tour 02b",
-      "confidence": "medium"
-    },
-    "rise_per_row_ft": {
-      "value": 1.0,
-      "source": "Estimate",
-      "confidence": "low"
-    },
-    "soffit_drop_ft": {
-      "value": 2.5,
-      "source": "Estimate",
+    "soffit_lip_ahead_of_rail_ft": {
+      "value": 3.0,
+      "source": "Slab underside reaches just past the rear box row",
       "confidence": "low"
     }
-  },
-  "_calibration": "Tier topology and the 80 ft rail distance are from sources/wmoh-technical-specs.pdf and the tour/seat-photo captures in sources/calibration; see sources/CALIBRATION.md."
+  }
 }

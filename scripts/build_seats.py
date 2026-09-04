@@ -9,8 +9,8 @@ House topology (calibrated against the War Memorial virtual tour and SF Opera
 seat photos, see sources/CALIBRATION.md):
   orchestra  -> rear rows under the box ring
   boxes      -> horseshoe ring; rear boxes under the Grand Tier
-  grand_tier -> 5 rows on its own slab, low soffit of the Dress Circle above
-  dress_circle -> 11 rows on its own slab, Balcony above rows B-L
+  lower tier -> Grand Tier AA-EE, cross-aisle, Dress Circle A-L: one slab;
+                the Balcony lip lands over Dress Circle row A
   upper tier -> Balcony Circle AA-EE + Balcony A-L, one open tier under the dome
 
 Run:  python3 scripts/build_seats.py
@@ -103,23 +103,20 @@ class Tier:
 
 def make_tiers():
     tiers = {}
-    g = G["grand_tier"]
-    rz, off = g["rail_z_ft"]["value"], g["first_row_offset_ft"]["value"]
-    rows = [(rz + off + i * TIER_PITCH, g["floor_y_ft"]["value"] + i * g["rise_per_row_ft"]["value"]) for i in range(5)]
-    tiers["grand_tier"] = Tier("grand_tier", rz, g["curve_center_z_ft"]["value"], rows,
-                               g["floor_y_ft"]["value"] - g["soffit_drop_ft"]["value"],
-                               g["rise_per_row_ft"]["value"] / TIER_PITCH)
-    d = G["dress_circle"]
-    rz, off = d["rail_z_ft"]["value"], d["first_row_offset_ft"]["value"]
-    rows = [(rz + off + i * TIER_PITCH, d["floor_y_ft"]["value"] + i * d["rise_per_row_ft"]["value"]) for i in range(11)]
-    tiers["dress_circle"] = Tier("dress_circle", rz, d["curve_center_z_ft"]["value"], rows,
-                                 d["floor_y_ft"]["value"] - d["soffit_drop_ft"]["value"],
-                                 d["rise_per_row_ft"]["value"] / TIER_PITCH)
+    L = G["lower_tier"]
+    rz, off = L["rail_z_ft"]["value"], L["first_row_offset_ft"]["value"]
+    y0, r1, r2 = L["floor_y_ft"]["value"], L["grand_tier_rise_per_row_ft"]["value"], L["dress_circle_rise_per_row_ft"]["value"]
+    rows = [(rz + off + i * TIER_PITCH, y0 + i * r1) for i in range(5)]
+    base_z, base_y = rows[-1][0] + CROSS + TIER_PITCH, rows[-1][1] + L["cross_aisle_rise_ft"]["value"]
+    rows += [(base_z + j * TIER_PITCH, base_y + j * r2) for j in range(11)]
+    tiers["lower_tier"] = Tier("lower_tier", rz, L["curve_center_z_ft"]["value"], rows,
+                               y0 - L["soffit_drop_ft"]["value"], r1 / TIER_PITCH)
+    tiers["lower_tier"].lip_ahead = L["soffit_lip_ahead_of_rail_ft"]["value"]
     u = G["upper_tier"]
     rz, off = u["rail_z_ft"]["value"], u["first_row_offset_ft"]["value"]
     y0, r1, r2 = u["floor_y_ft"]["value"], u["balcony_circle_rise_per_row_ft"]["value"], u["balcony_rise_per_row_ft"]["value"]
     rows = [(rz + off + i * TIER_PITCH, y0 + i * r1) for i in range(5)]
-    base_z, base_y = rows[-1][0] + CROSS, rows[-1][1] + u["cross_aisle_rise_ft"]["value"]
+    base_z, base_y = rows[-1][0] + CROSS + TIER_PITCH, rows[-1][1] + u["cross_aisle_rise_ft"]["value"]
     rows += [(base_z + j * TIER_PITCH, base_y + j * r2) for j in range(11)]
     tiers["upper_tier"] = Tier("upper_tier", rz, u["curve_center_z_ft"]["value"], rows,
                                y0 - u["soffit_drop_ft"]["value"], r1 / TIER_PITCH)
@@ -140,18 +137,18 @@ def box_ring_lip_z(x):
 def box_floor_at(z):
     return BOX_Y + 0.5 * min(2, max(0, (z - (box_ring_lip_z(0) or 0)) / BOX_PITCH))
 
+def lower_lip_z(x):
+    return TIERS["lower_tier"].lip_z(x) - TIERS["lower_tier"].lip_ahead
+
 OVERHANGS = [
     {"name": "boxes", "lip_z": box_ring_lip_z, "soffit_y": BOX_SOFFIT, "slope": 0.0,
      "floor_below": lambda x, z: orch_floor_y(z)},
-    {"name": "grand_tier", "lip_z": TIERS["grand_tier"].lip_z,
-     "soffit_y": TIERS["grand_tier"].soffit_lip_y, "slope": TIERS["grand_tier"].slope,
+    {"name": "grand_tier", "lip_z": lower_lip_z,
+     "soffit_y": TIERS["lower_tier"].soffit_lip_y, "slope": TIERS["lower_tier"].slope,
      "floor_below": lambda x, z: box_floor_at(z) if abs(x) < BOX_RX + 8 else orch_floor_y(z)},
-    {"name": "dress_circle", "lip_z": TIERS["dress_circle"].lip_z,
-     "soffit_y": TIERS["dress_circle"].soffit_lip_y, "slope": TIERS["dress_circle"].slope,
-     "floor_below": lambda x, z: TIERS["grand_tier"].floor_at(z)},
     {"name": "upper_tier", "lip_z": TIERS["upper_tier"].lip_z,
      "soffit_y": TIERS["upper_tier"].soffit_lip_y, "slope": TIERS["upper_tier"].slope,
-     "floor_below": lambda x, z: TIERS["dress_circle"].floor_at(z)},
+     "floor_below": lambda x, z: TIERS["lower_tier"].floor_at(z)},
 ]
 
 def overhang_for(x, y_eye, z):
@@ -229,9 +226,9 @@ def view_score(m):
     s -= max(0.0, m["horiz_angle_deg"] - 15) * 1.0
     s -= (1.0 - m["stage_width_visible"]) * 60
     if m["overhang"] != "none":
-        s -= max(0.0, 25 - m["opening_angle_deg"]) * 1.2
-        s -= (PROSC_H - m["visible_prosc_height_ft"]) * 3
-        s -= max(0.0, 6 - m["headroom_ft"]) * 2.5      # a ceiling right over your head
+        s -= max(0.0, 25 - m["opening_angle_deg"]) * 1.0
+        s -= (PROSC_H - m["visible_prosc_height_ft"]) * 2
+        s -= max(0.0, 6 - m["headroom_ft"]) * 2.0      # a ceiling right over your head
         if not m["ceiling_reflection_singer"]:
             s -= 6
     s += m["pit_visible"] * 8
@@ -423,8 +420,8 @@ def layout_bal(block, n, count, w):
 
 place_orchestra()
 place_boxes()
-place_tier_rows("grand_tier", TIERS["grand_tier"], S.grand_tier_rows(), 0, SEAT_W, layout_gt)
-place_tier_rows("dress_circle", TIERS["dress_circle"], S.dress_circle_rows(), 0, SEAT_W, layout_dc)
+place_tier_rows("grand_tier", TIERS["lower_tier"], S.grand_tier_rows(), 0, SEAT_W, layout_gt)
+place_tier_rows("dress_circle", TIERS["lower_tier"], S.dress_circle_rows(), 5, SEAT_W, layout_dc)
 place_tier_rows("balcony_circle", TIERS["upper_tier"], S.balcony_circle_rows(), 0, SEAT_W, layout_bc)
 place_tier_rows("balcony", TIERS["upper_tier"], S.balcony_rows(), 5, BAL_SEAT_W, layout_bal)
 
@@ -462,8 +459,7 @@ shell = {
               "rail": [[round(v, 2) for v in box_path_point(t / 60)[:2]] for t in range(61)],
               "outer": [[round(box_path_point(t / 60)[0] + box_path_point(t / 60)[2][0] * 9, 2),
                          round(box_path_point(t / 60)[1] + box_path_point(t / 60)[2][1] * 9, 2)] for t in range(61)]},
-    "tiers": [tier_shell(TIERS["grand_tier"], 54), tier_shell(TIERS["dress_circle"], 53),
-              tier_shell(TIERS["upper_tier"], 56)],
+    "tiers": [tier_shell(TIERS["lower_tier"], 54), tier_shell(TIERS["upper_tier"], 56)],
 }
 
 # ------------------------------------------------------------------ output
