@@ -1,4 +1,5 @@
 <title>War Memorial Seat Finder</title>
+<meta charset="utf-8">
 <meta name="description" content="Seat-by-seat 3D model of the War Memorial Opera House with sightline, overhang and pit metrics for pricing a Walküre ticket.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
@@ -308,11 +309,43 @@ function init3D(){
     addMesh(stripFromRows(SHELL.orchestra.rows, r=>r.y - 0.05, SHELL.depth_orchestra - SHELL.orchestra.rows[SHELL.orchestra.rows.length-1].z), M.floor);
     for (const t of SHELL.tiers){
       addMesh(stripFromRows([t.rail, ...t.rows], r=>r.y, 6), M.tier);
-      addMesh(wallFromArc(t.rail.arc, t.soffit_lip_y, t.rail.y + 3.0), M.rail);
+      // the front rail follows the full plan curve: crescent plus the side slips
+      addMesh(wallFromArc(t.front || t.rail.arc, t.soffit_lip_y, t.rail.y + 3.0), M.rail);
     }
     const b = SHELL.boxes;
     addMesh(stripFromRows([{arc:b.rail, y:b.floor_y},{arc:b.outer, y:b.floor_y+1}], r=>r.y), M.tier);
     addMesh(wallFromArc(b.rail, b.soffit_y, b.floor_y + 3.0), M.rail);
+    // Grand Tier side slips: slab between the traced front curve and the wall
+    const sl = SHELL.side_slips;
+    if (sl && sl.path){
+      const W = SHELL.half_breadth;
+      const inner = sl.path.filter(p => Math.abs(p[0]) >= sl.inner_x);
+      for (const sgn of [-1,1]){
+        const side = inner.filter(p => sgn*p[0] > 0).sort((a,b)=>a[1]-b[1]);
+        if (side.length < 2) continue;
+        const wall = side.map(p => [sgn*W, p[1]]);
+        addMesh(stripFromRows([{arc:side, y:sl.floor_y},{arc:wall, y:sl.floor_y}], r=>r.y), M.tier);
+        addMesh(wallFromArc(side, sl.soffit_y, sl.floor_y + 3.0), M.rail);
+      }
+    }
+    // Balcony side sweeps: upper galleries descending from the Balcony front to the organ lofts
+    const sw = SHELL.balcony_sweep;
+    if (sw && sw.path){
+      const W = SHELL.half_breadth;
+      for (const sgn of [-1,1]){
+        const pos = [];
+        for (let j=0;j<sw.path.length-1;j++){
+          const [x1,z1,y1] = sw.path[j], [x2,z2,y2] = sw.path[j+1];
+          const a=[sgn*x1,y1,z1], b2=[sgn*x2,y2,z2], c=[sgn*W,y1,z1], d=[sgn*W,y2,z2];
+          pos.push(...a,...c,...b2, ...b2,...c,...d);                       // floor strip to the wall
+          const s1=y1-sw.soffit_drop, s2=y2-sw.soffit_drop;
+          pos.push(sgn*x1,s1,z1, sgn*x1,y1+3,z1, sgn*x2,s2,z2, sgn*x2,s2,z2, sgn*x1,y1+3,z1, sgn*x2,y2+3,z2); // rail face
+        }
+        const g = new THREE.BufferGeometry();
+        g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); g.computeVertexNormals();
+        addMesh(g, M.tier);
+      }
+    }
     const stageDepth = -st.back_wall_z;
     const stageMesh = new THREE.Mesh(new THREE.BoxGeometry(SHELL.half_breadth*2+10, st.y, stageDepth), M.stage);
     stageMesh.position.set(0, st.y/2, -stageDepth/2); scene.add(stageMesh);

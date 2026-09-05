@@ -92,9 +92,10 @@
       "confidence": "medium"
     },
     "row_pitch_ft": {
-      "value": 2.9,
-      "source": "Estimate (35 in). Orchestra A..ZZ then fills 116 ft depth with ~20 ft of rear standing/cross-aisle",
-      "confidence": "low"
+      "value": 3.0,
+      "source": "HSR 1993 orchestra plan: rows from z=25 to ~100-110 ft over 26 rows (3.0-3.3 ft); 1965 city report 36 in; Beranek 1962 31 in. The 2.55 written earlier came from a mis-registered plan frame.",
+      "confidence": "low",
+      "previous_value": 2.55
     },
     "tier_row_pitch_ft": {
       "value": 2.85,
@@ -163,39 +164,53 @@
       "previous_value": 13.0
     },
     "rail_radius_x_ft": {
-      "value": 46,
-      "source": "Ring inside the 113 ft breadth with 8 ft deep boxes",
-      "confidence": "low"
+      "value": 51,
+      "source": "HSR 1993 plans (sources/research/hsr1993), scaled 6.83 px/ft from the 52 ft proscenium; curtain line and centreline registered on the orchestra plan \u2014 ring legs 51 ft from centre (boxes ~5.5 ft deep to the wall)",
+      "confidence": "medium",
+      "previous_value": 46
     },
     "rail_radius_z_ft": {
-      "value": 30,
-      "source": "Rear rail at z=71 with the ring centred at z=41",
-      "confidence": "medium"
+      "value": 39.6,
+      "source": "HSR 1993 plans (sources/research/hsr1993), scaled 6.83 px/ft from the 52 ft proscenium; curtain line and centreline registered on the orchestra plan",
+      "confidence": "medium",
+      "previous_value": 30
     },
     "ring_center_z_ft": {
-      "value": 41,
-      "source": "Owner observation: box ring covers about the last ten orchestra rows; rear rail lands between rows R and S (z=71), where the side blocks narrow to two seats",
-      "confidence": "medium"
+      "value": 57,
+      "source": "HSR 1993 plans (sources/research/hsr1993), scaled 6.83 px/ft from the 52 ft proscenium; curtain line and centreline registered on the orchestra plan \u2014 rear rail at z=96.6 at centre (behind the Grand Tier rail); rail at |x|=40 near z=82",
+      "confidence": "medium",
+      "previous_value": 41
     },
     "leg_front_z_ft": {
-      "value": 28,
-      "source": "Box A/Z near the proscenium",
-      "confidence": "low"
+      "value": 15,
+      "source": "HSR 1993 plans traced (sources/research/hsr1993), 6.83 px/ft, curtain line at the pit back wall (orchestra sheet x=1110), centreline y=1040; cross-checked: GT rail 79 ft vs published 80 from the footlights, box legs and Balcony sweep heights from the row-A panorama",
+      "confidence": "medium",
+      "previous_value": 7
     },
     "soffit_drop_ft": {
       "value": 1.5,
       "source": "Beranek 1996 p.159 section (redrawn 1931 Brown/Lansburgh section), scaled from its feet bar; cross-checked against the 2023 tour panorama pose solve (sources/DATA_ACQUISITION.md) \u2014 floor 17.5 minus soffit 16.3",
       "confidence": "medium",
       "previous_value": 2.5
+    },
+    "leg_inner_x_ft": {
+      "value": 49,
+      "confidence": "low",
+      "source": "Seats within ~2 ft of the leg rail count as under it"
+    },
+    "soffit_at_legs_ft": {
+      "value": 13.0,
+      "confidence": "low",
+      "source": "2023 tour panorama from orchestra row A (P1), elevation angles to the side-wall rails with the solved camera pose \u2014 leg rail top 17-19 ft along the wall (floor ~14-16), soffit ~13; side rear-orchestra seat photos show the arch clipped"
     }
   },
   "upper_tier": {
     "_note": "Balcony Circle rows AA-EE and Balcony rows A-L, one continuous open tier under the dome (tour 04a/04c). Its front lip sits over Dress Circle row A (owner observation, tour frame from the Grand Tier cross-aisle).",
     "rail_z_ft": {
-      "value": 92.0,
-      "source": "Beranek 1996 p.159 section (redrawn 1931 Brown/Lansburgh section), scaled from its feet bar; cross-checked against the 2023 tour panorama pose solve (sources/DATA_ACQUISITION.md) \u2014 Balcony rail 8 ft behind the Grand Tier rail in section (drawn 78 vs 70 ft from the proscenium wall)",
+      "value": 104.4,
+      "source": "HSR 1993 plans traced (sources/research/hsr1993), 6.83 px/ft, curtain line at the pit back wall (orchestra sheet x=1110), centreline y=1040; cross-checked: GT rail 79 ft vs published 80 from the footlights, box legs and Balcony sweep heights from the row-A panorama \u2014 25 ft behind the Grand Tier rail at centre, 20 ft at the sides; the Balcony Circle front-row panorama (P4/Q1) solves at z~100 with a 56.6 ft camera, i.e. the rail floor ~50 ft",
       "confidence": "medium",
-      "previous_value": 100.0
+      "previous_value": 92.0
     },
     "first_row_offset_ft": {
       "value": 2.0,
@@ -203,9 +218,11 @@
       "confidence": "medium"
     },
     "curve_center_z_ft": {
-      "value": -10,
-      "source": "Estimate",
-      "confidence": "low"
+      "value": -222,
+      "source": "HSR 1993 plans (sources/research/hsr1993), scaled 6.83 px/ft from the 52 ft proscenium; curtain line and centreline registered on the orchestra plan \u2014 Balcony front 4 ft forward at |x|=50 relative to centre; no side arm in front of the rail",
+      "confidence": "medium",
+      "previous_value": -10,
+      "note": "superseded by plan_curves"
     },
     "floor_y_ft": {
       "value": 50.0,
@@ -267,9 +284,10 @@
   "lower_tier": {
     "_note": "Grand Tier rows AA-EE, a cross-aisle at the 2nd-floor doors, then Dress Circle rows A-L rising to the 3rd-floor doors: one continuous slab (tour frame from the cross-aisle shows both blocks and the Balcony lip over Dress Circle row A).",
     "rail_z_ft": {
-      "value": 84.33,
-      "source": "Published: balcony rail (FOH lighting rail, on this tier's front) to footlights 80 ft; footlights 4.33 ft behind the curtain line",
-      "confidence": "high"
+      "value": 79.2,
+      "source": "HSR 1993 plans traced (sources/research/hsr1993), 6.83 px/ft, curtain line at the pit back wall (orchestra sheet x=1110), centreline y=1040; cross-checked: GT rail 79 ft vs published 80 from the footlights, box legs and Balcony sweep heights from the row-A panorama",
+      "confidence": "medium",
+      "previous_value": 84.33
     },
     "first_row_offset_ft": {
       "value": 2.0,
@@ -277,9 +295,11 @@
       "confidence": "medium"
     },
     "curve_center_z_ft": {
-      "value": -10,
-      "source": "Estimate",
-      "confidence": "low"
+      "value": -334,
+      "source": "HSR 1993 plans (sources/research/hsr1993), scaled 6.83 px/ft from the 52 ft proscenium; curtain line and centreline registered on the orchestra plan \u2014 Grand Tier front is nearly straight: 3 ft forward at centre relative to |x|=50",
+      "confidence": "medium",
+      "previous_value": -10,
+      "note": "superseded by plan_curves"
     },
     "floor_y_ft": {
       "value": 27.6,
@@ -313,6 +333,235 @@
       "value": 3.0,
       "source": "Slab underside reaches just past the rear box row",
       "confidence": "low"
+    },
+    "side_slip_inner_x_ft": {
+      "value": 46,
+      "confidence": "medium",
+      "source": "HSR 1993 plans traced (sources/research/hsr1993), 6.83 px/ft, curtain line at the pit back wall (orchestra sheet x=1110), centreline y=1040; cross-checked: GT rail 79 ft vs published 80 from the footlights, box legs and Balcony sweep heights from the row-A panorama"
+    },
+    "side_slip_front_z_ft": {
+      "value": 20,
+      "confidence": "medium",
+      "source": "HSR 1993 plans traced (sources/research/hsr1993), 6.83 px/ft, curtain line at the pit back wall (orchestra sheet x=1110), centreline y=1040; cross-checked: GT rail 79 ft vs published 80 from the footlights, box legs and Balcony sweep heights from the row-A panorama",
+      "previous_value": 7
+    },
+    "side_slip_floor_y_ft": {
+      "value": 28.5,
+      "confidence": "medium",
+      "source": "2023 tour panorama from orchestra row A (P1), elevation angles to the side-wall rails with the solved camera pose \u2014 balustrade top 30.7-33 ft along the wall, roughly level, slightly rising to the rear"
+    }
+  },
+  "plan_curves": {
+    "_note": "Polylines in the model frame (x across the house in ft, z from the curtain line). Curves are symmetric; only x>=0 is stored. box_ring_rail and tier fronts are z as a function of |x|; balcony_sweep is the upper side gallery that runs from the Balcony front forward and inward to the organ lofts beside the proscenium (x as a function of z), with its floor height along the way.",
+    "source": "HSR 1993 plans traced (sources/research/hsr1993), 6.83 px/ft, curtain line at the pit back wall (orchestra sheet x=1110), centreline y=1040; cross-checked: GT rail 79 ft vs published 80 from the footlights, box legs and Balcony sweep heights from the row-A panorama",
+    "box_ring_rail": {
+      "value": [
+        [
+          0,
+          97.1
+        ],
+        [
+          10,
+          96.3
+        ],
+        [
+          20,
+          93.5
+        ],
+        [
+          26,
+          90.5
+        ],
+        [
+          30,
+          87.6
+        ],
+        [
+          36,
+          87.1
+        ],
+        [
+          38,
+          85.6
+        ],
+        [
+          40,
+          70.6
+        ],
+        [
+          42,
+          55.4
+        ],
+        [
+          46,
+          48.0
+        ],
+        [
+          50,
+          41.1
+        ],
+        [
+          52,
+          30.0
+        ],
+        [
+          53,
+          15.0
+        ]
+      ],
+      "confidence": "medium"
+    },
+    "grand_tier_front": {
+      "value": [
+        [
+          0,
+          79.2
+        ],
+        [
+          6,
+          79.1
+        ],
+        [
+          10,
+          78.5
+        ],
+        [
+          14,
+          77.4
+        ],
+        [
+          18,
+          76.2
+        ],
+        [
+          22,
+          74.8
+        ],
+        [
+          26,
+          73.6
+        ],
+        [
+          30,
+          72.8
+        ],
+        [
+          36,
+          72.9
+        ],
+        [
+          42,
+          72.7
+        ],
+        [
+          44,
+          72.2
+        ],
+        [
+          46,
+          60.0
+        ],
+        [
+          47.5,
+          40.0
+        ],
+        [
+          48,
+          20.0
+        ]
+      ],
+      "confidence": "medium",
+      "note": "crescent to |x|=44, then the side slip along the wall forward to the proscenium boxes at ~27.6 ft floor (row-A panorama)"
+    },
+    "balcony_front": {
+      "value": [
+        [
+          0,
+          104.4
+        ],
+        [
+          6,
+          103.8
+        ],
+        [
+          10,
+          103.2
+        ],
+        [
+          14,
+          102.6
+        ],
+        [
+          18,
+          101.7
+        ],
+        [
+          22,
+          100.4
+        ],
+        [
+          28,
+          101.1
+        ],
+        [
+          32,
+          99.8
+        ],
+        [
+          36,
+          97.9
+        ],
+        [
+          40,
+          93.6
+        ],
+        [
+          41,
+          93.0
+        ]
+      ],
+      "confidence": "medium"
+    },
+    "balcony_sweep": {
+      "value": [
+        [
+          94.4,
+          41.0,
+          55
+        ],
+        [
+          77.6,
+          38.1,
+          57
+        ],
+        [
+          60.0,
+          35.1,
+          50
+        ],
+        [
+          45.4,
+          31.9,
+          45
+        ],
+        [
+          32.2,
+          27.8,
+          40
+        ],
+        [
+          23.4,
+          20.5,
+          36
+        ],
+        [
+          15.4,
+          15.4,
+          33
+        ]
+      ],
+      "confidence": "low",
+      "note": "[z, |x|, floor_y]; heights from the row-A panorama lighting-rail reads (44-65 ft along it, descending toward the stage) and the Commons photo"
     }
   }
 }

@@ -135,3 +135,50 @@ looking along the tier toward the grille arch. Shows, qualitatively:
 - The Dress Circle side blocks rise steeply behind the Grand Tier's side sweep.
 No scale; use for topology, not dimensions. The model currently draws each tier as a single
 arc about `curve_center_z`; a side-arm descent per tier is not modelled.
+
+## 6. Side geometry from the HSR 1993 plans + the row-A panorama (2026-09-03, late)
+Plan scale 6.83 px/ft (52 ft proscenium = 355 px on the orchestra sheet); curtain line at
+plan x=1245, centreline y=1040 (orchestra sheet frame). Findings, all now in `house_geometry.json`:
+- Box ring: legs along the walls at |x|=51 from z≈7 (proscenium boxes) to z≈60, then an arc
+  to the rear rail at z≈97 at centre, i.e. behind the Grand Tier rail (the rear boxes are
+  recessed under the Grand Tier slab). At |x|=40 the rail is near z=82-86. Leg rail top
+  17-19 ft from the row-A panorama (floor ~14-16): the ring is ~3 ft lower at the legs.
+- Grand Tier front: nearly straight in plan, 3 ft forward at centre relative to |x|=50
+  (curve centre -334). Side slips along the walls at ~28.5 ft floor, roughly level, from the
+  proscenium boxes back to the crescent. They overhang the outermost orchestra seats and the
+  side boxes.
+- Balcony front: 4 ft forward at |x|=50 relative to centre (curve centre -222). No side arm
+  in front of the rail: the Balcony's edge along the walls rises toward the rear with its rows
+  (this is the "descending arm" in the Commons photo, seen from the Grand Tier looking toward
+  the stage). The ceiling cornice with the lighting positions is at ~75-85 ft, not a tier.
+- Orchestra row pitch 2.55 ft (rows A-ZZ from z=25.6 to 88.6 on the 1993 plan; Beranek 1962:
+  31 in). With this, no centre orchestra row is under the box ring; only the outer seats of
+  rows S-ZZ are, which is what the SmartSeat side-block photo shows.
+Model changes (`scripts/build_seats.py`): overhangs are now plan regions with position-
+dependent soffits (horseshoe legs, side slips); sightlines are ray-marched, and only overhangs
+the eye sits under can block a ray. Viewer draws the slips.
+Photo check: full proscenium from mid-orchestra sides, far Grand Tier, rear boxes, Dress
+Circle sides, Dress Circle J, centre rear orchestra — model agrees (no clipping anywhere now
+except what the outermost rear-orchestra side seats would see). Not yet modelled: the Grand
+Tier far blocks (seats 29-40) actually sit on the side slips and curve forward along the wall;
+the model still places them on the crescent.
+
+## 7. Correction (2026-09-05): plan frame was mis-registered by 20 ft
+Section 6 above used the pit rail (orchestra sheet x=1245) as the curtain line. The curtain
+line is the pit's back wall at x=1110 (pit width 19.8 ft = 135 px confirms it). Every plan-
+derived depth in section 6 was 20 ft short; the flattened tier fronts and the 2.55 ft orchestra
+pitch were artefacts. Corrected values, now stored as traced polylines in
+`house_geometry.json > plan_curves`:
+- Box ring: rear rail z=97 at centre, 87 at |x|=30–38, then the legs angle out to |x|=50 at
+  z=41 and reach the proscenium boxes at |x|≈53, z≈15. A true horseshoe, 76 ft across at the
+  rear, 106 ft at the front.
+- Grand Tier front: z=79 at centre (published rail 80 ft from the footlights), 72.7 at
+  |x|=30–44, then the side slip along the wall forward to z≈20.
+- Balcony front: z=104 at centre, 93 at |x|=40; side sweeps run forward and inward from
+  (41, 94) to the organ lofts at (15, 15), descending from ~57 to ~33 ft floor (row-A panorama
+  lighting-rail reads; the Commons photo). These are the upper side galleries.
+- Orchestra pitch back to 3.0 ft (rows to z≈100; 1965 report 36 in).
+- Panorama P4/Q1 resolved: it is the Balcony Circle front row at z≈100–104 with a 50 ft floor,
+  which the 56.6 ft camera height matches. No outlier remains.
+Consequences: Grand Tier EE and Dress Circle A are open to the ceiling; the Balcony lip lands
+over Dress Circle B–C; the orchestra's last rows at centre are under the Grand Tier slab.

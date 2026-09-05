@@ -26,14 +26,25 @@ about the last ten orchestra rows. Grand Tier rail 80 ft from the footlights
 (published). Full reasoning and the photo evidence: `sources/CALIBRATION.md`.
 Every dimension with its source and confidence: `data/house_geometry.json`.
 
-## Open questions on the geometry
+## Open questions on the geometry (updated 2026-09-03 late)
 
-1. Does the box ring hide the top of the proscenium from orchestra rows
-   Y–ZZ, as the model predicts? One look from the tour's orchestra position
-   or a seat photo from row Z settles it.
-2. Box ring position at centre (currently between rows R and S) and how far
-   the Balcony rail sits behind the Grand Tier rail (currently 16 ft).
-3. Row pitch on every level (2.9 ft orchestra, 2.85 ft tiers, both guesses).
+Answered: the box ring does not hide the proscenium top at centre (its rear
+rail is at z≈97, behind the Grand Tier rail; only the outer seats of rows
+S–ZZ are under it, and the side seat photo shows the clip). Box ring plan and
+the Balcony rail (8 ft behind the Grand Tier rail) come from the 1993 plans
+and the 1931 section. Orchestra pitch 2.55 ft from the plan and Beranek.
+
+Tier fronts, the box ring and the Balcony side sweeps are now traced
+polylines from the 1993 plans (`plan_curves` in `house_geometry.json`; see
+`sources/DATA_ACQUISITION.md` §7 for the frame correction that made them right).
+
+Still open:
+1. Grand Tier far blocks (seats 29–40) sit on the side slips and curve forward
+   along the walls; the model still puts them on the crescent.
+2. Tier row pitch (2.85 ft) and the per-row rises on the upper tier are not
+   measured; the Beranek section is a redrawn schematic.
+3. Balcony sweep heights (33–57 ft) rest on one panorama's lighting-rail reads.
+4. Orchestra pitch 3.0 ft is bracketed (31 in Beranek, 36 in 1965 report).
 
 ## Next build: Sound Purchase
 
