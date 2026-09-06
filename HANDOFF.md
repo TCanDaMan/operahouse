@@ -8,7 +8,7 @@ halls. Keep working autonomously; do not make the user repeatedly say continue.
 Explain results in plain language. They supplied plans, sections, and tour views.
 
 Repository: TCanDaMan/operahouse. Local checkout:
-`/Users/tyler/Documents/ChatGPT/Sound Purchase/operahouse`.
+`/Users/tyler/Developer/personal/soundpurchase` (an older copy may exist under ~/Documents/ChatGPT).
 Checkpoint branch: `codex/hall-calibration-checkpoint`.
 Base before this work: `75e4048` on `claude/opera-house-seat-model-94ksm4`.
 Do not mistake old README conclusions or historical calibration logs for verified
@@ -50,6 +50,9 @@ index.html; the viewer is no longer a standalone single HTML file.
 - Rear-center box rail was shifted 17 ft forward, tapered to zero at |x|=40.
   Old trace retained in house_geometry.json. This was a visual/section-based
   hypothesis, NOT a completed plan registration. Its placement changes metrics.
+  Owner reviewed tour screenshots on 2026-09-05 and chose to KEEP the shift:
+  the box parapet visibly sits close under the Grand Tier front. Do not revert
+  without new plan evidence. Still needs plan registration for a measured depth.
 - Box parapet 2.2 ft, dividers, molding and chairs are illustrative.
 - Tier depths remain unresolved. Do NOT move Balcony forward 26 ft just because
   the lab reports that discrepancy. The picked schematic section feature and
@@ -95,8 +98,8 @@ candidate interpretations. More detail: sources/CALIBRATION_NEXT.md.
 
 ## References
 
-Seven latest user tour screenshots saved as sources/calibration/user-tour-2026-09-05/
-01–07.png, with an index README. Original panoramas, 1932 sections, 1993 plans,
+Twelve user tour screenshots saved as sources/calibration/user-tour-2026-09-05/
+01–12.png, with an index README. Original panoramas, 1932 sections, 1993 plans,
 Beranek section, and SmartSeat seat photos already live under sources/.
 No external messages sent. No merge or deployment performed in this checkpoint.
 

@@ -93,7 +93,7 @@
     },
     "row_pitch_ft": {
       "value": 3.0,
-      "source": "HSR 1993 orchestra plan: rows from z=25 to ~100-110 ft over 26 rows (3.0-3.3 ft); 1965 city report 36 in; Beranek 1962 31 in. The 2.55 written earlier came from a mis-registered plan frame.",
+      "source": "HSR 1993 orchestra plan: rows from z=25 to ~100-110 ft over 26 rows (3.0-3.3 ft); 1965 city report 36 in; Beranek 1962 31 in. The 2.55 written earlier came from a mis-registered plan frame. 2026-09-05 owner review of tour screenshots 01-03 and 11 (sources/calibration/user-tour-2026-09-05): box parapet sits nearly under the Grand Tier front at center; owner judges the shifted position closer to correct than the HSR trace. Visual corroboration only; keep until plan registration confirms.",
       "confidence": "low",
       "previous_value": 2.55
     },
