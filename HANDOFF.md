@@ -16,6 +16,13 @@ AUDIO_ENGINE.md for the decomposition and the two open items (dome facet
 coverage over the Grand Tier; the four out-of-wall box seats). Serve this
 checkout on port 8766.
 
+2026-09-06 afternoon (Fable): exhaustive deep research (five Opus agents; synthesis
+in sources/research/DEEP_RESEARCH_2026-09-06.md). Engine recalibrated on evidence:
+measured RT, acoustic-plaster dome, Barron-Lee tail from the direct arrival, seat
+dip, recentred sound score. All level medians now inside the published occupied
+ranges; ranking agrees with SF Opera's own seating advice. See the afternoon
+follow-up in AUDIO_ENGINE.md for numbers and the open items.
+
 ---
 
 # Sound Purchase — checkpoint, 2026-09-05 (evening)

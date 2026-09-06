@@ -503,7 +503,11 @@ def add(level, section, row, number, x, floor_y, z, zone, flags=None):
     if m["overhang"] != "none":
         o = overhang_for(eye[0], eye[1], eye[2])
         lip = (o["lip_x"], o["lip_y"], o["lip_z"])
-    grazing = level == "orchestra" and m["elev_to_singer_deg"] < 4.0 and z > 45
+    # direct sound skimming the seated audience: the main floor from a few rows
+    # back; metres of audience traversed measured from the front row
+    grazing = None
+    if level == "orchestra" and m["elev_to_singer_deg"] < 15.0 and z > 30:
+        grazing = (m["elev_to_singer_deg"], (z - 25.6) * AC.FT)
     rec.update(AC.seat_acoustics(eye, ray_blocked, soffit_planes, m["pit_visible"], grazing, oh, lip))
     # the flat-plane ceiling check is superseded by the image-source result against the profile
     rec["ceiling_reflection_singer"] = any(t[5] == "C" for t in rec["aur"]["singer"]["r"])
@@ -727,7 +731,7 @@ fields = ["id", "level", "section", "row", "seat", "zone", "price", "x", "y", "z
           "ceiling_reflection_pit", "direct_level_db", "score",
           "itdg_ms", "c80_db", "strength_db", "lateral_fraction", "reverb_vs_direct_db",
           "voice_over_pit_db", "early_reflections", "first_reflection_from",
-          "direct_path_blocked", "seat_dip", "sound_score", "overall_score"]
+          "direct_path_blocked", "seat_dip", "seat_dip_db", "sound_score", "overall_score"]
 with open(os.path.join(ROOT, "data", "seats.csv"), "w", newline="") as f:
     w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore", lineterminator="\n")
     w.writeheader()

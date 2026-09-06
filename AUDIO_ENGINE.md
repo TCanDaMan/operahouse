@@ -64,6 +64,35 @@ Still open from this comparison:
   get no significant early reflection and C80 -7.9 dB. That is the wall-footprint
   conflict in data/geometry_conflicts.json, not a listening result.
 
+## Follow-up 2026-09-06 (Fable, afternoon): deep research and recalibration
+
+Five parallel research passes (sources/research/DEEP_RESEARCH_2026-09-06.md and the
+per-angle reports beside it). Changes made on that evidence:
+
+- RT is Beranek's measured 2001 occupied value (1.59/1.58/1.53/1.46/1.39/1.26 s),
+  the only published measurement for the hall. No C80, G, EDT or IACC exists.
+- The dome is acoustic plaster (Beranek 1996 p160; Swan 1932). The 36 facets are
+  replaced by a flat acoustic-plaster patch in the ceiling plane; faceting a dome
+  puts Rindel's diffraction cut-off near 500 Hz and makes coverage patchy.
+- Tail law is Barron & Lee revised theory: (31200 T/V) exp(-0.04 r/T) relative to
+  the direct sound at 10 m, per source and band, starting at the direct arrival,
+  with the explicit image-source energy subtracted (floor 25%). tail_start_ms is
+  now 0 and TAIL_RISE_S 2 ms. Validated for a fore-stage source; the pit source is
+  outside that validation.
+- Seat dip: elevation-scaled excess attenuation of the direct sound on the main
+  floor (0.7 dB/m of audience at 400 Hz-3 kHz, 0.5 dB/m at 125 Hz, zero above 15
+  degrees), applied to both sources. Exported as seat_dip_db. Low confidence:
+  rests mainly on Kahle/Rummler 2025.
+- sound_score recentred on occupied opera ranges: G penalty below 0 dB, C80 centred
+  on +2.5 dB, seat-dip penalty proportional.
+
+Calibration after the changes (level medians): C80 +1.3..+3.0 dB (target +2..+4
+occupied stage source; Barron for this V,T +0.6..+2.2 in the stalls), G -2.4..+1.0
+(target -1.5..+1.5), house C80 sd 1.3 (within-house sd 1-2.5 in measured houses),
+main-floor centre ITDG 52-55 ms (measured 51). Dress Circle and Balcony G sit at
+the low edge. Next geometry job: enrich the explicit reflector set (box fronts,
+proscenium splays, side-wall segments) so it carries 35-50% of reflected energy.
+
 ## Run / validation
 
 ```sh

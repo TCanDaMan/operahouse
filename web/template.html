@@ -137,7 +137,7 @@
     <div>
       <h1><small>San Francisco · Die Walküre reference</small>War Memorial Seat Finder</h1>
       <p class="lede">Every seat in the house in 3D, with what sits above you, what you can see, and how the room answers the singer. Click a seat, then listen from it.</p>
-      <p class="note">Model, not measurement: tier depths are still being checked against the drawings, and the reverberation time is an assumption. Seat differences are predictions to explore, not verified listening results.</p>
+      <p class="note">Model, not measurement: tier depths are still being checked against the drawings, and the reverberation time is Beranek's 2001 occupied measurement. Seat differences are predictions to explore, not verified listening results.</p>
     </div>
 
     <div>
@@ -179,7 +179,7 @@
       <div id="valueList" style="margin-top:8px"></div>
     </div>
 
-    <p class="note">Prices are placeholders per zone. Room acoustics: image-source early reflections against the modelled surfaces plus a statistical tail from the published 20,900 m³ volume; the published 51 ms main-floor initial delay is a calibration reference, not proof that other seats are accurate. Listening uses a synthesized voice and orchestra; it is an impression of the differences between seats, not a recording. See the repository README.</p>
+    <p class="note">Prices are placeholders per zone. Room acoustics: image-source early reflections against the modelled surfaces plus a Barron–Lee reverberant tail (measured occupied RT, 20,900 m³, level falling with distance) that carries the reflected energy the explicit paths miss; hall means are tuned to sit in the occupied ranges Hidaka and Beranek measured in 23 opera houses, and the published 51 ms main-floor initial delay is a calibration reference, not proof that any one seat is accurate. Listening uses a synthesized voice and orchestra; it is an impression of the differences between seats, not a recording. See the repository README.</p>
   </aside>
 
   <main id="stage">
@@ -963,7 +963,7 @@ function verdict(s){
   snd.push(s.strength_db >= 2 ? "Full, present sound." : s.strength_db >= 0 ? "Comfortable level." : "Quieter and more distant than the main floor.");
   if (s.lateral_fraction >= 0.2) snd.push("Strong side-wall reflections wrap the sound around you.");
   if (s.voice_over_pit_db < -2) snd.push(`The pit sits ${(-s.voice_over_pit_db).toFixed(0)} dB above the voice in direct sound here.`);
-  if (s.seat_dip) snd.push("Low on a flat floor behind many rows: the sound grazes the audience, potentially thinning the bass (seat-dip); this effect is flagged but not yet synthesized.");
+  if (s.seat_dip) snd.push(`Low behind many rows: the direct sound skims the audience and the model takes ${s.seat_dip_db.toFixed(0)} dB off it in the mid band (seat-dip; an empirical filter, not a measurement).`);
   return {cls, text: bits.join(" "), sound: snd.join(" ")};
 }
 function metricsList(s){

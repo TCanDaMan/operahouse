@@ -10,7 +10,7 @@ for(const s of seats){
     assert(a.bands.every(v=>Number.isFinite(v)&&v>=0));
     assert(a.tail_energy.every(v=>Number.isFinite(v)&&v>0));
     assert(a.r.every(t=>t[0]>=-0.1&&t[7].length===4&&t[7].every(v=>Number.isFinite(v)&&v>=0)));
-    assert(a.tail_start_ms>=20);
+    assert(a.tail_start_ms>=0);
   }
 }
 function energy(a){let v=0;for(const x of a){assert(Number.isFinite(x));v+=x*x;}return v;}

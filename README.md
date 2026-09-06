@@ -1,4 +1,6 @@
-> **Audio update (2026-09-06):** See [AUDIO_ENGINE.md](AUDIO_ENGINE.md). Four-band repeatable seat audio, corrected stereo energy/direction, shared ceiling parameters, and direct-sound comparison are implemented. This is not measurement-validated.
+> **Recalibration (2026-09-06 pm):** measured occupied RT (Beranek 2001), acoustic-plaster dome, Barron–Lee tail, seat dip; level medians inside published opera-house ranges. Research synthesis: [sources/research/DEEP_RESEARCH_2026-09-06.md](sources/research/DEEP_RESEARCH_2026-09-06.md).
+
+> **Audio update (2026-09-06 am):** See [AUDIO_ENGINE.md](AUDIO_ENGINE.md). Four-band repeatable seat audio, corrected stereo energy/direction, shared ceiling parameters, and direct-sound comparison are implemented. This is not measurement-validated.
 
 > **Current status:** Start with [HANDOFF.md](HANDOFF.md). Historical seat conclusions below predate the latest geometry corrections and are not validated. The model remains a reconstruction in progress.
 

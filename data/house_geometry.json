@@ -763,6 +763,16 @@
       "value": "plaster except centre domed section, acoustic plaster; floors fully carpeted except upper part of top balcony; main-floor seats fully upholstered, balcony seats hard backs; velvet on pit rails and cross-aisle rails",
       "confidence": "high",
       "source": "Beranek 1996 p160 Architectural and structural details, verified by the author 1993; Swan 1932 (Architect and Engineer, Nov 1932) says concave focusing surfaces were deliberately avoided in the design"
+    },
+    "tail_model": {
+      "value": "Barron & Lee revised theory: reflected energy (31200 T/V) exp(-0.04 r/T) relative to the direct sound at 10 m, tail from the direct arrival, explicit image-source energy subtracted (floor 25%)",
+      "confidence": "medium",
+      "source": "Barron 2015 JASA 137(6) (akutek.info/Papers/MB_ConcertHall_SoundLevels.pdf): rms 1.0 dB G, 1.4 dB C80 over 212 measurements in 19 halls; validated for opera houses with a fore-stage source, the pit source is outside that validation"
+    },
+    "seat_dip": {
+      "value": "0.7 dB per metre of audience traversed at 400 Hz-3 kHz and 0.5 dB/m in the 125 Hz band, scaled from 1 at 0 degrees source elevation to 0 at 15 degrees, caps 16/10 dB, main floor only",
+      "confidence": "low",
+      "source": "Kahle/Rummler Forum Acusticum Euronoise 2025 'Forget about the seat dip effect' scale-model data and audience-related transfer functions; Round Robin 1 named grazing attenuation as a model failure cause. Single recent source; magnitude provisional"
     }
   },
   "interior_ceiling": {
@@ -775,6 +785,6 @@
       "dome_aspect": 0.85
     },
     "confidence": "low",
-    "source": "Shared illustrative interior ceiling from Fable visual rebuild. Rear uses candidate section outline. Not a surveyed interior; dome uses bounded facets for first-order acoustic reflection only."
+    "source": "Shared illustrative interior ceiling from Fable visual rebuild. Rear uses candidate section outline. Not a surveyed interior; dome uses bounded facets for first-order acoustic reflection only. | Carey & Co. Historic Structure Report 1993 (sources/research/hsr1993/HSR_1993_text.txt): the orchestra ceiling has a large recessed oval bounded by a gilded cornice, sunburst chandelier 27 ft in diameter (25 ft per SFGATE/SFCV); ceilings over the balconies flat plaster with recessed octagonal fixtures. No source gives the oval's diameter, depth or the ceiling height beyond Beranek H = 73 ft; dome_radius/rise remain illustrative."
   }
 }

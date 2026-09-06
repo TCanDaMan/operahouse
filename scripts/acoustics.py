@@ -25,13 +25,20 @@ HI = 3
 EARLY_MS = 80.0
 MAX_ORDER = 2
 # Onset ramp of the statistical tail, shared by the C80 accounting and the
-# renderer (exported as tail_rise_s). Kept short: it is an anti-click device,
-# not a physical build-up claim. A 25 ms ramp with the tail energy renormalised
-# afterwards moved ~3 dB of tail energy past 80 ms and dropped house-median C80
-# to -3..-6 dB, outside the -4..+4 dB range reported for opera houses. The
-# coarse image-source set carries only 4-17% of the reflected energy, so the
-# tail must stand in for the early reflected energy it does not resolve.
-TAIL_RISE_S = 0.005
+# renderer (exported as tail_rise_s). An anti-click device only: Barron's
+# 170-measurement test (JASA 137, 2015, Table VII) shows reflected energy is
+# best integrated from the direct-sound arrival, and a long ramp with the tail
+# renormalised afterwards moved ~3 dB of energy past 80 ms in this model.
+TAIL_RISE_S = 0.002
+# Barron & Lee revised theory: total reflected energy relative to the direct
+# sound at 10 m is (31200 T / V) exp(-0.04 r / T), r in metres. The exponential
+# is the empirical distance decay the flat Sabine 4/R lacks (0.174 r/T dB, so
+# 3.5 dB at 30 m); rms error against 212 measurements in 19 halls 1.0 dB (G),
+# 1.4 dB (C80). Validated for opera houses with a fore-stage source; the pit
+# source under the proscenium is outside that validation.
+BARRON_K = 31200.0
+BARRON_DECAY = 0.04
+TAIL_FLOOR = 0.25   # the tail never drops below this fraction of Barron's total
 
 # --------------------------------------------------------------- context
 K = {}   # filled by configure(): geometry callables and constants
@@ -110,13 +117,22 @@ def _build_surfaces():
     c = K["G"]["interior_ceiling"]["value"]
     def in_dome(p):
         return (p[0]/c["dome_radius"])**2 + ((p[2]-c["dome_z"])/(c["dome_radius"]*c["dome_aspect"]))**2 < 1
-    # Main flat surface has a real hole for the dome; rear matches the viewer.
+    # The dome footprint is a flat acoustic-plaster patch in the ceiling plane.
+    # Beranek 1996 p160: the centre domed section is acoustic plaster; Swan
+    # 1932: focusing surfaces were deliberately avoided. Flat facets were
+    # rejected: 36 facets of ~7 m2 have a Rindel diffraction cut-off near
+    # 500 Hz, so faceting creates a low-frequency hole and patchy coverage.
+    # A true curved-surface treatment (specular point on the sphere plus the
+    # curvature gain) would raise the return by 5-10 dB in the convergence
+    # footprint; until the dome is measured this patch understates that.
     for i, ((z0, y0), (z1, y1)) in enumerate(zip(prof, prof[1:])):
         n = norm((0.0, -(z1 - z0), (y1 - y0)))     # points down into the room
         if n[1] > 0: n = mul(n, -1)
         SURFACES.append(Plane(f"ceiling {i}", "C", (0.0, y0, z0), n, "plaster",
                               lambda p, z0=z0, z1=z1, hb=hb: z0 - 0.01 <= p[2] <= z1 + 0.01 and abs(p[0]) <= hb and not in_dome(p)))
-    _dome_surfaces(c)
+        SURFACES.append(Plane("main dome (acoustic plaster patch)", "C", (0.0, y0, z0), n, "acoustic_plaster",
+                              lambda p, z0=z0, z1=z1, hb=hb: z0 - 0.01 <= p[2] <= z1 + 0.01 and abs(p[0]) <= hb and in_dome(p),
+                              order2=False))
     # side walls
     for sgn in (-1, 1):
         SURFACES.append(Plane("side wall " + ("L" if sgn < 0 else "R"), "W", (sgn*hb, 0.0, 0.0), (-sgn, 0.0, 0.0), "plaster",
@@ -137,34 +153,6 @@ def _build_surfaces():
     # seated audience is absorbed and scattered (the seat-dip effect is
     # flagged separately), and a flat plane there produced a spurious
     # first reflection a fraction of a millisecond after the direct sound.
-
-def _dome_surfaces(c):
-    """Bounded triangle approximation of the displayed spherical cap.
-    First-order only: avoid pretending this coarse mesh resolves dome focusing.
-    Material is acoustic plaster: Beranek 1996 p160 reports the centre domed
-    section as acoustic plaster, and Swan 1932 says focusing surfaces were
-    deliberately avoided, so the dome returns little energy."""
-    radius, rise = c["dome_radius"], c["dome_rise"]
-    sphere = (radius*radius + rise*rise)/(2*rise)
-    def point(r, a):
-        return (r*math.cos(a), c["main_y"]+rise-sphere+math.sqrt(sphere*sphere-r*r),
-                c["dome_z"]+c["dome_aspect"]*r*math.sin(a))
-    rings = [[point(radius*f, i*math.tau/12) for i in range(12)] for f in (0, 0.5, 1)]
-    def triangle(a,b,cpt):
-        u,v=sub(b,a),sub(cpt,a)
-        n=(u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0])
-        if n[1]>0: n=mul(n,-1)
-        def inside(p):
-            w=sub(p,a); uu,vv,uv=dot(u,u),dot(v,v),dot(u,v); d=uu*vv-uv*uv
-            s=(vv*dot(w,u)-uv*dot(w,v))/d; t=(uu*dot(w,v)-uv*dot(w,u))/d
-            # Half-open seams avoid double counting shared edges.
-            return s>=0 and t>=0 and s+t<1
-        SURFACES.append(Plane("main dome", "C", a,n,"acoustic_plaster",inside,order2=False))
-    for i in range(12):
-        j=(i+1)%12
-        triangle(rings[0][i],rings[1][i],rings[1][j])
-        triangle(rings[1][i],rings[2][i],rings[2][j])
-        triangle(rings[1][i],rings[2][j],rings[1][j])
 
 # ------------------------------------------------------ slab occlusion grid
 GRID = {}
@@ -288,9 +276,25 @@ def arrival_angles(listener, look, frm):
 SCATTER = Plane("overhang edge", "S", (0.0, 0.0, 0.0), (0.0, -1.0, 0.0), "plaster", lambda p: True, order2=False)
 SCALE = 4 * math.pi * FT ** 2   # model energy (1/ft^2 on axis) -> 1/(4 pi r_m^2)
 
+def seat_dip_db(elev_deg, audience_m):
+    """Excess attenuation of a direct sound that grazes the seated audience.
+    Kahle et al. (Forum Acusticum 2025) and Round Robin 1: ~0.7 dB per metre of
+    audience traversed across 400 Hz-3 kHz at 0 degrees source elevation, plus a
+    quarter-wave notch near 100-160 Hz, falling to nothing above ~15 degrees.
+    Returned per band (125 Hz, 500 Hz, 2 kHz, 4 kHz), capped at 16 dB."""
+    scale = max(0.0, min(1.0, 1.0 - elev_deg / 15.0))
+    if scale <= 0 or audience_m <= 0:
+        return [0.0] * 4
+    broad = min(16.0, 0.7 * audience_m) * scale
+    return [min(10.0, 0.5 * audience_m) * scale, broad, broad, 0.5 * broad]
+
 def seat_acoustics(eye, direct_blocked_fn, soffit_planes_fn, pit_visible, grazing, oh, lip=None):
     """Compute the acoustic picture at one listening position.
-    oh  = fraction of the room's late sound reaching a seat under an overhang.
+    oh  = fraction of the room's late sound reaching a seat under an overhang
+          (Barron 1995: overhangs cut late sound consistently, early sound
+          haphazardly, so it multiplies the tail only).
+    grazing = (elevation of the singer in degrees, metres of audience the
+          direct sound skims) or None when the seat does not graze.
     lip = (x, y, z) of the overhang edge in front of the seat, if any: the
           fascia and soffit edge scatter sound down to the seats beneath."""
     singer, pit = K["singer"], K["pit_src"]
@@ -308,6 +312,8 @@ def seat_acoustics(eye, direct_blocked_fn, soffit_planes_fn, pit_visible, grazin
         _, damps = path_amplitude(src, fwd, [], [], eye)
         if blocked:                          # diffraction over the lip / rail
             damps = [a * 10 ** (-(5 if key == "pit" else 12) / 20) for a in damps]
+        dip = seat_dip_db(*grazing) if grazing else [0.0] * 4   # both sources skim the same rows
+        damps = [a * 10 ** (-d / 20) for a, d in zip(damps, dip)]
         paths = find_paths(src, fwd, eye, surfaces, blocked)
         taps = []
         for p in paths:
@@ -333,20 +339,28 @@ def seat_acoustics(eye, direct_blocked_fn, soffit_planes_fn, pit_visible, grazin
     e_late_refl = sum(mid(q["amps"]) for q in taps if q["t"] > EARLY_MS)
     lateral = sum(mid(q["amps"]) * math.sin(math.radians(q["az"])) ** 2
                   for q in taps if 5 <= q["t"] <= EARLY_MS)
-    # statistical tail: 4/R (per unit source power, metric) brought into the
-    # model's units, where the on-axis direct sound is 1/L_ft^2
-    # One exported tail law drives both the metrics and the rendered response.
-    # Total pressure-squared energy per frequency band; equal source-power
-    # assumption for singer and pit, not a measured orchestral balance.
-    tail_energy = [4 / r * SCALE * oh for r in K["R"]]
+    # Statistical tail, Barron & Lee revised theory, per source and band. The
+    # total reflected energy at this distance is the target; the explicit
+    # image-source paths carry part of it and the tail carries the rest, so
+    # nothing is counted twice. The tail starts at the direct arrival (Barron
+    # 2015) and decays with the measured band RT. Equal source power is assumed
+    # for singer and pit, not a measured orchestral balance. Model units: the
+    # on-axis direct sound is 1/L_ft^2; Barron's unit is the direct sound at
+    # 10 m, i.e. 1/(4 pi 100) in metric intensity.
+    tails = {}
+    for key in ("singer", "pit"):
+        _t0, _d, ktaps, kLd = aur[key]
+        r_m = kLd * FT
+        total = [BARRON_K * K["rt"][b] / K["V"] * math.exp(-BARRON_DECAY * r_m / K["rt"][b])
+                 / (4 * math.pi * 100) * SCALE * oh for b in range(4)]
+        explicit = [sum(q["amps"][b] ** 2 for q in ktaps) for b in range(4)]
+        tails[key] = [max(total[b] - explicit[b], TAIL_FLOOR * total[b]) for b in range(4)]
+    tail_energy = tails["singer"]
     e_late = (tail_energy[1] + tail_energy[2]) / 2
     sig = [q for q in taps if mid(q["amps"]) >= e_dir * 10 ** (-15 / 10) and q["code"] not in ("F", "S")]
     itdg = sig[0]["t"] if sig else None
-    # Do not synthesize diffuse room sound before its first valid room return.
-    room_taps = [q["t"] for q in taps if q["code"] != "F"]
-    t_mix = max(20.0, min(room_taps) if room_taps else 80.0) / 1000
     rise = TAIL_RISE_S
-    late_tail = sum(tail_energy[b] * tail_fraction_after(EARLY_MS / 1000 - t_mix, K["rt"][b], rise)
+    late_tail = sum(tail_energy[b] * tail_fraction_after(EARLY_MS / 1000, K["rt"][b], rise)
                     for b in MID) / 2
     early_total = e_dir + e_early + e_late - late_tail
     late_total = late_tail + e_late_refl
@@ -366,7 +380,8 @@ def seat_acoustics(eye, direct_blocked_fn, soffit_planes_fn, pit_visible, grazin
         "early_reflections": len([q for q in taps if q["t"] <= EARLY_MS]),
         "first_reflection_from": sig[0]["surf"][-1] if sig else None,
         "direct_path_blocked": bool(direct_blocked),
-        "seat_dip": bool(grazing),
+        "seat_dip": bool(grazing) and seat_dip_db(*grazing)[1] >= 3.0,
+        "seat_dip_db": round(seat_dip_db(*grazing)[1], 1) if grazing else 0.0,
     })
     res["sound_score"] = round(sound_score(res), 1)
     # ---- compact auralization record
@@ -385,8 +400,8 @@ def seat_acoustics(eye, direct_blocked_fn, soffit_planes_fn, pit_visible, grazin
         rec[key] = {"t0": round(t0, 1), "d": [round((damps[1] + damps[2]) / 2, 5), round(damps[3], 5), round(az), round(el)],
                     "r": [tap_rec(q) for q in strong],
                     "bands": [round(v, 8) for v in damps],
-                    "tail_energy": tail_energy,
-                    "tail_start_ms": max(20.0, min((q["t"] for q in taps if q["code"] != "F"), default=80.0)),
+                    "tail_energy": tails[key],
+                    "tail_start_ms": 0.0,
                     "tail_rise_s": rise}
     rec["version"] = 2
     rec["rev_db"] = round(rev_db, 1)
@@ -404,17 +419,18 @@ def tail_fraction_after(t, rt, rise=TAIL_RISE_S):
     return sum(w * math.exp(-r*t) / r for w, r in zip((1, -2, 1), rates)) / sum(w/r for w, r in zip((1, -2, 1), rates))
 
 def sound_score(m):
-    """0-100 listening score. Weights are opinions, like view_score."""
+    """0-100 listening score. Weights are opinions, like view_score. Centred on
+    the occupied opera-house ranges from Hidaka & Beranek 2000 and Barron:
+    strength G about 0 dB (-1.5..+1.5), stage-source C80 +2..+4 dB."""
     s = 100.0
-    s -= max(0.0, 2.0 - m["strength_db"]) * 5            # weak, distant sound
-    s -= max(0.0, abs(m["c80_db"] - 1.5) - 2.0) * 6      # muddy or dry
+    s -= max(0.0, 0.0 - m["strength_db"]) * 5            # weak, distant sound
+    s -= max(0.0, abs(m["c80_db"] - 2.5) - 2.0) * 6      # muddy or dry
     if m["itdg_ms"] is not None:
         s -= min(20.0, max(0.0, m["itdg_ms"] - 35) * 0.5)  # a long gap before the room answers
     s += min(m["lateral_fraction"], 0.30) * 40 - 6        # envelopment: LF 0.15 is neutral
-    s -= max(0.0, m["reverb_vs_direct_db"] - 10) * 1.5    # the room swamps the voice: distant
+    s -= max(0.0, m["reverb_vs_direct_db"] - 12) * 1.5    # the room swamps the voice: distant
     s -= max(0.0, -m["voice_over_pit_db"] - 2) * 3       # the pit covers the voice
-    if m["seat_dip"]:
-        s -= 6
+    s -= min(8.0, 0.5 * m.get("seat_dip_db", 0.0))       # direct sound thinned by grazing the audience
     if m["direct_path_blocked"]:
         s -= 15
     return max(0.0, min(100.0, s))
