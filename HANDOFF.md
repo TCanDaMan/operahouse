@@ -127,3 +127,23 @@ profile is in house_geometry.json > ceiling_profile. It is NOT an interior
 ceiling, transverse dome, wall footprint or acoustic reflection surface.
 The 224 unknown rear-ceiling results remain unknown. Browser checked overview;
 upper-surface regressions passed. Controls wrap to avoid covering the cutaway.
+
+## Follow-up: acoustic engine, auralization, visual rebuild (2026-09-05, later)
+
+- scripts/acoustics.py: image-source early reflections (orders 1-2) against
+  the modelled surfaces, proscenium and slab occlusion, lip scatter,
+  statistical tail from Beranek's volume and an ASSUMED RT (house_geometry.json
+  > acoustics, confidence low). Per-seat ITDG, C80, G, LF, rev/direct, voice
+  over pit, sound_score, overall_score; compact "aur" taps for the browser.
+  Main-floor ITDG 53 ms vs Beranek's measured 51 ms.
+- Headroom and the ceiling-reflection flags now use the ceiling profile, not
+  the flat 74 ft plane; the 224 rear-Balcony "not modeled" results are gone.
+- web/template.html: Web Audio auralization (synth voice + pit chord, or a
+  user file), echogram, reflection paths in 3D, sound metrics in the panel
+  and compare table, value list ranked by overall score. Full visual rebuild
+  (see README). Shell surfaces are single-sided facing inward.
+- Serve this checkout on its own port; a server on 8765 may be serving the
+  older copy under ~/Documents/ChatGPT.
+- Open: the Balcony soffit slope (equal to the rake) gives no specular soffit
+  reflection; check against photos. RT is an assumption. Loge arch positions,
+  dome size and chandelier are illustrative.

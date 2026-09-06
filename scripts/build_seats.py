@@ -23,6 +23,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "data"))
+sys.path.insert(0, os.path.join(ROOT, "scripts"))
 import seating_spec as S  # noqa: E402
 
 with open(os.path.join(ROOT, "data", "house_geometry.json")) as f:
@@ -344,6 +345,16 @@ def stage_width_fraction(eye):
     lo, hi = max(lo, -half), min(hi, half)
     return max(0.0, (hi - lo) / PROSC_W)
 
+def ceiling_profile_y(z):
+    """Ceiling height from the section-derived profile (main dome height in front, rising cove at the rear)."""
+    prof = G["ceiling_profile"]["value"]
+    if z <= prof[0][0]:
+        return prof[0][1]
+    for (z0, y0), (z1, y1) in zip(prof, prof[1:]):
+        if z <= z1:
+            return y0 + (y1 - y0) * (z - z0) / (z1 - z0)
+    return prof[-1][1]
+
 def ceiling_reflection_ok(eye, src):
     # The rear balcony rises beyond the simplified main-dome plane.
     # A ray to a ceiling below the listener is not a valid reflection model.
@@ -403,7 +414,7 @@ def metrics(eye):
         m["overhang_depth_ft"] = 0.0
         m["overhang_opening_ft"] = None
         m["overhang_d_over_h"] = 0.0
-        m["headroom_ft"] = round(CEILING_Y - eye[1], 1) if eye[1] < CEILING_Y else None
+        m["headroom_ft"] = round(ceiling_profile_y(eye[2]) - eye[1], 1)
         m["lip_elev_deg"] = None
         m["opening_angle_deg"] = round(90.0 - m["elev_to_singer_deg"], 1)
         m["prosc_top_clipped"] = False
@@ -417,8 +428,60 @@ def metrics(eye):
     m["score"] = round(view_score(m), 1)
     return m
 
+# --------------------------------------------------------------- acoustics
+import acoustics as AC  # noqa: E402
+
+_lower, _upper = TIERS["lower_tier"], TIERS["upper_tier"]
+_lower_rear_z = _lower.rows[-1][0] + 4
+_box_rear_z = RING[0][1] + 9
+AC.configure(
+    G=G, half_breadth=HALF_BREADTH, ceiling_profile=G["ceiling_profile"]["value"],
+    depth_balcony=P("published", "depth_balcony_level_ft"),
+    depth_orchestra=P("published", "depth_orchestra_level_ft"),
+    stage={"y": STAGE_Y, "prosc_w": PROSC_W, "prosc_h": PROSC_H,
+           "back_wall_z": -P("published", "curtain_to_back_wall_ft")},
+    pit_front_z=PIT_FRONT_Z, pit_back_z=PIT_BACK_Z, singer=SINGER, pit_src=PIT_SRC,
+    rear_walls=[
+        ("rear wall, orchestra", P("published", "depth_orchestra_level_ft"),
+         lambda p: orch_floor_y(p[2]), lambda p: BOX_SOFFIT, "plaster"),
+        ("rear wall, boxes", _box_rear_z, lambda p: BOX_Y + 1, lambda p: _lower_soffit(p[0], p[2]), "drape"),
+        ("rear wall, dress circle", _lower_rear_z, lambda p: _lower.rows[-1][1], lambda p: _upper_soffit(p[0], p[2]), "plaster"),
+        ("rear wall, balcony", P("published", "depth_balcony_level_ft"),
+         lambda p: _upper.rows[-1][1], lambda p: AC.ceiling_y_at(p[2]), "plaster"),
+    ],
+    tier_fronts=[
+        ("box front", RING[0][1], BOX_SOFFIT, BOX_Y + P("boxes", "parapet_height_ft"), 30),
+        ("grand tier front", GT_FRONT[0][1], _lower.soffit_lip_y, _lower.rows[0][1] + 3, 40),
+        ("balcony front", BAL_FRONT[0][1], _upper.soffit_lip_y, _upper.rows[0][1] + 3, 40),
+    ],
+    overhangs=[
+        (OVERHANGS[0], lambda x, z: box_floor_at(z)),
+        (OVERHANGS[1], lambda x, z: _lower.floor_at(z) if abs(x) < _lower.x_end else P("lower_tier", "side_slip_floor_y_ft")),
+        (OVERHANGS[2], lambda x, z: _upper.floor_at(z)),
+    ],
+)
+
+def soffit_planes(eye):
+    """Local planar stand-ins for the curved soffits over this seat."""
+    planes = []
+    for o, tier in ((OVERHANGS[0], None), (OVERHANGS[1], _lower), (OVERHANGS[2], _upper)):
+        if not o.contains(eye[0], eye[2]):
+            continue
+        sy = o.soffit(eye[0], eye[2])
+        if sy <= eye[1] + 0.5:
+            continue
+        slope = 0.0 if tier is None or abs(eye[0]) >= tier.x_end else tier.slope
+        planes.append(AC.Plane("soffit, " + o.name.replace("_", " "), "S", (eye[0], sy, eye[2]),
+                               (0.0, -1.0, slope), "plaster",
+                               lambda p, o=o: o.contains(p[0], p[2]) and abs(p[1] - o.soffit(p[0], p[2])) < 1.5,
+                               order2=False))
+    return planes
+
 # ------------------------------------------------------------ seat placing
 seats = []
+
+def overall_score(view, sound):
+    return round(0.55 * view + 0.45 * sound, 1)
 
 def add(level, section, row, number, x, floor_y, z, zone, flags=None):
     eye = (x, floor_y + EYE, z)
@@ -431,7 +494,22 @@ def add(level, section, row, number, x, floor_y, z, zone, flags=None):
     }
     if flags:
         rec["flags"] = flags
-    rec.update(metrics(eye))
+    m = metrics(eye)
+    rec.update(m)
+    # late sound under an overhang: the seat sees a wedge of the room. A 60
+    # degree opening keeps it all; below that it falls off, never under 30%.
+    oh = 1.0 if m["overhang"] == "none" else max(0.3, min(1.0, m["opening_angle_deg"] / 60.0))
+    lip = None
+    if m["overhang"] != "none":
+        o = overhang_for(eye[0], eye[1], eye[2])
+        lip = (o["lip_x"], o["lip_y"], o["lip_z"])
+    grazing = level == "orchestra" and m["elev_to_singer_deg"] < 4.0 and z > 45
+    rec.update(AC.seat_acoustics(eye, ray_blocked, soffit_planes, m["pit_visible"], grazing, oh, lip))
+    # the flat-plane ceiling check is superseded by the image-source result against the profile
+    rec["ceiling_reflection_singer"] = any(t[5] == "C" for t in rec["aur"]["singer"]["r"])
+    rec["ceiling_reflection_pit"] = any(t[5] == "C" for t in rec["aur"]["pit"]["r"])
+    rec["view_score"] = rec["score"]
+    rec["overall_score"] = overall_score(rec["view_score"], rec["sound_score"])
     seats.append(rec)
 
 def lateral_center_split(n, w):
@@ -645,7 +723,10 @@ fields = ["id", "level", "section", "row", "seat", "zone", "price", "x", "y", "z
           "overhang", "overhang_depth_ft", "overhang_opening_ft", "overhang_d_over_h",
           "headroom_ft", "opening_angle_deg", "prosc_top_clipped", "visible_prosc_height_ft",
           "pit_visible", "stage_width_visible", "ceiling_reflection_singer",
-          "ceiling_reflection_pit", "direct_level_db", "score"]
+          "ceiling_reflection_pit", "direct_level_db", "score",
+          "itdg_ms", "c80_db", "strength_db", "lateral_fraction", "reverb_vs_direct_db",
+          "voice_over_pit_db", "early_reflections", "first_reflection_from",
+          "direct_path_blocked", "seat_dip", "sound_score", "overall_score"]
 with open(os.path.join(ROOT, "data", "seats.csv"), "w", newline="") as f:
     w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore", lineterminator="\n")
     w.writeheader()

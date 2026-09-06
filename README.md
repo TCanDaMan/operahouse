@@ -141,14 +141,63 @@ Deep links: `web/index.html?seat=dress_circle:L:105&view=sit` opens sitting
 in that seat looking at the stage. Views: `overview`, `top`, `section`,
 `stagefront`, `sit`.
 
+## Room acoustics (scripts/acoustics.py)
+
+Every seat gets a geometric-acoustics picture, computed at build time:
+
+- Early sound by the image-source method, first and second order, against
+  the modelled surfaces: the section-derived ceiling profile, the side walls,
+  a rear wall per level, the tier soffits (as local planes), the tier fronts
+  and the stage floor. Each path is checked through the proscenium opening
+  and against the tier slabs, so a seat under the Balcony loses the ceiling,
+  a seat far to the side loses what the proscenium jamb hides, and the front
+  rows lose the ceiling reflection because it would have to leave the stage
+  above the proscenium head. Overhang edges scatter sound to the seats
+  beneath them (a specular-strength path via the lip, 6 dB down).
+- The singing voice has a directivity pattern (-12 dB behind the singer);
+  the pit source is omnidirectional and is knocked down when the pit rail
+  hides it.
+- Late sound as a statistical tail from Beranek's published volume
+  (20,900 m³) and an *assumed* occupied reverberation time, 1.5 s
+  mid-frequency with a bass rise; no measured RT for this hall is in the
+  repository. Under an overhang the tail is scaled by the opening angle.
+- Per seat: initial time delay gap, clarity C80, strength G, lateral
+  fraction, reverberant-to-direct ratio, voice-over-pit balance, a seat-dip
+  flag for low seats far back on the flat floor, a 0–100 sound score whose
+  weights are opinions (`sound_score()`), and an overall score that mixes
+  view and sound 55/45.
+
+Validation: Beranek measured the initial time delay gap at 51 ms at the
+centre of the main floor. The model gives 53 ms at row O centre, from the
+side walls, with the ceiling arriving at 69 ms. Beranek's other remarks
+also come out of the model unprompted: the gap is too long for the forward
+main floor (row A has no early reflection at all), the side walls rather
+than the ceiling feed the rear of the balconies, and the Balcony hears
+better than the main floor. None of this validates the absolute levels.
+
+The Balcony's soffit rises so steeply toward the rear that the singer cannot
+see its underside, so the model gives no mirror-like soffit reflection to
+the Dress Circle; those seats get the scattered lip path and the side walls.
+If the real soffit is shallower than the rake (photos suggest it may be),
+that changes.
+
+## Listening
+
+The viewer builds a stereo impulse response for the selected seat in the
+browser from the exported reflection taps (delay, mid and 4 kHz amplitude,
+arrival direction) plus a band-shaped noise tail with the assumed RTs, and
+plays a synthesized soprano call from the singer's position and a low-string
+chord from the pit through it. Absolute loudness is consistent between
+seats, so a far seat is quieter. You can also load your own recording; it
+plays from the singer's position. This is an impression of the differences
+between seats, not a recording of the hall.
+
 ## Not modelled
 
-Wave acoustics. The geometric checks above (direct level, overhang, ceiling
-reflection) are the part of acoustics that seat choice actually changes; the
-hall's reverberation is the same for everyone. Heads in the row in front are
-not modelled because the row-to-row rise is not published. The ceiling is a
-flat plane at the dome height; the lower cove over the rear Balcony rows is
-not drawn.
+Wave effects (the seat-dip effect is a flag, not a filter), diffraction
+other than the lip scatter, scattering from ornament, and the audience as a
+reflector. Heads in the row in front are drawn but do not block sound or
+sight in the metrics.
 
 ## Viewer pass, 2026-09-05
 
@@ -194,3 +243,19 @@ all boxes project ahead of Grand Tier. The previous trace is retained in
 The illustrative box parapet is reduced from 3 to 2.2 ft. Seat positions and
 sightline outputs were regenerated together; the inventory remains 192 box
 seats and 3,006 total. Stagefront rendering was checked in the browser.
+
+
+## Acoustic engine and visual rebuild, 2026-09-05
+
+Added `scripts/acoustics.py` (see "Room acoustics" above) and rebuilt the
+viewer: solid ceiling from the section profile with a shallow dome and
+sunburst, coffered rear ceiling with octagonal lights, coursed-stone side
+walls with three arched loges per side, gilt cornice and proscenium frieze,
+swagged house curtain with tied-back legs, patterned carpet, velvet on the
+cross-aisle rails and box doorways, rounded upholstered chairs, a seated
+audience (hidden in analysis mode and in your own seat), a Walküre stage
+picture with night sky and flickering fire, shadows and an environment map.
+Every surface faces inward, so the house reads as a dollhouse from outside
+and as a room from a seat. Selecting a seat draws its early reflection paths
+(gold under 30 ms, orange to 80 ms, blue after) and an echogram.
+Everything is procedural; nothing loads from the network except fonts.

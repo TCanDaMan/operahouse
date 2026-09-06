@@ -661,5 +661,78 @@
     ],
     "confidence": "low",
     "source": "Candidate longitudinal envelope from section_registration.json source-pixel ceiling picks; follows outer section outline, not a measured interior soffit. Display-only; transverse dome shape and wall outline unresolved."
+  },
+  "acoustics": {
+    "_note": "Room-acoustic inputs for scripts/acoustics.py. Geometry of reflecting surfaces comes from the rest of this file; these are the statistical-tail and material parameters.",
+    "volume_m3": {
+      "value": 20900,
+      "confidence": "high",
+      "source": "Beranek 1996 p160, V = 738,600 ft3 (20,900 m3)"
+    },
+    "seats_published": {
+      "value": 3252,
+      "confidence": "high",
+      "source": "Beranek 1996 p160, N = 3,252"
+    },
+    "itdg_main_floor_ms": {
+      "value": 51,
+      "confidence": "high",
+      "source": "Beranek 1996 p160, t_I = 51 msec, measured at the centre of the main floor; used as a validation target, not an input"
+    },
+    "rt_occupied_s": {
+      "value": {
+        "125": 1.9,
+        "500": 1.55,
+        "2k": 1.4,
+        "4k": 1.15
+      },
+      "confidence": "low",
+      "source": "Assumed. Beranek 1996 p157 describes the liveness as greater than La Scala (1.2 s) or the Vienna Staatsoper (1.3 s) and remarks on fullness of bass; 1.5 s mid-frequency occupied with a bass rise is consistent with that and with a 20,900 m3 plaster house. No measured RT for this hall is in the repository."
+    },
+    "absorption": {
+      "value": {
+        "plaster": [
+          0.1,
+          0.05,
+          0.04,
+          0.05
+        ],
+        "audience": [
+          0.5,
+          0.8,
+          0.9,
+          0.9
+        ],
+        "wood": [
+          0.15,
+          0.1,
+          0.07,
+          0.07
+        ],
+        "drape": [
+          0.2,
+          0.5,
+          0.65,
+          0.7
+        ]
+      },
+      "confidence": "medium",
+      "source": "Textbook octave-band coefficients (125 Hz, 500 Hz, 2 kHz, 4 kHz) for plaster on lath, fully occupied upholstered seating, wood floor over air space, and heavy velvet; Beranek p160 gives the materials"
+    },
+    "air_absorption_db_per_100ft": {
+      "value": [
+        0.0,
+        0.01,
+        0.3,
+        0.8
+      ],
+      "confidence": "medium",
+      "source": "ISO 9613-1, 20 C, 50% RH"
+    },
+    "voice_directivity_db_at_rear": {
+      "value": -12,
+      "confidence": "medium",
+      "source": "Singing-voice directivity: roughly -6 dB at 90 degrees and -12 dB behind the singer in the 1-4 kHz range; pattern -12*(1-cos)/2 dB"
+    }
   }
 }

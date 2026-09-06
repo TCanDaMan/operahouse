@@ -1,7 +1,7 @@
 <title>War Memorial Seat Finder</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Seat-by-seat 3D model of the War Memorial Opera House with sightline, overhang and pit metrics for pricing a Walküre ticket.">
+<meta name="description" content="Seat-by-seat 3D model of the War Memorial Opera House with sightline, overhang and room-acoustic metrics, and a listen-from-this-seat auralization.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
   :root {
@@ -17,8 +17,8 @@
     --good: #5aa88a;
     --warn: #d9a441;
     --bad: #c4553d;
-    --scene: #10152a;
-    --scene-fog: #10152a;
+    --scene: #0d0b10;
+    --scene-fog: #0d0b10;
     --focus: #e3c584;
     --shadow: 0 10px 30px rgba(0,0,0,.35);
   }
@@ -28,7 +28,7 @@
       --ink: #1c2136; --ink-2: #4b5068; --ink-3: #7c8196;
       --brass: #9a7a35; --brass-2: #7a5f22;
       --good: #2f8a69; --warn: #b27a12; --bad: #b2402b;
-      --scene: #e9e3d5; --scene-fog: #e9e3d5; --focus: #7a5f22;
+      --scene: #1a1518; --scene-fog: #1a1518; --focus: #7a5f22;
       --shadow: 0 10px 30px rgba(60,50,20,.15);
     }
   }
@@ -37,7 +37,7 @@
     --ink: #1c2136; --ink-2: #4b5068; --ink-3: #7c8196;
     --brass: #9a7a35; --brass-2: #7a5f22;
     --good: #2f8a69; --warn: #b27a12; --bad: #b2402b;
-    --scene: #e9e3d5; --scene-fog: #e9e3d5; --focus: #7a5f22;
+    --scene: #1a1518; --scene-fog: #1a1518; --focus: #7a5f22;
     --shadow: 0 10px 30px rgba(60,50,20,.15);
   }
   * { box-sizing: border-box; }
@@ -48,7 +48,7 @@
     overflow: hidden;
   }
   .mono { font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; }
-  #app { display: grid; grid-template-columns: 360px 1fr; height: 100vh; }
+  #app { display: grid; grid-template-columns: 372px 1fr; height: 100vh; }
   @media (max-width: 860px) {
     body { overflow: auto; }
     #app { grid-template-columns: 1fr; grid-template-rows: 60vh auto; height: auto; }
@@ -85,6 +85,8 @@
     padding: 8px 10px; font: 600 13px "Source Sans 3", sans-serif; cursor: pointer;
   }
   button.act.primary { background: var(--brass); color: var(--ground); border-color: var(--brass); }
+  button.act[aria-pressed="true"] { border-color: var(--brass); box-shadow: inset 0 0 0 1px var(--brass); }
+  button.act:disabled { opacity: .5; cursor: default; }
   #seatCard { border-top: 1px solid var(--line); padding-top: 14px; }
   #seatCard h2 { margin: 0; font-size: 18px; font-weight: 600; }
   #seatCard .zone { color: var(--brass-2); font-weight: 600; margin-top: 2px; }
@@ -92,6 +94,8 @@
   .verdict.bad { border-left-color: var(--bad); }
   .verdict.warn { border-left-color: var(--warn); }
   .verdict.good { border-left-color: var(--good); }
+  .verdict p { margin: 0; }
+  .verdict p + p { margin-top: 6px; }
   dl.metrics { display: grid; grid-template-columns: 1fr auto; gap: 5px 14px; margin: 0; font-size: 14px; }
   dl.metrics dt { color: var(--ink-2); }
   dl.metrics dd { margin: 0; text-align: right; }
@@ -107,9 +111,9 @@
   #valueList .p { color: var(--ink-2); }
   #stage { position: relative; background: var(--scene); }
   canvas { display: block; width: 100%; height: 100%; }
-  #views { position: absolute; top: 14px; left: 14px; right: 175px; display: flex; gap: 6px; flex-wrap: wrap; }
-  #views button, #cut { background: color-mix(in srgb, var(--panel) 85%, transparent); backdrop-filter: blur(6px); }
-  #cut { position: absolute; top: 14px; right: 14px; }
+  #views { position: absolute; top: 14px; left: 14px; right: 14px; display: flex; gap: 6px; flex-wrap: wrap; }
+  #views button { background: color-mix(in srgb, var(--panel) 85%, transparent); backdrop-filter: blur(6px); }
+  #views .spacer { flex: 1; }
   #legend {
     position: absolute; bottom: 14px; left: 14px; background: color-mix(in srgb, var(--panel) 88%, transparent);
     backdrop-filter: blur(6px); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; min-width: 220px; box-shadow: var(--shadow);
@@ -120,6 +124,11 @@
   #hover { position: absolute; pointer-events: none; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; font-size: 13px; display: none; box-shadow: var(--shadow); }
   .note { font-size: 12px; color: var(--ink-3); }
   a { color: var(--brass-2); }
+  #echo { width: 100%; height: 96px; display: block; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-2); margin-top: 10px; }
+  .listen { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .listen .row button { flex: 1; }
+  .listen .now { color: var(--brass-2); font-weight: 600; font-size: 13px; min-height: 18px; }
+  input[type=file] { font-size: 12px; color: var(--ink-2); }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
@@ -127,8 +136,8 @@
   <aside id="rail">
     <div>
       <h1><small>San Francisco · Die Walküre reference</small>War Memorial Seat Finder</h1>
-      <p class="note">Work in progress: tier depths are being checked against the drawings. Unverified side galleries are excluded from both the model and sightline scores.</p>
-      <p class="lede">Every seat in the house, placed in 3D from the seat charts and the published hall dimensions, with what sits above you and what you can see.</p>
+      <p class="lede">Every seat in the house in 3D, with what sits above you, what you can see, and how the room answers the singer. Click a seat, then listen from it.</p>
+      <p class="note">Model, not measurement: tier depths are still being checked against the drawings, and the reverberation time is an assumption. Differences between seats are the useful part.</p>
     </div>
 
     <div>
@@ -158,11 +167,11 @@
 
     <div id="compare">
       <p class="label">Compare</p>
-      <div id="compareBody"><p class="empty">Add two seats with "Compare" to see them side by side.</p></div>
+      <div id="compareBody"><p class="empty">Add two seats with "Compare" to see and hear them side by side.</p></div>
     </div>
 
     <div>
-      <p class="label">Best score per dollar under</p>
+      <p class="label">Best overall score per dollar under</p>
       <div class="row">
         <input type="range" id="maxPrice" min="30" max="405" step="5" value="150" aria-label="Maximum price">
         <span class="mono" id="maxPriceLbl" style="flex:0 0 auto">$150</span>
@@ -170,7 +179,7 @@
       <div id="valueList" style="margin-top:8px"></div>
     </div>
 
-    <p class="note">Prices are placeholders per zone. Tier order and the Grand Tier rail distance are from the War Memorial spec sheet and the virtual tour; row pitch and tier heights are estimates fitted to seat photos. See the repository README.</p>
+    <p class="note">Prices are placeholders per zone. Room acoustics: image-source early reflections against the modelled surfaces plus a statistical tail from the published 20,900 m³ volume; the main-floor initial time delay gap comes out at 53 ms against Beranek's measured 51 ms. Listening uses a synthesized voice and orchestra; it is an impression of the differences between seats, not a recording. See the repository README.</p>
   </aside>
 
   <main id="stage">
@@ -180,8 +189,10 @@
       <button class="act" data-view="section">Section</button>
       <button class="act" data-view="stagefront">From the stage</button>
       <button class="act primary" id="sitBtn" disabled>Sit here</button>
+      <span class="spacer"></span>
+      <button class="act" id="refl" aria-pressed="true" title="Draw the early reflection paths from the singer to the selected seat">Sound paths</button>
+      <button class="act" id="cut" aria-pressed="false">Cut away near half</button>
     </div>
-    <button class="act" id="cut" aria-pressed="false">Cut away near half</button>
     <div id="legend"><div id="legendTitle" style="font-weight:600;font-size:13px"></div><div class="bar" id="legendBar"></div><div class="ends"><span id="legendLo"></span><span id="legendHi"></span></div></div>
     <div id="hint">Drag to orbit · wheel to zoom · right-drag to pan</div>
     <div id="hover" class="mono"></div>
@@ -200,9 +211,17 @@ const LEVEL_ABBR = {orch:"orchestra", orchestra:"orchestra", or:"orchestra", o:"
   gt:"grand_tier", dc:"dress_circle", bc:"balcony_circle", bal:"balcony", balcony:"balcony"};
 
 const METRICS = {
+  overall_score:{label:"Overall score (view + sound)", lo:45, hi:95, fmt:v=>v.toFixed(0), good:"high"},
+  value:        {label:"Overall score per $100", lo:10, hi:120, fmt:v=>v.toFixed(0), good:"high", calc:s=>s.overall_score/s.price*100},
   score:        {label:"View score (0–100)", lo:30, hi:100, fmt:v=>v.toFixed(0), good:"high"},
-  value:        {label:"Score per $100", lo:10, hi:120, fmt:v=>v.toFixed(0), good:"high", calc:s=>s.score/s.price*100},
+  sound_score:  {label:"Sound score (0–100)", lo:60, hi:100, fmt:v=>v.toFixed(0), good:"high"},
   price:        {label:"Price", lo:30, hi:405, fmt:v=>"$"+v, good:"low"},
+  strength_db:  {label:"Strength G (dB): how loud the room is", lo:-6, hi:5, fmt:v=>(v>0?"+":"")+v.toFixed(1)+" dB", good:"high"},
+  c80_db:       {label:"Clarity C80 (dB): words vs. bloom", lo:-6, hi:4, fmt:v=>(v>0?"+":"")+v.toFixed(1)+" dB", good:"high"},
+  itdg_ms:      {label:"Initial time delay gap (ms)", lo:5, hi:90, fmt:v=>v.toFixed(0)+" ms", good:"low"},
+  lateral_fraction:{label:"Lateral fraction: envelopment", lo:0, hi:.35, fmt:v=>v.toFixed(2), good:"high"},
+  reverb_vs_direct_db:{label:"Reverb over direct (dB)", lo:2, hi:18, fmt:v=>v.toFixed(0)+" dB", good:"low"},
+  voice_over_pit_db:{label:"Voice over pit (dB)", lo:-6, hi:6, fmt:v=>(v>0?"+":"")+v.toFixed(1)+" dB", good:"high"},
   dist_singer_ft:{label:"Distance to singer (ft)", lo:35, hi:165, fmt:v=>v.toFixed(0)+" ft", good:"low"},
   opening_angle_deg:{label:"Opening angle under the lip (°)", lo:5, hi:60, fmt:v=>v.toFixed(0)+"°", good:"high"},
   overhang_d_over_h:{label:"Overhang depth ÷ opening (Beranek)", lo:0, hi:2.2, fmt:v=>v.toFixed(2), good:"low"},
@@ -212,12 +231,12 @@ const METRICS = {
   pit_visible:  {label:"Pit floor visible", lo:0, hi:0.8, fmt:v=>(v*100).toFixed(0)+"%", good:"high"},
   elev_to_singer_deg:{label:"Looking-down angle (°)", lo:0, hi:35, fmt:v=>v.toFixed(0)+"°", good:"low", calc:s=>Math.max(0,-s.elev_to_singer_deg)},
 };
-const metricValue = (s,k) => METRICS[k].calc ? METRICS[k].calc(s) : s[k];
+const metricValue = (s,k) => { const v = METRICS[k].calc ? METRICS[k].calc(s) : s[k]; return v == null ? METRICS[k].lo : v; };
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
 // shared state
 const activeLevels = new Set(LEVELS.map(l=>l[0]));
-let cutaway = false, currentMetric = "score", selected = null;
+let cutaway = false, currentMetric = "overall_score", selected = null, showPaths = true;
 const cmp = [null, null];
 const visible = s => activeLevels.has(s.level) && !(cutaway && s.x > 1);
 
@@ -240,51 +259,294 @@ function updateLegend(){
   document.getElementById("legendLo").textContent = m.fmt(m.lo); document.getElementById("legendHi").textContent = m.fmt(m.hi);
 }
 
+// ------------------------------------------------------------ auralization
+// Builds a stereo impulse response for a seat from the exported reflection
+// taps (delay, mid-band amplitude, 4 kHz amplitude, azimuth, elevation) and a
+// band-shaped noise tail with the assumed reverberation times, then plays a
+// synthesized voice from the singer's position and a chord from the pit
+// through it. Absolute loudness is kept consistent between seats.
+const Aural = (()=>{
+  let ctx = null, master = null, live = [], irCache = new Map(), userBuffer = null, onEnd = null;
+  const AMP = 22;                     // model amplitude (1/ft) -> sample amplitude; row A direct ≈ 0.62
+  function ensure(){
+    if (!ctx){ ctx = new (window.AudioContext||window.webkitAudioContext)(); master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination); }
+    if (ctx.state === "suspended") ctx.resume();
+    return ctx;
+  }
+  // RBJ biquads on Float32Arrays
+  function biquad(x, type, f0, Q){
+    const sr = ctx.sampleRate, w = 2*Math.PI*f0/sr, cw = Math.cos(w), sw = Math.sin(w), al = sw/(2*Q);
+    let b0,b1,b2,a0,a1,a2;
+    if (type==="bp"){ b0=al; b1=0; b2=-al; }
+    else if (type==="lp"){ b0=(1-cw)/2; b1=1-cw; b2=(1-cw)/2; }
+    else { b0=(1+cw)/2; b1=-(1+cw); b2=(1+cw)/2; }
+    a0=1+al; a1=-2*cw; a2=1-al;
+    b0/=a0; b1/=a0; b2/=a0; a1/=a0; a2/=a0;
+    const y = new Float32Array(x.length); let x1=0,x2=0,y1=0,y2=0;
+    for (let i=0;i<x.length;i++){ const v = b0*x[i]+b1*x1+b2*x2-a1*y1-a2*y2; x2=x1; x1=x[i]; y2=y1; y1=v; y[i]=v; }
+    return y;
+  }
+  const BAND_FILTERS = [["lp",250,.7],["bp",600,.7],["bp",2000,.7],["hp",3200,.7]];
+  const BAND_WEIGHT = [.16,.36,.33,.15];
+  function noise(n){ const a = new Float32Array(n); for (let i=0;i<n;i++) a[i] = Math.random()*2-1; return a; }
+  function buildIR(seat, key){
+    const id = seat.id+":"+key; if (irCache.has(id)) return irCache.get(id);
+    const a = seat.aur, src = a[key], sr = ctx.sampleRate;
+    const rt = a.rt, maxRT = Math.max(...rt);
+    const len = Math.ceil(sr*(0.1 + maxRT*1.15));
+    const L = new Float32Array(len), R = new Float32Array(len);
+    // keep the singer/pit timing relationship: the earlier source's direct sound lands at 8 ms
+    const base = 8 + (src.t0 - Math.min(a.singer.t0, a.pit.t0));
+    const taps = [[0, src.d[0], src.d[1], src.d[2], src.d[3], "D"]].concat(src.r);
+    const direct = src.d[0]*AMP;
+    for (const tp of taps){
+      const [t, am, ah, az] = tp;
+      const g = am*AMP, h = Math.max(0, Math.min(1, ah/Math.max(am,1e-9)));
+      const k0 = g*(1+h)/2, k1 = g*(1-h)/2;                      // DC = g, Nyquist = g*h
+      const rad = az*Math.PI/180, s = Math.sin(rad);
+      const gl = Math.sqrt((1-s)/2)*(Math.abs(az)>90?.85:1), gr = Math.sqrt((1+s)/2)*(Math.abs(az)>90?.85:1);
+      const n = Math.round((base+t)/1000*sr), itd = Math.round(sr*0.00032*s);
+      const nl = n + Math.max(0,itd), nr = n + Math.max(0,-itd);
+      if (nl+1 < len){ L[nl] += k0*gl; L[nl+1] += k1*gl; }
+      if (nr+1 < len){ R[nr] += k0*gr; R[nr+1] += k1*gr; }
+    }
+    // late tail: energy relative to the singer's direct sound (rev_db), shaped per band
+    const eTail = Math.pow(a.singer.d[0]*AMP, 2) * Math.pow(10, a.rev_db/10);
+    const startMs = base + Math.max(12, Math.min(40, (seat.itdg_ms||30)*0.6));
+    const start = Math.round(startMs/1000*sr), fade = Math.round(0.025*sr);
+    const under = seat.overhang !== "none";
+    for (let b=0;b<4;b++){
+      const w = BAND_WEIGHT[b] * (under && b>=2 ? .6 : 1);
+      for (const ch of [L,R]){
+        const src2 = biquad(noise(len-start), ...BAND_FILTERS[b]);
+        let e = 0; const env = new Float32Array(len-start);
+        for (let i=0;i<env.length;i++){ const t=i/sr; env[i] = Math.exp(-6.908*t/rt[b]) * Math.min(1, i/fade); e += (src2[i]*env[i])**2; }
+        const gain = Math.sqrt(eTail*w/Math.max(e,1e-12));
+        for (let i=0;i<env.length;i++) ch[start+i] += src2[i]*env[i]*gain;
+      }
+    }
+    const buf = ctx.createBuffer(2, len, sr); buf.copyToChannel(L,0); buf.copyToChannel(R,1);
+    if (irCache.size > 24) irCache.delete(irCache.keys().next().value);
+    irCache.set(id, buf); return buf;
+  }
+  // --- synthesized sources
+  function voice(dest, t0){
+    // a soprano "Hojotoho": glottal saw through three formants with vibrato
+    const osc = ctx.createOscillator(); osc.type = "sawtooth";
+    const lfo = ctx.createOscillator(); lfo.frequency.value = 5.6; const lfoG = ctx.createGain(); lfoG.gain.value = 0;
+    lfo.connect(lfoG); lfoG.connect(osc.detune);
+    const sum = ctx.createGain(); sum.gain.value = 0;
+    for (const [f,q,g] of [[700,7,1],[1150,8,.55],[2900,6,.35],[3300,4,.3]]){
+      const bp = ctx.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=f; bp.Q.value=q;
+      const gg = ctx.createGain(); gg.gain.value = g; osc.connect(bp); bp.connect(gg); gg.connect(sum);
+    }
+    const hp = ctx.createBiquadFilter(); hp.type="highpass"; hp.frequency.value = 180;
+    sum.connect(hp); hp.connect(dest);
+    const notes = [[494,.32],[740,.32],[988,.95],[0,.18],[494,.32],[740,.32],[988,.5],[1109,.5],[988,.35],[740,.9]];
+    let t = t0; const G = sum.gain, D = osc.frequency;
+    G.setValueAtTime(0, t); lfoG.gain.setValueAtTime(0, t);
+    for (const [f,d] of notes){
+      if (f === 0){ G.setTargetAtTime(0, t, .04); t += d; continue; }
+      D.setValueAtTime(f, t); G.setTargetAtTime(.9, t, .03); lfoG.gain.setTargetAtTime(f>600?40:25, t+.12, .08);
+      G.setTargetAtTime(.75, t+d*.6, .1); t += d; G.setTargetAtTime(0, t-.06, .05);
+    }
+    osc.start(t0); lfo.start(t0); osc.stop(t+.5); lfo.stop(t+.5);
+    return t+.5;
+  }
+  function orchestra(dest, t0, tEnd){
+    // low strings holding a B minor chord, a little swell, a timpani stroke
+    const lp = ctx.createBiquadFilter(); lp.type="lowpass"; lp.frequency.value = 1100; lp.Q.value=.5;
+    const env = ctx.createGain(); env.gain.value = 0; lp.connect(env); env.connect(dest);
+    for (const f of [123.5,185,247,370,123.5*1.005,185*.995]){
+      const o = ctx.createOscillator(); o.type="sawtooth"; o.frequency.value=f; const g=ctx.createGain(); g.gain.value=.045;
+      o.connect(g); g.connect(lp); o.start(t0); o.stop(tEnd+1);
+    }
+    env.gain.setTargetAtTime(1, t0, .35); env.gain.setTargetAtTime(1.6, t0+1.6, .5); env.gain.setTargetAtTime(0, tEnd-.4, .25);
+    const tim = ctx.createOscillator(); tim.type="sine"; const tg = ctx.createGain(); tg.gain.value = 0;
+    tim.frequency.setValueAtTime(95, t0); tim.frequency.exponentialRampToValueAtTime(58, t0+.35);
+    tg.gain.setValueAtTime(0.9, t0); tg.gain.exponentialRampToValueAtTime(.001, t0+.9);
+    tim.connect(tg); tg.connect(dest); tim.start(t0); tim.stop(t0+1);
+  }
+  function stop(){ for (const n of live){ try{ n.stop(); }catch(e){} try{ n.disconnect(); }catch(e){} } live = []; if (onEnd){ onEnd(); onEnd=null; } }
+  function play(seat, mode, done){
+    ensure(); stop(); onEnd = done;
+    const t0 = ctx.currentTime + 0.05;
+    const chain = key => { const c = ctx.createConvolver(); c.normalize = false; c.buffer = buildIR(seat, key); c.connect(master); live.push(c); return c; };
+    let tEnd = t0 + 4.6;
+    if (mode === "file" && userBuffer){
+      const s = ctx.createBufferSource(); s.buffer = userBuffer; s.connect(chain("singer")); s.start(t0); live.push(s); tEnd = t0 + userBuffer.duration;
+    } else {
+      const v = chain("singer"); tEnd = voice(v, t0);
+      if (mode === "both"){ orchestra(chain("pit"), t0, tEnd); }
+    }
+    const timer = setTimeout(()=>{ if (onEnd){ onEnd(); onEnd=null; } }, (tEnd - t0 + Math.max(...seat.aur.rt)) * 1000);
+    live.push({stop(){ clearTimeout(timer); }, disconnect(){}});
+  }
+  async function loadFile(file){ ensure(); const buf = await file.arrayBuffer(); userBuffer = await ctx.decodeAudioData(buf); return userBuffer; }
+  return { play, stop, loadFile, hasFile: ()=>!!userBuffer, ensure };
+})();
+
+// echogram: taps as bars, tail as a decaying line; 0–250 ms after the direct sound
+function drawEchogram(canvas, seat){
+  const g = canvas.getContext("2d"), W = canvas.width = canvas.clientWidth*2, H = canvas.height = canvas.clientHeight*2;
+  g.clearRect(0,0,W,H);
+  const a = seat.aur.singer, d0 = a.d[0], pad = 26, x0 = 36, span = 250;
+  const xOf = t => x0 + (t/span)*(W-x0-8), yOf = db => pad + (-db/36)*(H-pad-18);
+  g.font = `${11*2}px "Source Sans 3", sans-serif`; g.fillStyle = css("--ink-3");
+  g.fillText("dB", 4, pad+8); [0,-12,-24].forEach(db=>{ g.fillText(db, 4, yOf(db)+8); g.fillStyle = css("--line"); g.fillRect(x0, yOf(db), W-x0-8, 1); g.fillStyle = css("--ink-3"); });
+  [0,50,100,150,200].forEach(t=>g.fillText(t+" ms", xOf(t)-14, H-3));
+  // tail
+  const rt = (seat.aur.rt[1]+seat.aur.rt[2])/2, rev = seat.reverb_vs_direct_db, start = Math.max(12, Math.min(40,(seat.itdg_ms||30)*.6));
+  g.beginPath(); g.strokeStyle = css("--ink-3"); g.lineWidth = 2;
+  for (let t=start; t<=span; t+=4){ const db = rev - 10 - 60*(t-start)/1000/rt; const y = Math.min(H-18, yOf(db)); t===start ? g.moveTo(xOf(t), y) : g.lineTo(xOf(t), y); }
+  g.stroke();
+  const color = {D:css("--brass-2"), C:"#7fb3ff", W:css("--good"), R:"#c98fdc", S:css("--warn"), T:"#e8a1c2", F:"#a3a3a3"};
+  const bars = [[0, d0, "D"]].concat(a.r.map(r=>[r[0], r[1], r[5]]));
+  for (const [t, am, code] of bars){
+    if (t > span) continue;
+    const db = 20*Math.log10(am/d0), x = xOf(t), y = Math.max(pad, yOf(Math.max(-36, db)));
+    g.fillStyle = color[code[0]] || css("--ink-2"); g.fillRect(x-2, y, 4, H-18-y);
+  }
+}
+
 // ------------------------------------------------------------ 3D view (optional)
 const stageEl = document.getElementById("stage");
 const HAS3D = typeof THREE !== "undefined";
-// interface the panel uses; no-ops until the scene exists
-const view = { recolor(){}, mark(){}, markCompare(){}, sit(){}, focus(){}, setView(){}, theme(){} };
+const view = { recolor(){}, mark(){}, markCompare(){}, sit(){}, focus(){}, setView(){}, theme(){}, paths(){} };
 
 function init3D(){
-  const renderer = new THREE.WebGLRenderer({antialias:true});
+  const renderer = new THREE.WebGLRenderer({antialias:true, powerPreference:"high-performance"});
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.25;
+  renderer.toneMappingExposure = 1.15;
   renderer.localClippingEnabled = true;
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   const cutPlane = new THREE.Plane(new THREE.Vector3(-1,0,0), 0);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   stageEl.appendChild(renderer.domElement);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(50, 1, 0.5, 900);
-  scene.add(new THREE.HemisphereLight(0xfff4e0, 0x203050, 0.9));
-  const sun = new THREE.DirectionalLight(0xffffff, 0.6); sun.position.set(-60, 120, -40); scene.add(sun);
   const hex = h => new THREE.Color(h);
 
+  // ---------------- lights: a warm house
+  scene.add(new THREE.HemisphereLight(0xfff0d8, 0x2a1c16, 0.6));
+  const key = new THREE.DirectionalLight(0xffe9c8, 0.55); key.position.set(-30, 150, 20); key.target.position.set(0, 20, 80); scene.add(key); scene.add(key.target);
+  key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0015; key.shadow.normalBias = 0.3;
+  Object.assign(key.shadow.camera, {left:-70, right:70, top:110, bottom:-110, near:20, far:320}); key.shadow.camera.updateProjectionMatrix();
+  // stage lighting: two front-of-house spots on the singers, a cool wash from above the stage
+  for (const sx of [-34, 34]){ const sp = new THREE.SpotLight(0xffe4b8, 1.6, 200, .22, .6, 1.1); sp.position.set(sx, 58, 34); sp.target.position.set(0, 8, -8); scene.add(sp); scene.add(sp.target); }
+  const wash = new THREE.SpotLight(0x9ab4ff, .9, 120, .9, .8, 1); wash.position.set(0, 44, -30); wash.target.position.set(0, 4, -20); scene.add(wash); scene.add(wash.target);
+  // a soft environment so the gilt and velvet pick up reflections (nothing loads from the network)
+  {
+    const env = new THREE.Scene(); env.add(new THREE.Mesh(new THREE.BoxGeometry(60,60,60), new THREE.MeshBasicMaterial({color:0x3a2a1e, side:THREE.BackSide})));
+    const panel = (x,y,z,w,h,c,rot)=>{ const m = new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({color:c})); m.position.set(x,y,z); if (rot) m.rotation.set(...rot); env.add(m); };
+    panel(0, 29, 0, 30, 30, 0xfff1d6, [Math.PI/2,0,0]); panel(-29, 8, 0, 20, 12, 0xffd9a8, [0,Math.PI/2,0]); panel(29, 8, 0, 20, 12, 0xffd9a8, [0,-Math.PI/2,0]);
+    panel(0, 6, -29, 16, 10, 0xc99a5c, [0,0,0]); panel(0, -29, 0, 40, 40, 0x5a2a2a, [-Math.PI/2,0,0]);
+    const pmrem = new THREE.PMREMGenerator(renderer); scene.environment = pmrem.fromScene(env, 0.04).texture; pmrem.dispose();
+  }
+  const chand = new THREE.PointLight(0xffd6a0, 1.3, 240, 1.6); chand.position.set(0, 71, 46); scene.add(chand);
+  for (const [x,z] of [[-30,28],[30,28],[-30,72],[30,72]]){ const l = new THREE.PointLight(0xffe2b8, .45, 150, 1.8); l.position.set(x, 71, z); scene.add(l); }
+  const rearL = new THREE.PointLight(0xffe2b8, .6, 160, 1.8); rearL.position.set(0, 84, 128); scene.add(rearL);
+  const spot = new THREE.SpotLight(0xfff0d0, 1.4, 220, .42, .55, 1.2); spot.position.set(0, 62, 42); spot.target.position.set(0, 6, -12); scene.add(spot); scene.add(spot.target);
+
+  // ---------------- procedural textures (nothing loads from the network)
+  function canvasTex(w, h, draw, feetPerTile){
+    const c = document.createElement("canvas"); c.width = w; c.height = h; const g = c.getContext("2d"); draw(g, w, h);
+    const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.encoding = THREE.sRGBEncoding;
+    t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); t.repeat.set(1/feetPerTile, 1/feetPerTile); return t;
+  }
+  const rnd = (a,b)=>a+Math.random()*(b-a);
+  const stoneTex = canvasTex(512, 512, (g,w,h)=>{                 // coursed ashlar, 16 ft per tile
+    g.fillStyle = "#c9b894"; g.fillRect(0,0,w,h);
+    const rows = 8, ch = h/rows;
+    for (let r=0;r<rows;r++){
+      const off = (r%2)*w/8;
+      for (let c=-1;c<4;c++){
+        const x = c*w/4+off, y = r*ch;
+        g.fillStyle = `hsl(${rnd(38,44)}, ${rnd(26,36)}%, ${rnd(78,86)}%)`; g.fillRect(x+4, y+4, w/4-8, ch-8);
+      }
+    }
+    g.fillStyle = "rgba(90,70,40,.08)"; for (let i=0;i<2500;i++) g.fillRect(rnd(0,w), rnd(0,h), 2, 2);
+  }, 16);
+  const plasterTex = canvasTex(256, 256, (g,w,h)=>{ g.fillStyle="#ebdfc3"; g.fillRect(0,0,w,h); g.fillStyle="rgba(120,95,60,.07)"; for (let i=0;i<1400;i++) g.fillRect(rnd(0,w), rnd(0,h), 2, 2); }, 8);
+  const carpetTex = canvasTex(256, 256, (g,w,h)=>{                // red with a gold damask lattice, 8 ft per tile
+    g.fillStyle = "#7e2a30"; g.fillRect(0,0,w,h);
+    g.strokeStyle = "rgba(214,172,96,.55)"; g.lineWidth = 3;
+    for (let i=-1;i<=2;i++){ g.beginPath(); g.moveTo(i*w/2, 0); g.lineTo(i*w/2+w/2, h); g.stroke(); g.beginPath(); g.moveTo(i*w/2, h); g.lineTo(i*w/2+w/2, 0); g.stroke(); }
+    g.fillStyle = "rgba(214,172,96,.6)";
+    for (const [x,y] of [[w/4,h/4],[3*w/4,h/4],[w/4,3*h/4],[3*w/4,3*h/4],[0,0],[w/2,0],[0,h/2],[w/2,h/2],[w,0],[w,h],[0,h],[w,h/2],[w/2,h]]){
+      for (let k=0;k<4;k++){ g.beginPath(); g.ellipse(x+Math.cos(k*Math.PI/2)*9, y+Math.sin(k*Math.PI/2)*9, 7, 4, k*Math.PI/2, 0, Math.PI*2); g.fill(); }
+    }
+    g.fillStyle = "rgba(0,0,0,.08)"; for (let i=0;i<1200;i++) g.fillRect(rnd(0,w), rnd(0,h), 2, 2);
+  }, 8);
+  const plainCarpetTex = canvasTex(128, 128, (g,w,h)=>{ g.fillStyle="#7a262c"; g.fillRect(0,0,w,h); g.fillStyle="rgba(0,0,0,.12)"; for (let i=0;i<900;i++) g.fillRect(rnd(0,w), rnd(0,h), 2, 2); }, 4);
+  const curtainTex = canvasTex(512, 512, (g,w,h)=>{               // gold drapery folds, 12 ft per tile
+    for (let x=0;x<w;x++){ const f = .72 + .28*Math.pow(.5+.5*Math.sin(x/w*Math.PI*2*9), 1.6); g.fillStyle = `rgb(${Math.round(214*f)},${Math.round(170*f)},${Math.round(84*f)})`; g.fillRect(x,0,1,h); }
+    g.fillStyle="rgba(0,0,0,.05)"; for (let i=0;i<2000;i++) g.fillRect(rnd(0,w), rnd(0,h), 2, 3);
+  }, 12);
+  const velvetTex = canvasTex(256, 256, (g,w,h)=>{
+    for (let x=0;x<w;x++){ const f = .6 + .4*Math.pow(.5+.5*Math.sin(x/w*Math.PI*2*7), 1.4); g.fillStyle = `rgb(${Math.round(128*f)},${Math.round(30*f)},${Math.round(38*f)})`; g.fillRect(x,0,1,h); }
+  }, 6);
+  const woodTex = canvasTex(256, 256, (g,w,h)=>{
+    for (let i=0;i<8;i++){ g.fillStyle = `hsl(${rnd(26,32)}, ${rnd(35,45)}%, ${rnd(28,36)}%)`; g.fillRect(0, i*h/8, w, h/8-1); }
+    g.fillStyle = "rgba(0,0,0,.15)"; for (let i=0;i<300;i++) g.fillRect(rnd(0,w), rnd(0,h), rnd(10,60), 1);
+  }, 8);
+  const latticeTex = canvasTex(256, 512, (g,w,h)=>{               // an arched loge opening with a gilt honeycomb grille
+    g.fillStyle = "#e4d6b6"; g.fillRect(0,0,w,h);
+    g.save(); g.beginPath(); g.moveTo(28, h); g.lineTo(28, w/2); g.arc(w/2, w/2, w/2-28, Math.PI, 0); g.lineTo(w-28, h); g.closePath(); g.clip();
+    const grad = g.createLinearGradient(0,0,0,h); grad.addColorStop(0,"#ffe2a6"); grad.addColorStop(1,"#d99a48"); g.fillStyle = grad; g.fillRect(0,0,w,h);
+    g.strokeStyle = "rgba(120,70,20,.75)"; g.lineWidth = 3;
+    for (let y=w/2-10;y<h+20;y+=22) for (let x=(Math.round(y/22)%2)*11+40;x<w-30;x+=22){ g.beginPath(); g.arc(x,y,9,0,Math.PI*2); g.stroke(); }
+    g.fillStyle = "rgba(90,50,10,.55)";                            // swag of drapery in the arch
+    g.beginPath(); g.moveTo(20, 70); g.quadraticCurveTo(w/2, 190, w-20, 70); g.lineTo(w-20, 0); g.lineTo(20, 0); g.closePath(); g.fill();
+    g.restore();
+    g.strokeStyle = "#cbb27a"; g.lineWidth = 10; g.beginPath(); g.moveTo(28, h); g.lineTo(28, w/2); g.arc(w/2, w/2, w/2-28, Math.PI, 0); g.lineTo(w-28, h); g.stroke();
+  }, 1);
+  latticeTex.wrapS = latticeTex.wrapT = THREE.ClampToEdgeWrapping; latticeTex.repeat.set(1,1);
+  const goldReliefTex = canvasTex(512, 128, (g,w,h)=>{
+    g.fillStyle = "#c9a45c"; g.fillRect(0,0,w,h);
+    for (let i=0;i<260;i++){ g.fillStyle = `rgba(${rnd(60,120)},${rnd(40,80)},0,${rnd(.15,.4)})`; g.beginPath(); g.ellipse(rnd(0,w), rnd(0,h), rnd(4,16), rnd(3,10), rnd(0,3), 0, Math.PI*2); g.fill(); }
+    for (let i=0;i<260;i++){ g.fillStyle = `rgba(255,240,190,${rnd(.15,.4)})`; g.beginPath(); g.ellipse(rnd(0,w), rnd(0,h), rnd(3,12), rnd(2,8), rnd(0,3), 0, Math.PI*2); g.fill(); }
+  }, 1);
+  goldReliefTex.repeat.set(1/60, 1/6);
+
   const M = {
-    floor: new THREE.MeshStandardMaterial({color:0x743e2e, roughness:.95, side:THREE.DoubleSide}),
-    tier:  new THREE.MeshStandardMaterial({color:0xc6a779, roughness:.9, side:THREE.DoubleSide}),
-    rail:  new THREE.MeshStandardMaterial({color:0xc9a45c, roughness:.4, metalness:.5, side:THREE.DoubleSide}),
-    stage: new THREE.MeshStandardMaterial({color:0x4a3c2e, roughness:.9}),
-    prosc: new THREE.MeshStandardMaterial({color:0xc9a45c, roughness:.5, metalness:.4}),
-    wall:  new THREE.MeshStandardMaterial({color:0x22283d, roughness:1, side:THREE.BackSide, transparent:true, opacity:.55}),
-    pwall: new THREE.MeshStandardMaterial({color:0xcbb68e, roughness:1, side:THREE.DoubleSide}),
-    pit:   new THREE.MeshStandardMaterial({color:0x1a1e2e, roughness:1, side:THREE.DoubleSide}),
-    rock:  new THREE.MeshStandardMaterial({color:0x5b5a63, roughness:1, flatShading:true}),
-    fire:  new THREE.MeshStandardMaterial({color:0xff7a2a, emissive:0xff5a10, emissiveIntensity:1.2, roughness:.6}),
-    singer:new THREE.MeshStandardMaterial({color:0xe8d8c0, roughness:.8}),
-    player:new THREE.MeshStandardMaterial({color:0x8a8f9a, roughness:.9}),
-    line:  new THREE.LineBasicMaterial({color:0x8090b0, transparent:true, opacity:.6}),
+    carpet:   new THREE.MeshStandardMaterial({map:carpetTex, roughness:1, side:THREE.DoubleSide}),
+    tread:    new THREE.MeshStandardMaterial({map:plainCarpetTex, roughness:1, side:THREE.DoubleSide}),
+    plaster:  new THREE.MeshStandardMaterial({map:plasterTex, roughness:.92, side:THREE.DoubleSide}),
+    tier:     new THREE.MeshStandardMaterial({map:plasterTex, color:0xd9c9a4, roughness:.9, side:THREE.DoubleSide}),
+    stone:    new THREE.MeshStandardMaterial({map:stoneTex, roughness:.95, side:THREE.FrontSide}),
+    ceiling:  new THREE.MeshStandardMaterial({map:plasterTex, color:0xe6d8b8, roughness:.95, side:THREE.FrontSide}),
+    dome:     new THREE.MeshStandardMaterial({map:plasterTex, color:0xefe3c6, roughness:.98, side:THREE.BackSide}),
+    gold:     new THREE.MeshStandardMaterial({color:0xd4ad5c, roughness:.38, metalness:.65}),
+    goldDull: new THREE.MeshStandardMaterial({color:0xb8934a, roughness:.55, metalness:.5, side:THREE.DoubleSide}),
+    relief:   new THREE.MeshStandardMaterial({map:goldReliefTex, roughness:.45, metalness:.55}),
+    rail:     new THREE.MeshStandardMaterial({color:0xc9a45c, roughness:.4, metalness:.5, side:THREE.DoubleSide}),
+    padded:   new THREE.MeshStandardMaterial({color:0xa8383f, roughness:1}),
+    velvet:   new THREE.MeshStandardMaterial({map:velvetTex, roughness:1, side:THREE.DoubleSide}),
+    curtain:  new THREE.MeshStandardMaterial({map:curtainTex, roughness:.7, side:THREE.DoubleSide}),
+    lattice:  new THREE.MeshStandardMaterial({map:latticeTex, emissiveMap:latticeTex, emissive:0xffd28a, emissiveIntensity:.55, roughness:.8}),
+    wood:     new THREE.MeshStandardMaterial({map:woodTex, roughness:.7}),
+    stageBox: new THREE.MeshStandardMaterial({color:0x2a2119, roughness:.9}),
+    pit:      new THREE.MeshStandardMaterial({color:0x14121a, roughness:1, side:THREE.DoubleSide}),
+    rock:     new THREE.MeshStandardMaterial({color:0x5b5a63, roughness:1, flatShading:true}),
+    fire:     new THREE.MeshStandardMaterial({color:0xff6a1a, emissive:0xff4a00, emissiveIntensity:.8, roughness:.6}),
+    singer:   new THREE.MeshStandardMaterial({color:0xe8d8c0, roughness:.8}),
+    player:   new THREE.MeshStandardMaterial({color:0x3a3d48, roughness:.9}),
+    lamp:     new THREE.MeshStandardMaterial({color:0xfff2d0, emissive:0xffe0a0, emissiveIntensity:1.6, roughness:.5}),
+    lampWarm: new THREE.MeshStandardMaterial({color:0xffe8c0, emissive:0xffc070, emissiveIntensity:1.2, roughness:.5}),
   };
 
+  // ---------------- geometry helpers with planar UVs in feet
   function stripFromRows(rows, yOf, yBack){
-    const pos = [];
+    const pos = [], uv = [];
+    const push = (p) => { pos.push(...p); uv.push(p[0], p[2]); };
     for (let i=0;i<rows.length-1;i++){
       const a = rows[i], b = rows[i+1], ya = yOf(a), yb = yOf(b);
       for (let j=0;j<a.arc.length-1;j++){
         const p1=[a.arc[j][0],ya,a.arc[j][1]], p2=[a.arc[j+1][0],ya,a.arc[j+1][1]];
         const p3=[b.arc[j][0],yb,b.arc[j][1]], p4=[b.arc[j+1][0],yb,b.arc[j+1][1]];
-        pos.push(...p1,...p3,...p2, ...p2,...p3,...p4);
+        push(p1); push(p3); push(p2); push(p2); push(p3); push(p4);
       }
     }
     if (yBack !== undefined){
@@ -292,158 +554,284 @@ function init3D(){
       for (let j=0;j<a.arc.length-1;j++){
         const p1=[a.arc[j][0],ya,a.arc[j][1]], p2=[a.arc[j+1][0],ya,a.arc[j+1][1]];
         const p3=[a.arc[j][0],ya,a.arc[j][1]+yBack], p4=[a.arc[j+1][0],ya,a.arc[j+1][1]+yBack];
-        pos.push(...p1,...p3,...p2, ...p2,...p3,...p4);
+        push(p1); push(p3); push(p2); push(p2); push(p3); push(p4);
       }
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
     g.computeVertexNormals();
     return g;
   }
   function wallFromArc(arc, y0, y1){
-    const pos = [];
+    const pos = [], uv = []; let s = 0;
     for (let j=0;j<arc.length-1;j++){
-      const [x1,z1]=arc[j], [x2,z2]=arc[j+1];
+      const [x1,z1]=arc[j], [x2,z2]=arc[j+1], ds = Math.hypot(x2-x1, z2-z1);
       pos.push(x1,y0,z1, x1,y1,z1, x2,y0,z2,  x2,y0,z2, x1,y1,z1, x2,y1,z2);
+      uv.push(s,y0, s,y1, s+ds,y0, s+ds,y0, s,y1, s+ds,y1); s += ds;
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
     g.computeVertexNormals();
     return g;
   }
-  const addMesh = (g, m) => { const mesh = new THREE.Mesh(g, m); scene.add(mesh); return mesh; };
-
+  const addMesh = (g, m, parent=scene) => { const mesh = new THREE.Mesh(g, m); mesh.receiveShadow = true; mesh.castShadow = true; parent.add(mesh); return mesh; };
+  function roundedBox(w, h, d, r){
+    const sh = new THREE.Shape(); const x=-w/2+r, y=-h/2+r, W=w-2*r, H=h-2*r;
+    sh.moveTo(x, y-r); sh.lineTo(x+W, y-r); sh.quadraticCurveTo(x+W+r, y-r, x+W+r, y); sh.lineTo(x+W+r, y+H); sh.quadraticCurveTo(x+W+r, y+H+r, x+W, y+H+r);
+    sh.lineTo(x, y+H+r); sh.quadraticCurveTo(x-r, y+H+r, x-r, y+H); sh.lineTo(x-r, y); sh.quadraticCurveTo(x-r, y-r, x, y-r);
+    const g = new THREE.ExtrudeGeometry(sh, {depth:Math.max(.01, d-2*r), bevelEnabled:true, bevelThickness:r, bevelSize:r*.95, bevelSegments:3, curveSegments:4});
+    g.center(); return g;
+  }
+  // make a single-sided surface face the given direction, so the room's shell
+  // is visible from inside and culled from outside (the dollhouse view)
+  function faceToward(g, dir){
+    g.computeVertexNormals(); const n = g.attributes.normal.array; let d = 0;
+    for (let i=0;i<n.length;i+=3) d += n[i]*dir[0]+n[i+1]*dir[1]+n[i+2]*dir[2];
+    if (d < 0){
+      if (g.index){ g.index.array.reverse(); g.index.needsUpdate = true; }
+      else { const p = g.attributes.position.array; for (let i=0;i<p.length;i+=9){ for (let k=0;k<3;k++){ const t=p[i+3+k]; p[i+3+k]=p[i+6+k]; p[i+6+k]=t; } } g.attributes.position.needsUpdate = true; }
+      g.computeVertexNormals();
+    }
+    return g;
+  }
   function molding(arc, y, radius=.16, material=M.rail){
     const points = arc.map(p=>new THREE.Vector3(p[0],y,p[1]));
     const path = new THREE.CatmullRomCurve3(points, false, 'centripetal');
     addMesh(new THREE.TubeGeometry(path, Math.max(80,arc.length*2), radius, 6, false), material);
   }
+  const profileAt = z => { const p = SHELL.ceiling_profile.value; if (z<=p[0][0]) return p[0][1]; for (let i=0;i<p.length-1;i++) if (z<=p[i+1][0]) return p[i][1]+(p[i+1][1]-p[i][1])*(z-p[i][0])/(p[i+1][0]-p[i][0]); return p[p.length-1][1]; };
+  const MAIN_END = 88, MAIN_Y = 75;                 // the flat main ceiling stands in for the 71-76 ft profile over the front of the house
+  const ceilingAt = z => z <= MAIN_END ? MAIN_Y : profileAt(z);
+
   function buildHouse(){
-    const st = SHELL.stage, pit = SHELL.pit;
-    addMesh(stripFromRows(SHELL.orchestra.rows, r=>r.y - 0.05, SHELL.depth_orchestra - SHELL.orchestra.rows[SHELL.orchestra.rows.length-1].z), M.floor);
+    const st = SHELL.stage, pit = SHELL.pit, hb = SHELL.half_breadth, depth = SHELL.depth_balcony;
+    // ---- orchestra floor: patterned carpet
+    addMesh(stripFromRows(SHELL.orchestra.rows, r=>r.y - 0.05, SHELL.depth_orchestra - SHELL.orchestra.rows[SHELL.orchestra.rows.length-1].z), M.carpet);
+    // ---- tiers: treads, risers, soffit, fascia with gilt moldings, velvet on the cross aisle
     for (const t of SHELL.tiers){
-      // Row coordinates are chair centers. Put each riser ahead of the
-      // chair footprint, keeping both supports on the same horizontal tread.
       const starts=t.rows.map(r=>({...r,arc:r.arc.map(([x,z])=>[x,z-1.05])}));
-      addMesh(stripFromRows([t.rail,starts[0]],r=>r.y),M.floor);
+      addMesh(stripFromRows([t.rail,starts[0]],r=>r.y),M.tread);
       for(let i=0;i<starts.length;i++){
         const a=starts[i];
         const next=starts[i+1] || {...a,arc:a.arc.map(([x,z])=>[x,z+4])};
-        addMesh(stripFromRows([a,{arc:next.arc,y:a.y}],r=>r.y),M.floor);
+        addMesh(stripFromRows([a,{arc:next.arc,y:a.y}],r=>r.y),M.tread);
         if(i+1<starts.length) addMesh(wallFromArc(next.arc,a.y,next.y),M.tier);
       }
       const underside = [t.rail,...t.rows].map(r=>({...r,y:t.soffit_lip_y+t.slope*(r.z-t.rail.z)}));
       addMesh(stripFromRows(underside,r=>r.y,4),M.tier);
       for (const offset of [0,2.65,3.05]) molding(t.front||t.rail.arc,t.rail.y+offset);
-      // the front rail follows the full plan curve: crescent plus the side slips
-      addMesh(wallFromArc(t.front || t.rail.arc, t.soffit_lip_y, t.rail.y + 3.0), M.rail);
+      addMesh(wallFromArc(t.front || t.rail.arc, t.soffit_lip_y, t.rail.y + 3.0), M.plaster);
+      // cross-aisle rail with a velvet valance (rows 5 -> 6)
+      const ca = starts[5]; addMesh(wallFromArc(ca.arc, ca.y+0.2, ca.y+2.6), M.velvet); molding(ca.arc, ca.y+2.7, .1);
     }
+    // ---- boxes
     const b = SHELL.boxes;
-    const paddedRail=new THREE.MeshStandardMaterial({color:0x8b2639,roughness:1});
-    molding(b.rail,b.floor_y+b.parapet_height+.05,.23,paddedRail);
-    // Separate box bays, as visible in the owner's close-up tour references.
-    // Bay spacing and profiles remain illustrative until individually traced.
-    for(const arc of b.partitions){
-      addMesh(wallFromArc(arc,b.floor_y,b.floor_y+b.parapet_height),M.tier);
-      molding(arc,b.floor_y+b.parapet_height+.05,.18,paddedRail);
-    }
-    molding(b.rail,b.floor_y);
+    molding(b.rail,b.floor_y+b.parapet_height+.05,.23,M.padded);
+    for(const arc of b.partitions){ addMesh(wallFromArc(arc,b.floor_y,b.floor_y+b.parapet_height),M.tier); molding(arc,b.floor_y+b.parapet_height+.05,.18,M.padded); }
+    molding(b.rail,b.floor_y); molding(b.rail, b.soffit_y+.2, .14);
     addMesh(stripFromRows([{arc:b.rail,y:b.soffit_y},{arc:b.outer,y:b.soffit_y}],r=>r.y),M.tier);
     for(let i=0;i<b.deck_rows.length-1;i++){
       const a=b.deck_rows[i], next=b.deck_rows[i+1];
-      addMesh(stripFromRows([a,{...next,y:a.y}],r=>r.y),M.floor);
+      addMesh(stripFromRows([a,{...next,y:a.y}],r=>r.y),M.tread);
       if(next.y>a.y) addMesh(wallFromArc(next.arc,a.y,next.y),M.tier);
     }
-    addMesh(wallFromArc(b.rail, b.soffit_y, b.floor_y + b.parapet_height), M.rail);
-    // Grand Tier side slips: slab between the traced front curve and the wall
+    addMesh(wallFromArc(b.rail, b.soffit_y, b.floor_y + b.parapet_height), M.plaster);
+    addMesh(wallFromArc(b.outer, b.floor_y, b.floor_y + 9), M.plaster);       // rear of the boxes: cream wall with a curtained doorway per box
+    for (let k=0;k<b.partitions.length-1;k++){
+      const [x0,z0] = b.outer[Math.round((k+.5)/(b.partitions.length-1)*(b.outer.length-1))];
+      const nx = x0/Math.hypot(x0, z0-60), nz = (z0-60)/Math.hypot(x0, z0-60);
+      const door = [[x0-nz*1.6-nx*.15, z0+nx*1.6-nz*.15],[x0+nz*1.6-nx*.15, z0-nx*1.6-nz*.15]];
+      addMesh(wallFromArc(door, b.floor_y, b.floor_y+7.2), M.velvet);
+    }
+    // ---- Grand Tier side slips
     const sl = SHELL.side_slips;
     if (sl && sl.path){
-      const W = SHELL.half_breadth;
       const inner = sl.path.filter(p => Math.abs(p[0]) >= sl.inner_x);
       for (const sgn of [-1,1]){
         const side = inner.filter(p => sgn*p[0] > 0).sort((a,b)=>a[1]-b[1]);
         if (side.length < 2) continue;
-        const wall = side.map(p => [sgn*W, p[1]]);
-        addMesh(stripFromRows([{arc:side, y:sl.floor_y},{arc:wall, y:sl.floor_y}], r=>r.y), M.tier);
-        addMesh(wallFromArc(side, sl.soffit_y, sl.floor_y + 3.0), M.rail);
+        const wall = side.map(p => [sgn*hb, p[1]]);
+        addMesh(stripFromRows([{arc:side, y:sl.floor_y},{arc:wall, y:sl.floor_y}], r=>r.y), M.tread);
+        addMesh(wallFromArc(side, sl.soffit_y, sl.floor_y + 3.0), M.plaster); molding(side, sl.floor_y+3.05, .14);
       }
     }
-    // The legacy balcony_sweep trace intrudes into the proscenium opening.
-    // It is not supported by the tour photographs; omit this uncalibrated
-    // solid rather than presenting it as an architectural feature.
+    // ---- stage, apron, pit
     const stageDepth = -st.back_wall_z;
-    const stageMesh = new THREE.Mesh(new THREE.BoxGeometry(SHELL.half_breadth*2+10, st.y, stageDepth), M.stage);
-    stageMesh.position.set(0, st.y/2, -stageDepth/2); scene.add(stageMesh);
-    const apron = new THREE.Mesh(new THREE.BoxGeometry(st.prosc_w+8, st.y, pit.front_z), M.stage);
-    apron.position.set(0, st.y/2, pit.front_z/2); scene.add(apron);
-    const jambW = 4, headH = 5, frameTop = st.y+st.prosc_h+headH;
-    for (const sgn of [-1,1]){
-      const j = new THREE.Mesh(new THREE.BoxGeometry(jambW, st.prosc_h+headH, 2.5), M.prosc);
-      j.position.set(sgn*(st.prosc_w/2+jambW/2), st.y+(st.prosc_h+headH)/2, 0); scene.add(j);
-    }
-    const head = new THREE.Mesh(new THREE.BoxGeometry(st.prosc_w+2*jambW, headH, 2.5), M.prosc);
-    head.position.set(0, st.y+st.prosc_h+headH/2, 0); scene.add(head);
-    const topWall = new THREE.Mesh(new THREE.PlaneGeometry(SHELL.half_breadth*2+10, SHELL.ceiling_y - frameTop), M.pwall);
-    topWall.position.set(0, (SHELL.ceiling_y + frameTop)/2, -1.3); scene.add(topWall);
-    for (const sgn of [-1,1]){
-      const w = SHELL.half_breadth+5 - (st.prosc_w/2+jambW);
-      const side = new THREE.Mesh(new THREE.PlaneGeometry(w, frameTop), M.pwall);
-      side.position.set(sgn*(st.prosc_w/2+jambW+w/2), frameTop/2, -1.3); scene.add(side);
-    }
+    const stageMesh = new THREE.Mesh(new THREE.BoxGeometry(hb*2+10, st.y, stageDepth), M.stageBox);
+    stageMesh.position.set(0, st.y/2-0.05, -stageDepth/2); scene.add(stageMesh);
+    const deck = new THREE.Mesh(new THREE.PlaneGeometry(st.prosc_w+16, stageDepth+pit.front_z), M.wood);
+    deck.rotation.x = -Math.PI/2; deck.position.set(0, st.y+0.02, (pit.front_z-stageDepth)/2); scene.add(deck);
+    deck.geometry.attributes.uv.array.forEach((v,i,arr)=>{ arr[i] = v * (i%2===0 ? (st.prosc_w+16) : (stageDepth+pit.front_z)); }); deck.geometry.attributes.uv.needsUpdate = true;
+    const apron = new THREE.Mesh(new THREE.BoxGeometry(st.prosc_w+8, st.y, pit.front_z), M.stageBox);
+    apron.position.set(0, st.y/2-0.05, pit.front_z/2); scene.add(apron);
     const pitFloor = new THREE.Mesh(new THREE.PlaneGeometry(pit.half_w*2, pit.back_z-pit.front_z), M.pit);
     pitFloor.rotation.x = -Math.PI/2; pitFloor.position.set(0, pit.floor_y, (pit.front_z+pit.back_z)/2); scene.add(pitFloor);
-    const rail = new THREE.Mesh(new THREE.BoxGeometry(pit.half_w*2, 0.3, 0.4), M.rail); rail.position.set(0, pit.rail_y, pit.back_z); scene.add(rail);
     const pitWall = new THREE.Mesh(new THREE.PlaneGeometry(pit.half_w*2, pit.rail_y - pit.floor_y), M.pit);
     pitWall.position.set(0, (pit.rail_y+pit.floor_y)/2, pit.back_z); scene.add(pitWall);
+    // balustrade along the pit rail
+    const balus = new THREE.InstancedMesh(new THREE.CylinderGeometry(.16,.22,pit.rail_y-0.5,8), M.gold, 60); const dm = new THREE.Object3D();
+    for (let i=0;i<60;i++){ dm.position.set(-pit.half_w+1+i*(pit.half_w*2-2)/59, (pit.rail_y-0.5)/2, pit.back_z); dm.updateMatrix(); balus.setMatrixAt(i, dm.matrix); }
+    balus.instanceMatrix.needsUpdate = true; scene.add(balus);
+    const railTop = new THREE.Mesh(new THREE.BoxGeometry(pit.half_w*2, 0.35, 0.6), M.gold); railTop.position.set(0, pit.rail_y, pit.back_z); scene.add(railTop);
     const players = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.7, 0.7, 3.2, 8), M.player, 90);
-    const dummy = new THREE.Object3D(); let n=0;
+    let n=0;
     for (let r=0;r<6 && n<90;r++) for (let c=0;c<16 && n<90;c++){
-      dummy.position.set(-pit.half_w+3+c*(pit.half_w*2-6)/15, pit.floor_y+1.6, pit.front_z+2+r*(pit.back_z-pit.front_z-4)/5);
-      dummy.updateMatrix(); players.setMatrixAt(n++, dummy.matrix);
+      dm.position.set(-pit.half_w+3+c*(pit.half_w*2-6)/15, pit.floor_y+1.6, pit.front_z+2+r*(pit.back_z-pit.front_z-4)/5);
+      dm.updateMatrix(); players.setMatrixAt(n++, dm.matrix);
     }
     players.instanceMatrix.needsUpdate = true; scene.add(players);
-    // Walküre stage picture: the Valkyries' rock upstage, the magic fire, three singers downstage
-    const rock = new THREE.Mesh(new THREE.ConeGeometry(16, st.rock_h, 7), M.rock);
-    rock.position.set(6, st.y + st.rock_h/2, -34); rock.rotation.y = .4; scene.add(rock);
-    const fire = new THREE.Mesh(new THREE.TorusGeometry(19, 1.2, 8, 40), M.fire);
-    fire.rotation.x = Math.PI/2; fire.position.set(6, st.y+0.6, -34); scene.add(fire);
-    const fireLight = new THREE.PointLight(0xff6a20, 1.2, 120); fireLight.position.set(6, st.y+6, -34); scene.add(fireLight);
-    for (const [x,z] of [[-9,-6],[0,-9],[9,-7]]){
-      const s = new THREE.Mesh(new THREE.CylinderGeometry(0.9,0.9,5.8,8), M.singer);
-      s.position.set(x, st.y+2.9, z); scene.add(s);
+    // ---- proscenium: gilt frame, sculpted frieze, arched cove; stone wall around it
+    const jambW = 4, headH = 5, frameTop = st.y+st.prosc_h+headH;
+    for (const sgn of [-1,1]){
+      const j = new THREE.Mesh(new THREE.BoxGeometry(jambW, st.prosc_h+headH, 2.5), M.relief); j.castShadow = j.receiveShadow = true;
+      j.position.set(sgn*(st.prosc_w/2+jambW/2), st.y+(st.prosc_h+headH)/2, 0); scene.add(j);
+      const pil = new THREE.Mesh(new THREE.BoxGeometry(3, frameTop+8, 1.6), M.plaster); pil.position.set(sgn*(st.prosc_w/2+jambW+2.5), (frameTop+8)/2, -0.3); scene.add(pil);
     }
-    // A section-derived envelope replaces the misleading constant-height box.
-    // Wireframe only: this is not a surveyed interior roof or acoustic surface.
-    const hb=SHELL.half_breadth, profile=SHELL.ceiling_profile.value;
-    const envelope=new THREE.Group();scene.add(envelope);
-    const envelopeMat=new THREE.LineBasicMaterial({color:0x9ba9bd,transparent:true,opacity:.45});
-    function envelopeLine(points){const g=new THREE.BufferGeometry().setFromPoints(points.map(p=>new THREE.Vector3(...p)));envelope.add(new THREE.Line(g,envelopeMat));}
-    for(const x of [-hb,0,hb]) envelopeLine(profile.map(([z,y])=>[x,y,z]));
-    for(const [z,y] of profile) envelopeLine([[-hb,y,z],[hb,y,z]]);
-    const [backZ,backY]=profile[profile.length-1];
-    for(const x of [-hb,hb]) envelopeLine([[x,0,0],[x,0,backZ],[x,backY,backZ]]);
-    const envelopeToggle=document.createElement('button');envelopeToggle.className='act';
-    envelopeToggle.textContent='Section envelope';envelopeToggle.setAttribute('aria-pressed','true');
-    envelopeToggle.title='Approximate outer section profile; not the interior ceiling';
-    document.getElementById('views').append(envelopeToggle);
-    envelopeToggle.onclick=()=>{envelope.visible=!envelope.visible;envelopeToggle.setAttribute('aria-pressed',String(envelope.visible));};
-
+    const head = new THREE.Mesh(new THREE.BoxGeometry(st.prosc_w+2*jambW, headH, 2.5), M.relief); head.castShadow = head.receiveShadow = true;
+    head.position.set(0, st.y+st.prosc_h+headH/2, 0); scene.add(head);
+    const frieze = new THREE.Mesh(new THREE.BoxGeometry(st.prosc_w+2*jambW+6, 6, 1.8), M.relief);
+    frieze.position.set(0, frameTop+3, -0.4); scene.add(frieze);
+    const cove = new THREE.Mesh(new THREE.RingGeometry(st.prosc_w/2+jambW+3, st.prosc_w/2+jambW+8, 48, 1, 0, Math.PI), M.goldDull);
+    cove.position.set(0, frameTop, -0.9); scene.add(cove);
+    const wallTop = ceilingAt(0);
+    const topWall = new THREE.Mesh(new THREE.PlaneGeometry(hb*2, wallTop - frameTop), M.stone);
+    topWall.position.set(0, (wallTop + frameTop)/2, -1.3); topWall.geometry.attributes.uv.array.forEach((v,i,arr)=>{ arr[i] = v*(i%2===0?hb*2:wallTop-frameTop); }); scene.add(topWall);
+    for (const sgn of [-1,1]){
+      const w = hb - (st.prosc_w/2+jambW);
+      const side = new THREE.Mesh(new THREE.PlaneGeometry(w, frameTop), M.stone);
+      side.position.set(sgn*(st.prosc_w/2+jambW+w/2), frameTop/2, -1.3); side.geometry.attributes.uv.array.forEach((v,i,arr)=>{ arr[i] = v*(i%2===0?w:frameTop); }); scene.add(side);
+    }
+    // house curtain: swagged valance and tied-back legs
+    const val = new THREE.Shape(); const vw = st.prosc_w/2+1, vTop = st.y+st.prosc_h+0.5, vBot = st.y+st.prosc_h-5;
+    val.moveTo(-vw, vTop); val.lineTo(vw, vTop); val.lineTo(vw, vBot);
+    for (let k=6;k>=0;k--){ const x0 = -vw + (k+1)*2*vw/7, x1 = -vw + k*2*vw/7; val.quadraticCurveTo((x0+x1)/2, vBot-2.4, x1, vBot); }
+    val.closePath();
+    const valMesh = new THREE.Mesh(new THREE.ShapeGeometry(val, 8), M.curtain); valMesh.position.set(0,0,0.6); scene.add(valMesh);
+    for (const sgn of [-1,1]){
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 4.2, st.prosc_h-4, 16, 1, true, sgn>0?Math.PI:0, Math.PI), M.curtain);
+      leg.position.set(sgn*(st.prosc_w/2-2.2), st.y+(st.prosc_h-4)/2, 0.8); scene.add(leg);
+      const tie = new THREE.Mesh(new THREE.TorusGeometry(2.6, .35, 8, 24), M.gold); tie.position.set(sgn*(st.prosc_w/2-2.2), st.y+12, 0.8); tie.rotation.x = Math.PI/2; scene.add(tie);
+    }
+    // ---- Walküre stage picture: night sky, the Valkyries' rock, the magic fire, three singers
+    const skyTex = canvasTex(1024, 512, (g,w,h)=>{
+      const grad = g.createLinearGradient(0,0,0,h); grad.addColorStop(0,"#05071a"); grad.addColorStop(.55,"#101a3c"); grad.addColorStop(1,"#4a2a1e"); g.fillStyle = grad; g.fillRect(0,0,w,h);
+      for (let i=0;i<500;i++){ g.fillStyle = `rgba(255,255,255,${rnd(.3,1)})`; g.fillRect(rnd(0,w), rnd(0,h*.7), rnd(1,2.5), rnd(1,2.5)); }
+      const glow = g.createRadialGradient(w*.55, h*.95, 10, w*.55, h*.95, w*.45); glow.addColorStop(0,"rgba(255,120,40,.7)"); glow.addColorStop(1,"rgba(255,120,40,0)"); g.fillStyle = glow; g.fillRect(0,0,w,h);
+    }, 1); skyTex.wrapS = skyTex.wrapT = THREE.ClampToEdgeWrapping; skyTex.repeat.set(1,1);
+    const sky = new THREE.Mesh(new THREE.PlaneGeometry(hb*2+10, 60), new THREE.MeshBasicMaterial({map:skyTex})); sky.position.set(0, st.y+30, st.back_wall_z+2); scene.add(sky);
+    const rockGeo = new THREE.IcosahedronGeometry(15, 3); const rp = rockGeo.attributes.position;
+    for (let i=0;i<rp.count;i++){ const v = new THREE.Vector3().fromBufferAttribute(rp, i); const n = 1 + .18*Math.sin(v.x*.9)*Math.cos(v.z*1.3) + .12*Math.sin(v.y*2.1+v.x) ; v.multiplyScalar(n); rp.setXYZ(i, v.x, v.y, v.z); }
+    rockGeo.computeVertexNormals();
+    const rock = new THREE.Mesh(rockGeo, new THREE.MeshStandardMaterial({color:0x4f4b52, roughness:1, flatShading:true}));
+    rock.scale.set(1.1, st.rock_h/15, .85); rock.position.set(6, st.y+2, -34); rock.rotation.y = .4; rock.castShadow = rock.receiveShadow = true; scene.add(rock);
+    const flames = new THREE.Group(); scene.add(flames);
+    for (let i=0;i<36;i++){ const a = i/36*Math.PI*2, r = 19+rnd(-1.5,1.5); const f = new THREE.Mesh(new THREE.ConeGeometry(rnd(.6,1.2), rnd(2,5), 5), M.fire); f.position.set(6+Math.cos(a)*r, st.y+1.5, -34+Math.sin(a)*r*.8); f.userData.h = f.position.y; flames.add(f); }
+    const fireLight = new THREE.PointLight(0xff6a20, 1.6, 140, 1.4); fireLight.position.set(6, st.y+7, -30); scene.add(fireLight);
+    scene.userData.flicker = t => { fireLight.intensity = 1.5 + .35*Math.sin(t*11) + .25*Math.sin(t*23+1); flames.children.forEach((f,i)=>{ f.scale.y = .8 + .35*Math.sin(t*9+i*1.7); }); };
+    const figure = (x, z, colorBody, colorCloak, spear) => {
+      const g = new THREE.Group(); g.position.set(x, st.y, z);
+      const body = new THREE.Mesh(roundedBox(2.2, 5.2, 1.4, .5), new THREE.MeshStandardMaterial({color:colorBody, roughness:.7, metalness:.35})); body.position.y = 2.7; g.add(body);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(.65, 12, 10), M.singer); head.position.y = 5.9; g.add(head);
+      const helm = new THREE.Mesh(new THREE.ConeGeometry(.75, .9, 12), new THREE.MeshStandardMaterial({color:0xd8d8e0, roughness:.35, metalness:.8})); helm.position.y = 6.5; g.add(helm);
+      const cloak = new THREE.Mesh(new THREE.ConeGeometry(1.9, 4.6, 12, 1, true), new THREE.MeshStandardMaterial({color:colorCloak, roughness:.9, side:THREE.DoubleSide})); cloak.position.set(0, 2.6, .5); g.add(cloak);
+      if (spear){ const sp = new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,8.5,6), M.gold); sp.position.set(1.4, 4.2, 0); g.add(sp); }
+      g.traverse(o=>{ if (o.isMesh){ o.castShadow = true; } }); scene.add(g); return g;
+    };
+    figure(-9, -6, 0x8a97b8, 0x2c3a6e, true); figure(0, -9, 0xb9bfd2, 0x6b1f2a, true); figure(9, -7, 0x6e5a8a, 0x1e2a48, false);
+    // ---- side walls: coursed stone up to the ceiling profile, loge arches, pilasters, cornice
+    const prof = SHELL.ceiling_profile.value;
+    for (const sgn of [-1,1]){
+      const pos = [], uv = [];
+      const zs = [0, ...prof.map(p=>p[0]).filter(z=>z>0 && z<depth), depth];
+      for (let i=0;i<zs.length-1;i++){
+        const z0=zs[i], z1=zs[i+1], y0=ceilingAt(z0), y1=ceilingAt(z1), x=sgn*hb;
+        const tri = sgn<0 ? [[x,0,z0],[x,0,z1],[x,y0,z0], [x,y0,z0],[x,0,z1],[x,y1,z1]] : [[x,0,z0],[x,y0,z0],[x,0,z1], [x,0,z1],[x,y0,z0],[x,y1,z1]];
+        for (const p of tri){ pos.push(...p); uv.push(p[2], p[1]); }
+      }
+      const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos,3)); g.setAttribute("uv", new THREE.Float32BufferAttribute(uv,2));
+      scene.add(new THREE.Mesh(faceToward(g, [-sgn,0,0]), M.stone));
+      // three arched loges high on the wall near the stage, pilasters between, a gilt cornice
+      for (const zc of [16, 30, 44]){
+        const arch = new THREE.Mesh(new THREE.PlaneGeometry(9, 18), M.lattice);
+        arch.position.set(sgn*(hb-0.25), 55, zc); arch.rotation.y = sgn<0 ? Math.PI/2 : -Math.PI/2; scene.add(arch);
+        const sill = new THREE.Mesh(new THREE.BoxGeometry(1.2, .5, 10), M.gold); sill.position.set(sgn*(hb-0.6), 46, zc); scene.add(sill);
+      }
+      for (const zc of [9, 23, 37, 51]){ const p = new THREE.Mesh(new THREE.BoxGeometry(1.2, 30, 2.4), M.plaster); p.position.set(sgn*(hb-0.6), 55, zc); scene.add(p); }
+      const cornice = zs.map(z=>[sgn*(hb-0.5), z]); const cy = prof.map(p=>p[1]);
+      const pts = zs.map(z=>new THREE.Vector3(sgn*(hb-0.5), ceilingAt(z)-1.2, z));
+      addMesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, false, 'centripetal'), 64, .45, 8, false), M.goldDull);
+      const band = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.4, depth), M.gold); band.position.set(sgn*(hb-0.4), 40, depth/2); scene.add(band);
+    }
+    // ---- rear walls per level
+    const lt = SHELL.tiers[0], ut = SHELL.tiers[1], ltLast = lt.rows[lt.rows.length-1], ltRearZ = ltLast.z + 4;
+    const rw = [[SHELL.depth_orchestra, 0, b.soffit_y],
+                [ltRearZ, ltLast.y, ut.soffit_lip_y + ut.slope*(ltRearZ - ut.rail.z)],
+                [depth, ut.rows[ut.rows.length-1].y, ceilingAt(depth)]];
+    for (const [z, y0, y1] of rw){
+      const g = new THREE.PlaneGeometry(hb*2, y1-y0); g.attributes.uv.array.forEach((v,i,arr)=>{ arr[i] = v*(i%2===0?hb*2:y1-y0); });
+      const m = new THREE.Mesh(g, M.stone); m.position.set(0, (y0+y1)/2, z); m.rotation.y = Math.PI; scene.add(m);   // PlaneGeometry faces +z; turned to face the stage
+    }
+    // ---- ceiling: flat plaster with the shallow dome and its sunburst over the main room, then the raked, coffered rear
+    const mainEnd = MAIN_END, domeR = 26, domeRise = 7, domeZ = 46, mainY = MAIN_Y;
+    const shape = new THREE.Shape(); shape.moveTo(-hb, -2); shape.lineTo(hb, -2); shape.lineTo(hb, mainEnd); shape.lineTo(-hb, mainEnd); shape.closePath();
+    const hole = new THREE.Path(); hole.absellipse(0, domeZ, domeR, domeR*0.85, 0, Math.PI*2, false, 0); shape.holes.push(hole);
+    const mainGeo = new THREE.ShapeGeometry(shape, 24); mainGeo.rotateX(Math.PI/2);        // shape (x, z) -> lies flat
+    const mainCeil = new THREE.Mesh(faceToward(mainGeo, [0,-1,0]), M.ceiling); mainCeil.position.y = mainY; scene.add(mainCeil);
+    const R = (domeR*domeR + domeRise*domeRise)/(2*domeRise), capAngle = Math.asin(domeR/R);
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(R, 48, 16, 0, Math.PI*2, 0, capAngle), M.dome);
+    dome.scale.set(1, 1, 0.85); dome.position.set(0, mainY + domeRise - R, domeZ); scene.add(dome);
+    // sunburst chandelier
+    const burst = new THREE.Group(); burst.position.set(0, mainY+domeRise-1.5, domeZ); scene.add(burst);
+    burst.add(new THREE.Mesh(new THREE.SphereGeometry(2.2, 16, 12), M.lamp));
+    for (let i=0;i<28;i++){
+      const len = 5 + 4*Math.abs(Math.sin(i*1.7)), spike = new THREE.Mesh(new THREE.ConeGeometry(.35, len, 6), M.lampWarm);
+      const a = i/28*Math.PI*2, tilt = .55 + .35*Math.abs(Math.cos(i*2.3));
+      spike.position.set(Math.cos(a)*len/2*Math.sin(tilt), -len/2*Math.cos(tilt), Math.sin(a)*len/2*Math.sin(tilt));
+      spike.lookAt(new THREE.Vector3(0,0,0)); spike.rotateX(-Math.PI/2); burst.add(spike);
+    }
+    // round lights on the flat ceiling around the dome
+    const disc = new THREE.CylinderGeometry(1.6, 1.6, .25, 10);
+    for (const x of [-42,-28,-14,14,28,42]) for (const z of [14, 30, 62, 78]) { const l = new THREE.Mesh(disc, M.lamp); l.position.set(x, mainY-.15, z); scene.add(l); }
+    for (const x of [-42,-28,28,42]) for (const z of [46]) { const l = new THREE.Mesh(disc, M.lamp); l.position.set(x, mainY-.15, z); scene.add(l); }
+    // rear ceiling strips from the section profile, with octagonal recessed lights (as in the rear Balcony tour view)
+    const rear = [[mainEnd, mainY], ...prof.filter(p=>p[0]>mainEnd)];   // profileAt(88) is 71.4; the step is hidden behind the balcony cove
+    for (let i=0;i<rear.length-1;i++){
+      const [z0,y0]=rear[i], [z1,y1]=rear[i+1];
+      const g = stripFromRows([{arc:[[-hb,z0],[hb,z0]], y:y0},{arc:[[-hb,z1],[hb,z1]], y:y1}], r=>r.y);
+      scene.add(new THREE.Mesh(faceToward(g, [0,-1,0]), M.ceiling));
+    }
+    const oct = new THREE.CylinderGeometry(2.4, 2.4, .3, 8);
+    for (const z of [98, 110, 122, 134, 146, 156]) for (const x of [-40,-24,-8,8,24,40]) { const l = new THREE.Mesh(oct, M.lamp); l.position.set(x, ceilingAt(z)-0.2, z); l.rotation.y = Math.PI/8; scene.add(l); }
   }
 
-  // Instanced upholstered chairs: local -Z faces the stage.
-  const seatMat = new THREE.MeshStandardMaterial({roughness:.93});
-  const woodMat = new THREE.MeshStandardMaterial({color:0x38261b,roughness:.65});
+  // ---------------- seats: instanced upholstered chairs, local -Z faces the stage
+  const seatMat = new THREE.MeshStandardMaterial({roughness:.82, envMapIntensity:.4});
+  const woodMat = new THREE.MeshStandardMaterial({color:0x3a2519,roughness:.55});
+  const clothMat = new THREE.MeshStandardMaterial({roughness:.95});
+  const skinMat = new THREE.MeshStandardMaterial({roughness:.7});
   const parts = [
-    [new THREE.BoxGeometry(1.45,.35,1.35),seatMat,0,1.25,0,0],
-    [new THREE.BoxGeometry(1.48,1.65,.26),seatMat,0,2.05,.59,-.10],
+    [roundedBox(1.45,.42,1.35,.14),seatMat,0,1.28,0,0],
+    [roundedBox(1.5,1.7,.32,.14),seatMat,0,2.1,.6,-.10],
     [new THREE.BoxGeometry(.13,.16,1.5),woodMat,-.82,1.8,0,0],
     [new THREE.BoxGeometry(.13,.16,1.5),woodMat,.82,1.8,0,0],
     [new THREE.BoxGeometry(.16,1.2,.65),woodMat,-.6,.6,.1,0],
-    [new THREE.BoxGeometry(.16,1.2,.65),woodMat,.6,.6,.1,0]
+    [new THREE.BoxGeometry(.16,1.2,.65),woodMat,.6,.6,.1,0],
+    [roundedBox(1.15,1.35,.75,.22),clothMat,0,2.25,.28,-.06],        // audience: torso
+    [new THREE.SphereGeometry(.32,10,8),skinMat,0,3.42,.22,0],        // audience: head
+    [new THREE.SphereGeometry(.335,10,6,0,Math.PI*2,0,Math.PI/2),clothMat,0,3.44,.22,-.35]  // audience: hair
   ];
-  const seatMeshes=parts.map(([g,m])=>{const mesh=new THREE.InstancedMesh(g,m,SEATS.length);scene.add(mesh);return mesh;});
-  const seatMesh=seatMeshes[0], tmp=new THREE.Object3D(), part=new THREE.Object3D();
+  const PEOPLE = [6,7,8];
+  const HAIR = [0x1a1210,0x2b1d14,0x4a2f1c,0x6b4a2a,0x9a7a52,0xd9c9b0,0x101010,0x3a2a22];
+  let sittingIn = null;
+  const seatMeshes=parts.map(([g,m],j)=>{const mesh=new THREE.InstancedMesh(g,m,SEATS.length);mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);return mesh;});
+  const CLOTH = [0x1e1e26,0x2a2530,0x3b2a2a,0x1f2a3a,0x4a3b2b,0x2b3b2b,0x5a1e2e,0x222,0x3a3a44,0x6b5a3a];
+  const SKIN = [0xf1d1b5,0xe3b894,0xc99a6d,0xa8764e,0x7a5236,0x5a3a26];
+  const seatSeed = SEATS.map(s=>{ let h=0; for (const c of s.id) h=(h*31+c.charCodeAt(0))>>>0; return h; });
+  const tmp=new THREE.Object3D(), part=new THREE.Object3D();
   const matrix=new THREE.Matrix4(), colorTmp=new THREE.Color();
+  const HOUSE_COLOR = {orchestra:0xb5464f, boxes:0xd98a86, grand_tier:0xb5464f, dress_circle:0xb5464f, balcony_circle:0xa7333c, balcony:0xa7333c};
   function recolor(){
     renderer.clippingPlanes=cutaway?[cutPlane]:[];
     seatMat.needsUpdate=true;
@@ -457,7 +845,12 @@ function init3D(){
         matrix.multiplyMatrices(tmp.matrix,part.matrix);seatMeshes[j].setMatrixAt(i,matrix);
         if(j<2){
           if(analysis){const [r,g,b]=rampRgb(seatT(s,currentMetric));colorTmp.setRGB(r/255,g/255,b/255).convertSRGBToLinear();}
-          else colorTmp.setHex(0xa84f2e);
+          else colorTmp.setHex(HOUSE_COLOR[s.level]).convertSRGBToLinear();
+          seatMeshes[j].setColorAt(i,colorTmp);
+        } else if (PEOPLE.includes(j)){
+          const h = seatSeed[i];
+          if (analysis || (h % 7) === 0 || s === sittingIn){ matrix.multiplyMatrices(tmp.matrix, new THREE.Matrix4().makeScale(0,0,0)); seatMeshes[j].setMatrixAt(i,matrix); }  // empty seats, your own seat, no audience in analysis mode
+          colorTmp.setHex(j===6 ? CLOTH[h % CLOTH.length] : j===7 ? SKIN[(h>>3) % SKIN.length] : HAIR[(h>>5) % HAIR.length]).convertSRGBToLinear();
           seatMeshes[j].setColorAt(i,colorTmp);
         }
       });
@@ -471,6 +864,21 @@ function init3D(){
   const cmpMarks = [0,1].map(()=>{ const m = new THREE.Mesh(markGeo, new THREE.MeshStandardMaterial({color:0x9ad0ff, emissive:0x5a90ff, emissiveIntensity:.6})); m.visible=false; scene.add(m); return m; });
   const sight = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({color:0xe3c584}));
   sight.visible=false; scene.add(sight);
+  // early reflection paths for the selected seat
+  const pathGroup = new THREE.Group(); scene.add(pathGroup);
+  const pathColor = t => t < 30 ? 0xffd27a : t < 80 ? 0xff9a4a : 0x7fb3ff;
+  function drawPaths(s){
+    while (pathGroup.children.length) pathGroup.remove(pathGroup.children[0]);
+    if (!s || !showPaths) return;
+    const src = new THREE.Vector3(...SHELL.stage.singer), ear = new THREE.Vector3(s.x, s.y, s.z);
+    for (const r of s.aur.singer.r){
+      if (r[5] === "S" || r[5] === "F") continue;
+      const pts = [src, ...r[6].map(p=>new THREE.Vector3(...p)), ear];
+      const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({color:pathColor(r[0]), transparent:true, opacity:.85}));
+      pathGroup.add(line);
+      for (const p of r[6]){ const dot = new THREE.Mesh(new THREE.SphereGeometry(.7, 8, 8), new THREE.MeshBasicMaterial({color:pathColor(r[0])})); dot.position.set(...p); pathGroup.add(dot); }
+    }
+  }
 
   buildHouse();
 
@@ -495,11 +903,12 @@ function init3D(){
   };
   function setView(name){
     const v = VIEWS[name]; if (!v) return;
+    if (sittingIn){ sittingIn = null; recolor(); }
     ctl.firstPerson=false; camera.fov=50; camera.updateProjectionMatrix();
     ctl.target.set(...v.target); ctl.theta=v.theta; ctl.phi=v.phi; ctl.r=v.r; updateCamera();
   }
   function sitHere(s){
-    selMark.visible=false; sight.visible=false;
+    selMark.visible=false; sight.visible=false; sittingIn = s; recolor();
     ctl.firstPerson=true; camera.fov=58; camera.updateProjectionMatrix();
     fp.pos.set(s.x, s.y, s.z);
     const sg = SHELL.stage.singer; const dx = sg[0]-s.x, dy = sg[1]-s.y, dz = sg[2]-s.z;
@@ -543,29 +952,31 @@ function init3D(){
 
   function resize(){ const w=stageEl.clientWidth, h=stageEl.clientHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
   addEventListener("resize", resize); resize();
-  (function loop(){ renderer.render(scene, camera); requestAnimationFrame(loop); })();
+  (function loop(t){ if (scene.userData.flicker) scene.userData.flicker(t/1000); renderer.render(scene, camera); requestAnimationFrame(loop); })(0);
 
   view.recolor = recolor;
-  view.mark = s => { selMark.position.set(s.x, s.y, s.z); selMark.visible=true; sight.geometry.setFromPoints([new THREE.Vector3(s.x,s.y,s.z), new THREE.Vector3(...SHELL.stage.singer)]); sight.visible=true; };
+  view.mark = s => { selMark.position.set(s.x, s.y, s.z); selMark.visible=true; sight.geometry.setFromPoints([new THREE.Vector3(s.x,s.y,s.z), new THREE.Vector3(...SHELL.stage.singer)]); sight.visible=true; drawPaths(s); };
+  view.paths = () => drawPaths(selected);
   view.markCompare = (i,s) => { cmpMarks[i].position.set(s.x,s.y,s.z); cmpMarks[i].visible=true; };
   view.sit = sitHere;
   view.focus = s => { ctl.firstPerson=false; ctl.target.set(s.x,s.y,s.z); ctl.r=Math.min(ctl.r,120); updateCamera(); };
   view.setView = setView;
-  view.theme = () => { const bg = hex(css("--scene")); scene.background = bg; scene.fog = new THREE.Fog(bg, 250, 700); };
+  view.theme = () => { const bg = hex(css("--scene")); scene.background = bg; scene.fog = new THREE.Fog(bg, 320, 800); };
 }
 
 if (HAS3D) init3D();
 else {
   const msg = document.createElement("p");
   msg.className = "empty"; msg.style.cssText = "position:absolute;inset:0;display:grid;place-items:center;margin:0;padding:24px;text-align:center";
-  msg.textContent = "The local Three.js library did not load. Keep the vendor folder beside index.html. The seat data, lookup, comparison and value list still work.";
+  msg.textContent = "The local Three.js library did not load. Keep the vendor folder beside index.html. The seat data, lookup, comparison, value list and listening still work.";
   stageEl.appendChild(msg);
 }
 
-function applyTheme(){ RAMP = null; view.theme(); view.recolor(); updateLegend(); }
+function applyTheme(){ RAMP = null; view.theme(); view.recolor(); updateLegend(); if (selected) { const c = document.getElementById("echo"); if (c) drawEchogram(c, selected); } }
 
 // ------------------------------------------------------------ panel
 const fmtFt = v => v == null ? "Not modeled" : v.toFixed(0)+" ft";
+const fmtDb = v => v == null ? "–" : (v>0?"+":"")+v.toFixed(1)+" dB";
 const reflectionLabel = v => v == null ? "Not modeled" : v ? "yes" : "blocked";
 function verdict(s){
   const bits=[]; let cls="good";
@@ -575,13 +986,25 @@ function verdict(s){
     const what = {boxes:"the box ring", grand_tier:"the Grand Tier", dress_circle:"the Dress Circle", upper_tier:"the Balcony Circle / Balcony"}[s.overhang];
     bits.push(`Under ${what}: lip ${s.overhang_depth_ft.toFixed(0)} ft in front, ${s.headroom_ft.toFixed(0)} ft over your head.`);
     if (s.opening_angle_deg < 15){ cls="bad"; bits.push(`Only ${s.opening_angle_deg.toFixed(0)}° between the singer and the overhang edge in this model.`); }
-    else if (s.opening_angle_deg < 30){ cls="warn"; bits.push(`${s.opening_angle_deg.toFixed(0)}° of opening beneath the overhang. This does not establish how the seat sounds.`); }
+    else if (s.opening_angle_deg < 30){ cls="warn"; bits.push(`${s.opening_angle_deg.toFixed(0)}° of opening beneath the overhang.`); }
     else bits.push(`${s.opening_angle_deg.toFixed(0)}° of opening beneath the overhang in this model.`);
     if (s.prosc_top_clipped){ cls="bad"; bits.push(`The lip clips the top ${(31.5-s.visible_prosc_height_ft).toFixed(1)} ft of the proscenium: projections and the Valkyrie rock summit are at risk.`); }
   }
   if (s.stage_width_visible < 0.85) { if (cls==="good") cls="warn"; bits.push(`The proscenium edge hides ${((1-s.stage_width_visible)*100).toFixed(0)}% of the stage width at 25 ft upstage.`); }
   if (s.pit_visible >= 0.4) bits.push("You can see into the pit.");
-  return {cls, text: bits.join(" ")};
+  // sound
+  const snd=[];
+  if (s.direct_path_blocked) snd.push("The singer is behind the overhang edge from here: direct sound arrives bent around it.");
+  const from = s.first_reflection_from ? s.first_reflection_from.replace(/ \d+$/,"") : null;
+  if (s.itdg_ms == null || !from) snd.push("No early reflection reaches this seat in the model; the room arrives only as reverberation.");
+  else if (s.itdg_ms > 60) snd.push(`The room answers late: the first reflection comes from the ${from} ${s.itdg_ms.toFixed(0)} ms after the voice, so the voice sounds close and a little dry.`);
+  else snd.push(`First reflection from the ${from} after ${s.itdg_ms.toFixed(0)} ms.`);
+  snd.push(s.c80_db > 2.5 ? "Clear and on the dry side: every word, less bloom." : s.c80_db > -2 ? "Words and bloom in balance." : "Warm and reverberant: the line blurs, the sound blooms.");
+  snd.push(s.strength_db >= 2 ? "Full, present sound." : s.strength_db >= 0 ? "Comfortable level." : "Quieter and more distant than the main floor.");
+  if (s.lateral_fraction >= 0.2) snd.push("Strong side-wall reflections wrap the sound around you.");
+  if (s.voice_over_pit_db < -2) snd.push(`The pit sits ${(-s.voice_over_pit_db).toFixed(0)} dB above the voice in direct sound here.`);
+  if (s.seat_dip) snd.push("Low on a flat floor behind many rows: the sound grazes the audience, thinning the bass (seat-dip).");
+  return {cls, text: bits.join(" "), sound: snd.join(" ")};
 }
 function metricsList(s){
   const rows = [
@@ -594,12 +1017,33 @@ function metricsList(s){
     ["Depth ÷ opening", s.overhang==="none"?"–":s.overhang_d_over_h.toFixed(2)], ["Opening angle", s.opening_angle_deg.toFixed(0)+"°"],
     ["Proscenium visible", s.visible_prosc_height_ft.toFixed(1)+" / 31.5 ft"], ["Stage width visible", (s.stage_width_visible*100).toFixed(0)+"%"],
     ["Pit floor visible", (s.pit_visible*100).toFixed(0)+"%"],
-    ["hdr","Sound (geometric)"],
-    ["Direct level vs row A", s.direct_level_db.toFixed(1)+" dB"], ["Ceiling reflection, voice", reflectionLabel(s.ceiling_reflection_singer)],
-    ["Ceiling reflection, pit", reflectionLabel(s.ceiling_reflection_pit)],
-    ["hdr","Score"], ["View score", s.score.toFixed(0)+" / 100"], ["Score per $100", (s.score/s.price*100).toFixed(0)],
+    ["hdr","Sound"],
+    ["Direct level vs row A", fmtDb(s.direct_level_db)],
+    ["First reflection", s.itdg_ms==null?"none":s.itdg_ms.toFixed(0)+" ms"],
+    ["Early reflections", String(s.early_reflections)],
+    ["Clarity C80", fmtDb(s.c80_db)], ["Strength G", fmtDb(s.strength_db)],
+    ["Lateral fraction", s.lateral_fraction.toFixed(2)], ["Reverb over direct", fmtDb(s.reverb_vs_direct_db)],
+    ["Voice over pit", fmtDb(s.voice_over_pit_db)],
+    ["Ceiling reflection, voice", reflectionLabel(s.ceiling_reflection_singer)],
+    ["hdr","Scores"], ["View", s.score.toFixed(0)+" / 100"], ["Sound", s.sound_score.toFixed(0)+" / 100"],
+    ["Overall", s.overall_score.toFixed(0)+" / 100"], ["Overall per $100", (s.overall_score/s.price*100).toFixed(0)],
   ];
   return `<dl class="metrics">${rows.map(([a,b])=> a==="hdr" ? `<dt class="hdr label">${b}</dt>` : `<dt>${a}</dt><dd class="mono">${b}</dd>`).join("")}</dl>`;
+}
+function listenControls(prefix, s){
+  return `<div class="listen">
+    <div class="row"><button class="act primary" id="${prefix}Voice">▶ Voice from here</button><button class="act" id="${prefix}Both">▶ Voice + orchestra</button><button class="act" id="${prefix}Stop" style="flex:0 0 auto">■</button></div>
+    <div class="now" id="${prefix}Now"></div>
+  </div>`;
+}
+let nowPlaying = null;
+function wireListen(prefix, s){
+  const now = document.getElementById(prefix+"Now");
+  const done = ()=>{ if (now) now.textContent = ""; nowPlaying = null; };
+  const start = mode => { Aural.play(s, mode, done); nowPlaying = s.id; now.textContent = `Playing from ${LEVEL_NAME[s.level]} ${s.row} ${s.seat}…`; };
+  document.getElementById(prefix+"Voice").onclick = ()=>start(Aural.hasFile() ? "file" : "voice");
+  document.getElementById(prefix+"Both").onclick = ()=>start("both");
+  document.getElementById(prefix+"Stop").onclick = ()=>Aural.stop();
 }
 function select(s){
   selected = s; view.mark(s);
@@ -607,38 +1051,50 @@ function select(s){
   const v = verdict(s);
   document.getElementById("seatBody").innerHTML = `
     <h2>${LEVEL_NAME[s.level]} · Row ${s.row} · Seat ${s.seat}</h2>
-    <div class="zone">${s.zone_name} · <span class="mono">$${s.price}</span></div>
-    <div class="verdict ${v.cls}">${v.text}</div>
+    <div class="zone">${s.zone_name} · <span class="mono">$${s.price}</span> · overall <span class="mono">${s.overall_score.toFixed(0)}</span></div>
+    <div class="verdict ${v.cls}"><p>${v.text}</p><p>${v.sound}</p></div>
+    ${listenControls("sel", s)}
+    <canvas id="echo" aria-label="Echogram: direct sound and early reflections at this seat"></canvas>
+    <p class="note" style="margin:6px 0 0">Echogram: gold = direct, green = side walls, blue = ceiling, purple = rear wall, amber = overhang edge; grey line = reverberant tail. <label style="cursor:pointer">Or listen with your own recording: <input type="file" id="userFile" accept="audio/*"></label></p>
     ${metricsList(s)}
     <div class="row" style="margin-top:12px"><button class="act primary" id="sit2" ${HAS3D?"":"disabled"}>Sit here</button><button class="act" id="cmpA">Compare as A</button><button class="act" id="cmpB">Compare as B</button></div>`;
   document.getElementById("sit2").onclick = ()=>view.sit(s);
   document.getElementById("cmpA").onclick = ()=>setCompare(0,s);
   document.getElementById("cmpB").onclick = ()=>setCompare(1,s);
+  wireListen("sel", s);
+  document.getElementById("userFile").onchange = async e => { const f = e.target.files[0]; if (!f) return; await Aural.loadFile(f); document.getElementById("selNow").textContent = `Loaded ${f.name}: “Voice from here” now plays it from the singer's position.`; };
+  drawEchogram(document.getElementById("echo"), s);
 }
 document.getElementById("sitBtn").addEventListener("click", ()=> selected && view.sit(selected));
 function setCompare(i,s){ cmp[i]=s; view.markCompare(i,s); renderCompare(); }
 function renderCompare(){
   const [a,b]=cmp; const body=document.getElementById("compareBody");
-  if (!a && !b){ body.innerHTML='<p class="empty">Add two seats with "Compare" to see them side by side.</p>'; return; }
+  if (!a && !b){ body.innerHTML='<p class="empty">Add two seats with "Compare" to see and hear them side by side.</p>'; return; }
   const name = s => s ? `${LEVEL_NAME[s.level].split(" ").map(w=>w[0]).join("")} ${s.row} ${s.seat}` : "–";
   const rows = [
-    ["Price", s=>"$"+s.price], ["View score", s=>s.score.toFixed(0)], ["Score per $100", s=>(s.score/s.price*100).toFixed(0)],
+    ["Price", s=>"$"+s.price], ["Overall", s=>s.overall_score.toFixed(0)], ["View", s=>s.score.toFixed(0)], ["Sound", s=>s.sound_score.toFixed(0)],
     ["Distance", s=>fmtFt(s.dist_singer_ft)], ["Off-axis", s=>s.horiz_angle_deg.toFixed(0)+"°"],
     ["Overhang", s=>s.overhang==="none"?"none":s.overhang.replace("_"," ")], ["Opening angle", s=>s.opening_angle_deg.toFixed(0)+"°"],
     ["Proscenium visible", s=>s.visible_prosc_height_ft.toFixed(1)+" ft"], ["Stage width", s=>(s.stage_width_visible*100).toFixed(0)+"%"],
-    ["Pit visible", s=>(s.pit_visible*100).toFixed(0)+"%"], ["Ceiling reflection", s=>reflectionLabel(s.ceiling_reflection_singer)],
+    ["First reflection", s=>s.itdg_ms==null?"none":s.itdg_ms.toFixed(0)+" ms"], ["Clarity C80", s=>fmtDb(s.c80_db)], ["Strength G", s=>fmtDb(s.strength_db)],
+    ["Lateral fraction", s=>s.lateral_fraction.toFixed(2)], ["Voice over pit", s=>fmtDb(s.voice_over_pit_db)],
   ];
-  body.innerHTML = `<table><thead><tr><th></th><th>${name(a)}</th><th>${name(b)}</th></tr></thead><tbody>${rows.map(([l,f])=>`<tr><td>${l}</td><td class="mono">${a?f(a):"–"}</td><td class="mono">${b?f(b):"–"}</td></tr>`).join("")}</tbody></table>`;
+  body.innerHTML = `<table><thead><tr><th></th><th>${name(a)}</th><th>${name(b)}</th></tr></thead><tbody>${rows.map(([l,f])=>`<tr><td>${l}</td><td class="mono">${a?f(a):"–"}</td><td class="mono">${b?f(b):"–"}</td></tr>`).join("")}</tbody></table>
+    <div class="row" style="margin-top:8px"><button class="act" id="hearA" ${a?"":"disabled"}>▶ Hear A</button><button class="act" id="hearB" ${b?"":"disabled"}>▶ Hear B</button><button class="act" id="hearStop" style="flex:0 0 auto">■</button></div><div class="listen"><div class="now" id="cmpNow"></div></div>`;
+  const now = document.getElementById("cmpNow"), done = ()=>{ now.textContent=""; };
+  if (a) document.getElementById("hearA").onclick = ()=>{ Aural.play(a, "both", done); now.textContent = `A: ${LEVEL_NAME[a.level]} ${a.row} ${a.seat}`; };
+  if (b) document.getElementById("hearB").onclick = ()=>{ Aural.play(b, "both", done); now.textContent = `B: ${LEVEL_NAME[b.level]} ${b.row} ${b.seat}`; };
+  document.getElementById("hearStop").onclick = ()=>Aural.stop();
 }
 
 // value list
 const maxPrice = document.getElementById("maxPrice");
 function renderValue(){
   const cap = +maxPrice.value; document.getElementById("maxPriceLbl").textContent = "$"+cap;
-  const best = SEATS.filter(s=>s.price<=cap && activeLevels.has(s.level)).sort((x,y)=> y.score/y.price - x.score/x.price || y.score - x.score);
+  const best = SEATS.filter(s=>s.price<=cap && activeLevels.has(s.level)).sort((x,y)=> y.overall_score/y.price - x.overall_score/x.price || y.overall_score - x.overall_score);
   const seen=new Set(), picks=[];
   for (const s of best){ const k=s.level+s.row+s.zone; if (seen.has(k)) continue; seen.add(k); picks.push(s); if (picks.length>=8) break; }
-  document.getElementById("valueList").innerHTML = picks.map(s=>`<button data-id="${s.id}"><span>${LEVEL_NAME[s.level]} ${s.row} ${s.seat}</span><span class="mono p">$${s.price}</span><span class="mono">${s.score.toFixed(0)}</span></button>`).join("");
+  document.getElementById("valueList").innerHTML = picks.map(s=>`<button data-id="${s.id}"><span>${LEVEL_NAME[s.level]} ${s.row} ${s.seat}</span><span class="mono p">$${s.price}</span><span class="mono">${s.overall_score.toFixed(0)}</span></button>`).join("");
   document.querySelectorAll("#valueList button").forEach(b=>b.onclick=()=>{ const s=SEATS.find(x=>x.id===b.dataset.id); select(s); view.focus(s); });
 }
 maxPrice.addEventListener("input", renderValue);
@@ -653,9 +1109,10 @@ Object.entries(METRICS).forEach(([k,m])=>{ const o=document.createElement("optio
 document.getElementById("appearance").addEventListener("change",()=>view.recolor());
 metricSel.addEventListener("change", ()=>{ document.getElementById("appearance").value="analysis"; currentMetric=metricSel.value; view.recolor(); updateLegend(); });
 
-// views + cutaway
+// views + cutaway + paths
 document.querySelectorAll("#views [data-view]").forEach(b=>b.addEventListener("click", ()=>view.setView(b.dataset.view)));
 document.getElementById("cut").addEventListener("click", e=>{ cutaway=!cutaway; e.currentTarget.setAttribute("aria-pressed", String(cutaway)); view.recolor(); });
+document.getElementById("refl").addEventListener("click", e=>{ showPaths=!showPaths; e.currentTarget.setAttribute("aria-pressed", String(showPaths)); view.paths(); });
 
 // lookup
 function lookup(){
