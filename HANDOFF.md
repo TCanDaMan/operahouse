@@ -1,18 +1,20 @@
-# Sound Purchase — current handoff, 2026-09-05
+# Sound Purchase — checkpoint, 2026-09-05 (evening)
 
 ## Start here
 
 User wants a realistic, dimensionally credible War Memorial Opera House model
-for choosing opera seats, and a repeatable reconstruction workflow for other
-halls. Keep working autonomously; do not make the user repeatedly say continue.
-Explain results in plain language. They supplied plans, sections, and tour views.
+for choosing opera seats, with a room-acoustic engine and listen-from-this-seat
+auralization, and a repeatable workflow for other halls. Keep working
+autonomously; explain results in plain language.
 
-Repository: TCanDaMan/operahouse. Local checkout:
-`/Users/tyler/Developer/personal/soundpurchase` (an older copy may exist under ~/Documents/ChatGPT).
-Checkpoint branch: `codex/hall-calibration-checkpoint`.
-Base before this work: `75e4048` on `claude/opera-house-seat-model-94ksm4`.
-Do not mistake old README conclusions or historical calibration logs for verified
-current facts. The prior handoff is archived in sources/history/.
+Repository: TCanDaMan/operahouse, branch `claude/opera-house-seat-model-94ksm4`.
+Local checkout: `/Users/tyler/Developer/personal/soundpurchase`.
+This checkpoint: tag `checkpoint-2026-09-05-acoustics`. It includes the outside
+review branch `codex/hall-calibration-checkpoint` (fast-forwarded; the owner
+chose to keep its box-ring shift) plus the acoustic engine and visual rebuild.
+Read the README sections "Room acoustics", "Listening" and the dated notes,
+then the follow-up sections at the bottom of this file. Historical handoffs
+are in sources/history/.
 
 ## Run
 
