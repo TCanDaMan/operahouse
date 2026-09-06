@@ -9,6 +9,13 @@ All 3,006 seat positions/prices and the owner-approved box shift are preserved.
 Audio and sound scores were regenerated. RTs remain assumptions. Fable's original
 checkout was not overwritten. Older notes below may describe superseded behavior.
 
+2026-09-06 later (Fable): branch merged into `claude/opera-house-seat-model-94ksm4`
+and pushed; tail onset ramp shortened from 25 ms to 5 ms after it was shown to be
+the sole cause of a house-wide 3 dB C80 drop. See the follow-up section in
+AUDIO_ENGINE.md for the decomposition and the two open items (dome facet
+coverage over the Grand Tier; the four out-of-wall box seats). Serve this
+checkout on port 8766.
+
 ---
 
 # Sound Purchase — checkpoint, 2026-09-05 (evening)

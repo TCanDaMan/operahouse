@@ -24,6 +24,14 @@ MID = (1, 2)                     # 500 Hz and 2 kHz columns
 HI = 3
 EARLY_MS = 80.0
 MAX_ORDER = 2
+# Onset ramp of the statistical tail, shared by the C80 accounting and the
+# renderer (exported as tail_rise_s). Kept short: it is an anti-click device,
+# not a physical build-up claim. A 25 ms ramp with the tail energy renormalised
+# afterwards moved ~3 dB of tail energy past 80 ms and dropped house-median C80
+# to -3..-6 dB, outside the -4..+4 dB range reported for opera houses. The
+# coarse image-source set carries only 4-17% of the reflected energy, so the
+# tail must stand in for the early reflected energy it does not resolve.
+TAIL_RISE_S = 0.005
 
 # --------------------------------------------------------------- context
 K = {}   # filled by configure(): geometry callables and constants
@@ -334,7 +342,7 @@ def seat_acoustics(eye, direct_blocked_fn, soffit_planes_fn, pit_visible, grazin
     # Do not synthesize diffuse room sound before its first valid room return.
     room_taps = [q["t"] for q in taps if q["code"] != "F"]
     t_mix = max(20.0, min(room_taps) if room_taps else 80.0) / 1000
-    rise = 0.025
+    rise = TAIL_RISE_S
     late_tail = sum(tail_energy[b] * tail_fraction_after(EARLY_MS / 1000 - t_mix, K["rt"][b], rise)
                     for b in MID) / 2
     early_total = e_dir + e_early + e_late - late_tail
@@ -384,7 +392,7 @@ def seat_acoustics(eye, direct_blocked_fn, soffit_planes_fn, pit_visible, grazin
     res["aur"] = rec
     return res
 
-def tail_fraction_after(t, rt, rise=0.025):
+def tail_fraction_after(t, rt, rise=TAIL_RISE_S):
     """Integral of [(1-exp(-t/rise))*exp(-3 ln(10)t/RT)]^2.
     Matches the renderer's smooth late-field onset, including the ramp energy."""
     t = max(0.0, t)

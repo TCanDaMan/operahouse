@@ -36,6 +36,34 @@ not a measured binaural reproduction of War Memorial Opera House.
   voice-plus-orchestra mode. “Use test voice” resets the upload. Stop now stops
   the synth oscillators; finished playback disconnects its graph.
 
+## Follow-up 2026-09-06 (Fable): tail onset ramp shortened to 5 ms
+
+Merged this branch into `claude/opera-house-seat-model-94ksm4` (fast-forward) and
+compared the regenerated metrics with checkpoint `cd83c9e`. House-median C80 had
+fallen about 3 dB in every level (Grand Tier -1.9 to -5.9 dB) and sound scores
+moved by up to 75 points. Decomposition over all 3,006 seats: the new mixing-time
+rule and the explicit-path/tail double count each change C80 by under 0.3 dB;
+the entire drop came from the 25 ms onset ramp with the tail energy renormalised
+after ramping, which pushes fixed diffuse energy past 80 ms. Since the coarse
+image-source set carries only 4-17% of the reflected energy, the tail has to stand
+in for early reflected energy the model does not resolve, and a long ramp removes
+exactly that. `TAIL_RISE_S` in scripts/acoustics.py is now 0.005 s, still shared
+by the metric and the renderer through `tail_rise_s`. Result: house C80 median
+-0.9 dB (range -7.9 to +1.8), within the -4 to +4 dB range reported for opera
+houses; level medians are within 0.4 dB of the checkpoint except Grand Tier.
+
+Still open from this comparison:
+
+- Grand Tier C80 is 1 dB below the checkpoint because the dome hole removes the
+  flat-ceiling reflection for 144 of 264 Grand Tier seats and the 36 facets return
+  it to only some. Dome size/position are illustrative; a real concave dome of this
+  curvature would focus and then spread the reflection, not drop it. Either
+  refine the facet mesh or treat the dome as a diffusing flat patch until the
+  ceiling is measured.
+- boxes A:4/5 and Z:5/6 (among the 14 seats outside the rectangular half-width)
+  get no significant early reflection and C80 -7.9 dB. That is the wall-footprint
+  conflict in data/geometry_conflicts.json, not a listening result.
+
 ## Run / validation
 
 ```sh

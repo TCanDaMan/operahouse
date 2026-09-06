@@ -17,7 +17,7 @@ class AcousticsTests(unittest.TestCase):
             step=.0001; all_energy=late_energy=0
             for i in range(60000):
                 t=(i+.5)*step
-                e=((1-math.exp(-t/.025))*math.exp(-3*math.log(10)*t/rt))**2
+                e=((1-math.exp(-t/a.TAIL_RISE_S))*math.exp(-3*math.log(10)*t/rt))**2
                 all_energy+=e
                 if t>=.06:late_energy+=e
             self.assertAlmostEqual(late_energy/all_energy,a.tail_fraction_after(.06,rt),places=6)
