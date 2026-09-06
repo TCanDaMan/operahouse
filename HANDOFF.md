@@ -1,3 +1,16 @@
+# Latest checkpoint — 2026-09-06 seat audio refinement
+
+Start with [AUDIO_ENGINE.md](AUDIO_ENGINE.md) for the current implementation,
+validation, assumptions, and next steps. This builds on Fable's `cd83c9e`.
+Branch: `codex/seat-audio-refinement`.
+Working checkout: `/Users/tyler/Documents/ChatGPT/Sound Purchase/operahouse-fable-review`.
+Preview: `http://127.0.0.1:8877/web/index.html` (the 8765 preview may be older).
+All 3,006 seat positions/prices and the owner-approved box shift are preserved.
+Audio and sound scores were regenerated. RTs remain assumptions. Fable's original
+checkout was not overwritten. Older notes below may describe superseded behavior.
+
+---
+
 # Sound Purchase — checkpoint, 2026-09-05 (evening)
 
 ## Start here

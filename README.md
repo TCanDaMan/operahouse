@@ -1,3 +1,5 @@
+> **Audio update (2026-09-06):** See [AUDIO_ENGINE.md](AUDIO_ENGINE.md). Four-band repeatable seat audio, corrected stereo energy/direction, shared ceiling parameters, and direct-sound comparison are implemented. This is not measurement-validated.
+
 > **Current status:** Start with [HANDOFF.md](HANDOFF.md). Historical seat conclusions below predate the latest geometry corrections and are not validated. The model remains a reconstruction in progress.
 
 # War Memorial Opera House seat model

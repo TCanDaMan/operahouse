@@ -734,5 +734,17 @@
       "confidence": "medium",
       "source": "Singing-voice directivity: roughly -6 dB at 90 degrees and -12 dB behind the singer in the 1-4 kHz range; pattern -12*(1-cos)/2 dB"
     }
+  },
+  "interior_ceiling": {
+    "value": {
+      "main_end": 88,
+      "main_y": 75,
+      "dome_radius": 26,
+      "dome_rise": 7,
+      "dome_z": 46,
+      "dome_aspect": 0.85
+    },
+    "confidence": "low",
+    "source": "Shared illustrative interior ceiling from Fable visual rebuild. Rear uses candidate section outline. Not a surveyed interior; dome uses bounded facets for first-order acoustic reflection only."
   }
 }

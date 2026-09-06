@@ -29,6 +29,7 @@ MAX_ORDER = 2
 K = {}   # filled by configure(): geometry callables and constants
 
 def configure(**kw):
+    K.clear()
     K.update(kw)
     A = K["G"]["acoustics"]
     K["alpha"] = A["absorption"]["value"]
@@ -81,8 +82,12 @@ class Plane:
 # -------------------------------------------------------------- surfaces
 SURFACES = []
 
+def interior_profile():
+    c = K["G"]["interior_ceiling"]["value"]
+    return [[0, c["main_y"]], [c["main_end"], c["main_y"]]] + [p for p in K["ceiling_profile"] if p[0] > c["main_end"]]
+
 def ceiling_y_at(z):
-    prof = K["ceiling_profile"]
+    prof = interior_profile()
     if z <= prof[0][0]:
         return prof[0][1]
     for (z0, y0), (z1, y1) in zip(prof, prof[1:]):
@@ -92,14 +97,18 @@ def ceiling_y_at(z):
 
 def _build_surfaces():
     SURFACES.clear()
-    hb, prof = K["half_breadth"], K["ceiling_profile"]
+    hb, prof = K["half_breadth"], interior_profile()
     depth = K["depth_balcony"]
-    # ceiling strips from the section profile
+    c = K["G"]["interior_ceiling"]["value"]
+    def in_dome(p):
+        return (p[0]/c["dome_radius"])**2 + ((p[2]-c["dome_z"])/(c["dome_radius"]*c["dome_aspect"]))**2 < 1
+    # Main flat surface has a real hole for the dome; rear matches the viewer.
     for i, ((z0, y0), (z1, y1)) in enumerate(zip(prof, prof[1:])):
         n = norm((0.0, -(z1 - z0), (y1 - y0)))     # points down into the room
         if n[1] > 0: n = mul(n, -1)
         SURFACES.append(Plane(f"ceiling {i}", "C", (0.0, y0, z0), n, "plaster",
-                              lambda p, z0=z0, z1=z1, hb=hb: z0 - 0.01 <= p[2] <= z1 + 0.01 and abs(p[0]) <= hb))
+                              lambda p, z0=z0, z1=z1, hb=hb: z0 - 0.01 <= p[2] <= z1 + 0.01 and abs(p[0]) <= hb and not in_dome(p)))
+    _dome_surfaces(c)
     # side walls
     for sgn in (-1, 1):
         SURFACES.append(Plane("side wall " + ("L" if sgn < 0 else "R"), "W", (sgn*hb, 0.0, 0.0), (-sgn, 0.0, 0.0), "plaster",
@@ -120,6 +129,31 @@ def _build_surfaces():
     # seated audience is absorbed and scattered (the seat-dip effect is
     # flagged separately), and a flat plane there produced a spurious
     # first reflection a fraction of a millisecond after the direct sound.
+
+def _dome_surfaces(c):
+    """Bounded triangle approximation of the displayed spherical cap.
+    First-order only: avoid pretending this coarse mesh resolves dome focusing."""
+    radius, rise = c["dome_radius"], c["dome_rise"]
+    sphere = (radius*radius + rise*rise)/(2*rise)
+    def point(r, a):
+        return (r*math.cos(a), c["main_y"]+rise-sphere+math.sqrt(sphere*sphere-r*r),
+                c["dome_z"]+c["dome_aspect"]*r*math.sin(a))
+    rings = [[point(radius*f, i*math.tau/12) for i in range(12)] for f in (0, 0.5, 1)]
+    def triangle(a,b,cpt):
+        u,v=sub(b,a),sub(cpt,a)
+        n=(u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0])
+        if n[1]>0: n=mul(n,-1)
+        def inside(p):
+            w=sub(p,a); uu,vv,uv=dot(u,u),dot(v,v),dot(u,v); d=uu*vv-uv*uv
+            s=(vv*dot(w,u)-uv*dot(w,v))/d; t=(uu*dot(w,v)-uv*dot(w,u))/d
+            # Half-open seams avoid double counting shared edges.
+            return s>=0 and t>=0 and s+t<1
+        SURFACES.append(Plane("main dome", "C", a,n,"plaster",inside,order2=False))
+    for i in range(12):
+        j=(i+1)%12
+        triangle(rings[0][i],rings[1][i],rings[1][j])
+        triangle(rings[1][i],rings[2][i],rings[2][j])
+        triangle(rings[1][i],rings[2][j],rings[1][j])
 
 # ------------------------------------------------------ slab occlusion grid
 GRID = {}
@@ -190,7 +224,7 @@ def path_amplitude(src, forward, points, surfaces, listener):
     d_db = directivity_db(src, forward, pts[1])
     amps = []
     for b in range(4):
-        g = 10 ** (d_db / 20) / L
+        g = 10 ** (d_db * (0.15, 0.5, 1.0, 1.2)[b] / 20) / max(L, 0.1)
         for s in surfaces:
             g *= math.sqrt(max(0.0, 1 - K["alpha"][s.material][b]))
         g *= 10 ** (-K["air"][b] * L / 100 / 20)
@@ -234,7 +268,7 @@ def arrival_angles(listener, look, frm):
     for a listener facing `look` (a horizontal unit vector)."""
     d = norm(sub(frm, listener))
     fwd = (look[0], 0.0, look[2])
-    right = (fwd[2], 0.0, -fwd[0])
+    right = (-fwd[2], 0.0, fwd[0])
     az = math.degrees(math.atan2(dot(d, right), dot(d, fwd)))
     el = math.degrees(math.asin(max(-1.0, min(1.0, d[1]))))
     return az, el
@@ -271,7 +305,7 @@ def seat_acoustics(eye, direct_blocked_fn, soffit_planes_fn, pit_visible, grazin
             taps.append({"t": t, "amps": p["amps"], "az": az, "el": el,
                          "code": "".join(s.code for s in p["surf"]),
                          "pt": p["pts"], "surf": [s.name for s in p["surf"]]})
-        if lip is not None and segment_clear(src, lip):
+        if lip is not None and segment_clear(src, lip) and segment_clear(lip, eye, skip_start=3.0):
             # diffuse scatter from the overhang edge: a specular-strength path
             # via the lip point, 6 dB down, spread over the soffit lowpass
             L, amps = path_amplitude(src, fwd, [lip], [SCATTER], eye)
@@ -290,17 +324,21 @@ def seat_acoustics(eye, direct_blocked_fn, soffit_planes_fn, pit_visible, grazin
                   for q in taps if 5 <= q["t"] <= EARLY_MS)
     # statistical tail: 4/R (per unit source power, metric) brought into the
     # model's units, where the on-axis direct sound is 1/L_ft^2
-    R = (K["R"][1] + K["R"][2]) / 2
-    e_late = 4 / R * SCALE * oh
-    rt_mid = (K["rt"][1] + K["rt"][2]) / 2
-    # first significant *room* reflection: within 15 dB of the direct sound;
-    # the stage-floor bounce at the singer's feet travels with the direct sound
+    # One exported tail law drives both the metrics and the rendered response.
+    # Total pressure-squared energy per frequency band; equal source-power
+    # assumption for singer and pit, not a measured orchestral balance.
+    tail_energy = [4 / r * SCALE * oh for r in K["R"]]
+    e_late = (tail_energy[1] + tail_energy[2]) / 2
     sig = [q for q in taps if mid(q["amps"]) >= e_dir * 10 ** (-15 / 10) and q["code"] not in ("F", "S")]
-    itdg = sig[0]["t"] if sig else (taps[0]["t"] if taps else None)
-    t_mix = max(20.0, min(itdg if itdg else 20.0, EARLY_MS)) / 1000
-    frac_after80 = math.exp(-13.82 * max(0.0, EARLY_MS / 1000 - t_mix) / rt_mid)
-    early_total = e_dir + e_early + e_late * (1 - frac_after80)
-    late_total = e_late * frac_after80 + e_late_refl
+    itdg = sig[0]["t"] if sig else None
+    # Do not synthesize diffuse room sound before its first valid room return.
+    room_taps = [q["t"] for q in taps if q["code"] != "F"]
+    t_mix = max(20.0, min(room_taps) if room_taps else 80.0) / 1000
+    rise = 0.025
+    late_tail = sum(tail_energy[b] * tail_fraction_after(EARLY_MS / 1000 - t_mix, K["rt"][b], rise)
+                    for b in MID) / 2
+    early_total = e_dir + e_early + e_late - late_tail
+    late_total = late_tail + e_late_refl
     c80 = 10 * math.log10(early_total / max(late_total, 1e-12))
     # G: total level relative to the same source in the free field at 10 m
     e_ref = SCALE / (4 * math.pi * 10 ** 2)
@@ -325,20 +363,34 @@ def seat_acoustics(eye, direct_blocked_fn, soffit_planes_fn, pit_visible, grazin
         a = q["amps"]
         return [round(q["t"], 1), round((a[1] + a[2]) / 2, 5), round(a[3], 5),
                 round(q["az"]), round(q["el"]), q["code"],
-                [[round(v, 1) for v in pt] for pt in q["pt"]]]
+                [[round(v, 1) for v in pt] for pt in q["pt"]],
+                [round(v, 8) for v in a]]
     rec = {}
-    for key, cap in (("singer", 14), ("pit", 8)):
+    for key in ("singer", "pit"):
         t0, damps, taps, Ld = aur[key]
-        strong = sorted(taps, key=lambda q: -mid(q["amps"]))[:cap]
+        strong = list(taps)  # retain all validated paths: no strongest-N truncation
         strong.sort(key=lambda q: q["t"])
         az, el = arrival_angles(eye, look, K[key if key == "singer" else "pit_src"])
         rec[key] = {"t0": round(t0, 1), "d": [round((damps[1] + damps[2]) / 2, 5), round(damps[3], 5), round(az), round(el)],
-                    "r": [tap_rec(q) for q in strong]}
+                    "r": [tap_rec(q) for q in strong],
+                    "bands": [round(v, 8) for v in damps],
+                    "tail_energy": tail_energy,
+                    "tail_start_ms": max(20.0, min((q["t"] for q in taps if q["code"] != "F"), default=80.0)),
+                    "tail_rise_s": rise}
+    rec["version"] = 2
     rec["rev_db"] = round(rev_db, 1)
     rec["rt"] = K["rt"]
     rec["oh"] = round(oh, 2)
     res["aur"] = rec
     return res
+
+def tail_fraction_after(t, rt, rise=0.025):
+    """Integral of [(1-exp(-t/rise))*exp(-3 ln(10)t/RT)]^2.
+    Matches the renderer's smooth late-field onset, including the ramp energy."""
+    t = max(0.0, t)
+    k = 6 * math.log(10) / rt
+    rates = (k, k + 1 / rise, k + 2 / rise)
+    return sum(w * math.exp(-r*t) / r for w, r in zip((1, -2, 1), rates)) / sum(w/r for w, r in zip((1, -2, 1), rates))
 
 def sound_score(m):
     """0-100 listening score. Weights are opinions, like view_score."""

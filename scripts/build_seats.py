@@ -347,7 +347,7 @@ def stage_width_fraction(eye):
 
 def ceiling_profile_y(z):
     """Ceiling height from the section-derived profile (main dome height in front, rising cove at the rear)."""
-    prof = G["ceiling_profile"]["value"]
+    prof = AC.interior_profile()
     if z <= prof[0][0]:
         return prof[0][1]
     for (z0, y0), (z1, y1) in zip(prof, prof[1:]):
@@ -677,6 +677,7 @@ def tier_shell(tier, half_w):
 shell = {
     "ceiling_y": CEILING_Y,
     "ceiling_profile": G["ceiling_profile"],
+    "interior_ceiling": G["interior_ceiling"],
     "half_breadth": HALF_BREADTH,
     "depth_orchestra": P("published", "depth_orchestra_level_ft"),
     "depth_balcony": P("published", "depth_balcony_level_ft"),
