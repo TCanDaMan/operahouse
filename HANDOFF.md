@@ -1,121 +1,101 @@
-# Checkpoint, 2026-09-04
+# Sound Purchase — current handoff, 2026-09-05
 
-Working name for the product: **Sound Purchase**. See the seat, hear the
-seat, price the seat; one venue package per house.
+## Start here
 
-## Where things stand
+User wants a realistic, dimensionally credible War Memorial Opera House model
+for choosing opera seats, and a repeatable reconstruction workflow for other
+halls. Keep working autonomously; do not make the user repeatedly say continue.
+Explain results in plain language. They supplied plans, sections, and tour views.
 
-- Branch `claude/opera-house-seat-model-94ksm4`, all work pushed.
-- `python3 scripts/build_seats.py` regenerates `data/seats.json`,
-  `data/seats.csv` and `web/index.html` from the geometry and seat spec.
-  No dependencies beyond the standard library.
-- `web/index.html` is self-contained; open it in a browser. Deep link:
-  `?seat=dress_circle:A:105&view=sit`.
-- Published viewer: https://claude.ai/code/artifact/5c086e14-1b66-4836-8184-695d51e9c50e
-- The 3D pane loads three.js r128 from cdnjs. It was never rendered in the
-  build sandbox (host blocked), so the first thing to do on the Mac is open
-  `web/index.html` and look at it. The seat panel, lookup, compare and value
-  list are verified; the scene is not.
+Repository: TCanDaMan/operahouse. Local checkout:
+`/Users/tyler/Documents/ChatGPT/Sound Purchase/operahouse`.
+Checkpoint branch: `codex/hall-calibration-checkpoint`.
+Base before this work: `75e4048` on `claude/opera-house-seat-model-94ksm4`.
+Do not mistake old README conclusions or historical calibration logs for verified
+current facts. The prior handoff is archived in sources/history/.
 
-## House model as of this checkpoint
+## Run
 
-Three tiers above the rear orchestra: box ring; one slab carrying Grand Tier
-AA–EE, a cross-aisle, and Dress Circle A–L; one open slab carrying Balcony
-Circle AA–EE and Balcony A–L. Balcony lip over Dress Circle A. Box ring over
-about the last ten orchestra rows. Grand Tier rail 80 ft from the footlights
-(published). Full reasoning and the photo evidence: `sources/CALIBRATION.md`.
-Every dimension with its source and confidence: `data/house_geometry.json`.
-
-## Open questions on the geometry (updated 2026-09-03 late)
-
-Answered: the box ring does not hide the proscenium top at centre (its rear
-rail is at z≈97, behind the Grand Tier rail; only the outer seats of rows
-S–ZZ are under it, and the side seat photo shows the clip). Box ring plan and
-the Balcony rail (8 ft behind the Grand Tier rail) come from the 1993 plans
-and the 1931 section. Orchestra pitch 2.55 ft from the plan and Beranek.
-
-Tier fronts, the box ring and the Balcony side sweeps are now traced
-polylines from the 1993 plans (`plan_curves` in `house_geometry.json`; see
-`sources/DATA_ACQUISITION.md` §7 for the frame correction that made them right).
-
-Still open:
-1. Grand Tier far blocks (seats 29–40) sit on the side slips and curve forward
-   along the walls; the model still puts them on the crescent.
-2. Tier row pitch (2.85 ft) and the per-row rises on the upper tier are not
-   measured; the Beranek section is a redrawn schematic.
-3. Balcony sweep heights (33–57 ft) rest on one panorama's lighting-rail reads.
-4. Orchestra pitch 3.0 ft is bracketed (31 in Beranek, 36 in 1965 report).
-
-## Next build: Sound Purchase
-
-1. **Venue package format.** One folder per house: `venue.json` (dimensions
-   with provenance), `seats.csv` (id, level, row, seat, x, y, z, zone),
-   `zones.json` (prices), `media/` (panoramas, seat photos, splat). The
-   current `data/` is the first package in all but layout.
-2. **Importer.** SF Opera's seat map is a vector drawing with one element per
-   seat. A paste-the-page importer reads seat ids and plan positions, which
-   replaces hand transcription for any Tessitura or AudienceView venue.
-3. **See layer.** Level 1: project the tour's five 360° panoramas onto the
-   geometry. Level 2: Gaussian splat of the auditorium rendered in three.js,
-   with the seat overlay, the overhang lip drawn on the real ceiling, and the
-   Walküre set as meshes placed on the real stage.
-4. **Hear layer.** Per-seat impulse response from geometric acoustics on the
-   same geometry (direct, early reflections, shared late tail), convolved
-   with a dry excerpt in the browser with Web Audio.
-5. **Value layer.** Live prices pasted from a listing, opera-specific weights,
-   "best seat under $X".
-
-## Getting the assets
-
-**Tour panoramas.** Open sfwarmemorial.org/virtual-tour in Chrome, open
-DevTools, Network tab, filter by image, and click into each auditorium
-position (Orchestra, Grand Tier, Dress Circle, Balcony, side box). The tour
-loads either one equirectangular JPEG per position or a set of cube-face
-tiles; save whichever appears, one folder per position, into
-`sources/panoramas/<position>/`. Note the position on the minimap for each.
-
-**Capture recipe for a splat.** Next time in the house with the house lights
-up, before the performance or at intermission:
-
-- Phone in landscape, video at 4K if available, exposure locked, no HDR, no
-  zoom. Walk slowly, half normal pace, and keep the phone moving in smooth
-  arcs rather than pans from one spot; the training needs parallax.
-- Cover each level as a loop: along the front rail, then along a cross-aisle
-  or the rear, with the camera pointed across the house, then at the ceiling,
-  then at the stage. Ten to fifteen minutes total is enough. Overlap matters
-  more than resolution.
-- Include the proscenium and pit from at least three levels, and the
-  underside of each overhang from the rows beneath it.
-- Feed the video to the Luma or Polycam app (both produce a splat file from
-  video) or to nerfstudio on a machine with a GPU. Export as `.ply` or
-  `.splat` and drop it into the venue package under `media/`.
-
-**Seat photos.** SF Opera's seat map shows a view photo for sample seats on
-each level. Save each with its seat id; they are the ground truth the tier
-heights are fitted to. Seven are already in `sources/calibration/seat-views/`.
-
-## Running on the Mac
-
-```
-git clone <repo> && cd operahouse
-git checkout claude/opera-house-seat-model-94ksm4
+```sh
 python3 scripts/build_seats.py
-open web/index.html
+python3 scripts/check_surface_consistency.py
+python3 -m http.server 8765 --bind 127.0.0.1
 ```
 
-Prices: edit `ZONE_PRICES` in `data/seating_spec.py` to the listing you are
-pricing, rebuild, and the value list updates.
+Open `/web/index.html` for the model and `/web/calibration.html` for Geometry Lab.
+The model builds with the Python standard library. Audit additionally needs NumPy
+and SciPy: `python3 scripts/calibrate_hall.py`. Section digitization:
+`python3 scripts/register_section.py`. These audit scripts do not update hall geometry.
+Three.js r128 is bundled in web/vendor with its license. Keep that folder beside
+index.html; the viewer is no longer a standalone single HTML file.
 
-## Update, 2026-09-03 late: calibration from the 1931 section and the tour panoramas
+## Implemented and checked
 
-`sources/DATA_ACQUISITION.md` has the full log. Short version: the SmartSeat API gave all
-3,006 seats with live prices and 47 seat-view photos; the virtual tour gave eleven full
-equirectangular panoramas (five at 13k px); a research pass found the Brown/Lansburgh
-longitudinal section (Architect and Engineer, Nov 1932) and Beranek's redrawn version with a
-scale bar (1996, p. 159). Tier heights in `data/house_geometry.json` are now from that section
-(box floor 17.5, Grand Tier rail 27.6, Balcony rail 50 at z=92, rear balcony ~80, orchestra rake
-4.6) and agree with a pose solve of the panoramas (`scripts/solve_pano_poses.py`) to within a
-tripod height. Rebuilt; README table and conclusions updated. Open items: the upper cross-aisle
-panoramas solve ~9 ft below the drawing; the box ring is lower toward the sides than the model
-draws (side rear-orchestra seat photos show the arch clipped); per-row rises on the upper tier
-are averages, not measured.
+- Instanced chair components, material/analysis modes, stepped upper decks,
+  soffits, brass trim, box dividers and padded caps; illustrative detail.
+- Full-width upper decks use the same clamped row curve as seat placement.
+  Risers offset forward of chair centers. Structural clipping works.
+- Stagefront camera fixed. Browser-checked multiple views and selected seats.
+- Removed unsupported giant side-sweep solids AND their phantom occlusion.
+  Upper-deck containment now has matching width, front, rear and soffit slope.
+  462 overhang classifications changed in that correction, all seat IDs/positions
+  preserved. Regression checks cover 81 upper-deck sections.
+- Main-ceiling plane is below 224 rear-balcony listeners. Their headroom and
+  ceiling-reflection results are now null / "Not modeled", not negative headroom
+  or a spurious yes/no. Unknown reflection does not incur a blocked-reflection penalty.
+- All 3,006 seats remain. Scores/prices are not validated purchase advice.
+
+## Provisional changes — do not promote to measured facts
+
+- Rear-center box rail was shifted 17 ft forward, tapered to zero at |x|=40.
+  Old trace retained in house_geometry.json. This was a visual/section-based
+  hypothesis, NOT a completed plan registration. Its placement changes metrics.
+- Box parapet 2.2 ft, dividers, molding and chairs are illustrative.
+- Tier depths remain unresolved. Do NOT move Balcony forward 26 ft just because
+  the lab reports that discrepancy. The picked schematic section feature and
+  floor-plan void boundary have not been shown to be equivalent. Floor plans
+  are horizontal cuts at different elevations, not necessarily front-rail plans.
+- The flat ceiling, side-slip seating and box depth/floors still need reconstruction.
+- Only upper-deck surface consistency is regression-checked. Do not claim all
+  rendered architecture matches the ray model. Dividers are not ray obstacles.
+
+## Calibration work
+
+scripts/calibrate_hall.py wraps legacy hand-read angular observations, uses a
+robust fit, varies pitch priors, tests both stage-lip z signs, and excludes lip
+observations for a feature holdout. JSON: data/calibration_audit.json.
+Baseline RMS .383 degrees, opposite sign .409; both fit well while some camera
+depths differ 4–5 ft. Held-out lip RMS ~1.26 degrees. Not independent validation.
+Old solver uses lip z=-4.33 whereas viewer apron is +4.33: feature/datum identity
+must be checked, not "resolved" by choosing lower fit error.
+
+Geometry Lab displays fits, adjustable section overlay and original panoramas.
+Manual pixel recorder saves browser-local observations and exports JSON.
+Two seed picks copied to data/panorama_landmarks.json; ~35 px estimated uncertainty,
+not refined full-resolution points. Legacy P/Q camera IDs are not reliably mapped
+back to file/pixel longitude origin; lab deliberately avoids false photo overlays.
+
+Section source-pixel picks, scale anchors and alternate datum retained in
+scripts/register_section.py and data/section_registration.json. Approximate
+8.044 px/ft; picks +/-8 px, additional schematic/datum uncertainty. Profiles are
+candidate interpretations. More detail: sources/CALIBRATION_NEXT.md.
+
+## Next substantive work
+
+1. Register source plans separately from shared stable architecture, preserving
+   pixel anchors, scale and origin for each sheet. Identify actual tier fronts
+   rather than arbitrary floor-cut boundaries.
+2. Match exact panorama filenames to known camera positions; refine landmark
+   picks at full resolution across multiple images, including architectural rails.
+3. Fit cameras and surface geometry jointly; keep unfit observations for checks.
+4. Replace provisional box shift only with evidence. Rebuild seats AND shell from
+   common geometry. Add a rear ceiling/cove profile before restoring rear-ceiling
+   acoustic claims. Validate with photo overlays from identified cameras.
+5. Continue improving shape; do not stop at building another diagnostic tool.
+
+## References
+
+Seven latest user tour screenshots saved as sources/calibration/user-tour-2026-09-05/
+01–07.png, with an index README. Original panoramas, 1932 sections, 1993 plans,
+Beranek section, and SmartSeat seat photos already live under sources/.
+No external messages sent. No merge or deployment performed in this checkpoint.

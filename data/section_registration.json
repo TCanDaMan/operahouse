@@ -1,0 +1,177 @@
+{
+  "source": "sources/research/beranek1996/p159_section_zoom.png",
+  "image_size": [
+    1990,
+    1312
+  ],
+  "method": "manual visual digitization; schematic section, not survey drawing",
+  "scale_anchors": [
+    {
+      "feet": 0,
+      "pixel_x": 868
+    },
+    {
+      "feet": 90,
+      "pixel_x": 1592
+    }
+  ],
+  "stage_floor_pixel_y": 754,
+  "stage_height_ft": 3.5,
+  "curtain_candidate_pixel_x": 1500,
+  "proscenium_candidate_pixel_x": 1450,
+  "pixel_pick_uncertainty": 8,
+  "datum_status": "Two visible verticals; curtain identity requires independent plan confirmation.",
+  "features": {
+    "box_front_floor": {
+      "pixel": [
+        888,
+        636
+      ],
+      "depth_ft": 76.07734806629834,
+      "height_ft": 18.16850828729282,
+      "depth_with_alternate_datum_ft": 69.86187845303867
+    },
+    "grand_tier_front_floor": {
+      "pixel": [
+        897,
+        548
+      ],
+      "depth_ft": 74.95856353591161,
+      "height_ft": 29.107734806629836,
+      "depth_with_alternate_datum_ft": 68.74309392265194
+    },
+    "grand_tier_rear_floor": {
+      "pixel": [
+        448,
+        420
+      ],
+      "depth_ft": 130.77348066298342,
+      "height_ft": 45.01933701657459,
+      "depth_with_alternate_datum_ft": 124.55801104972376
+    },
+    "balcony_front_floor": {
+      "pixel": [
+        869,
+        369
+      ],
+      "depth_ft": 78.43922651933701,
+      "height_ft": 51.35911602209945,
+      "depth_with_alternate_datum_ft": 72.22375690607736
+    },
+    "balcony_rear_floor": {
+      "pixel": [
+        290,
+        151
+      ],
+      "depth_ft": 150.41436464088397,
+      "height_ft": 78.45856353591161,
+      "depth_with_alternate_datum_ft": 144.1988950276243
+    },
+    "dome_apex": {
+      "pixel": [
+        1210,
+        168
+      ],
+      "depth_ft": 36.049723756906076,
+      "height_ft": 76.34530386740332,
+      "depth_with_alternate_datum_ft": 29.834254143646408
+    },
+    "rear_ceiling": {
+      "pixel": [
+        300,
+        65
+      ],
+      "depth_ft": 149.17127071823205,
+      "height_ft": 89.14917127071824,
+      "depth_with_alternate_datum_ft": 142.95580110497238
+    }
+  },
+  "profiles": {
+    "boxes": [
+      [
+        735,
+        636
+      ],
+      [
+        888,
+        636
+      ]
+    ],
+    "lower_tier": [
+      [
+        448,
+        420
+      ],
+      [
+        897,
+        548
+      ]
+    ],
+    "upper_tier": [
+      [
+        290,
+        151
+      ],
+      [
+        869,
+        369
+      ]
+    ],
+    "ceiling": [
+      [
+        230,
+        65
+      ],
+      [
+        350,
+        65
+      ],
+      [
+        510,
+        92
+      ],
+      [
+        650,
+        144
+      ],
+      [
+        795,
+        208
+      ],
+      [
+        905,
+        178
+      ],
+      [
+        1210,
+        168
+      ],
+      [
+        1430,
+        211
+      ]
+    ]
+  },
+  "pixels_per_foot": 8.044444444444444,
+  "floor_origin_pixel_y": 782.1555555555556,
+  "comparison": {
+    "box_front_floor": {
+      "model_depth_ft": 80.1,
+      "model_height_ft": 17.5,
+      "depth_difference_ft": 4.022651933701653,
+      "height_difference_ft": -0.6685082872928199
+    },
+    "grand_tier_front_floor": {
+      "model_depth_ft": 79.2,
+      "model_height_ft": 27.6,
+      "depth_difference_ft": 4.241436464088395,
+      "height_difference_ft": -1.5077348066298342
+    },
+    "balcony_front_floor": {
+      "model_depth_ft": 104.4,
+      "model_height_ft": 50.0,
+      "depth_difference_ft": 25.960773480662994,
+      "height_difference_ft": -1.3591160220994496
+    }
+  }
+}

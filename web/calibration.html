@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sound Purchase · Geometry lab</title>
+<style>body{margin:0;background:#141a28;color:#eee8dc;font:15px system-ui}main{max-width:1400px;margin:auto;padding:28px}h1{font:36px Georgia;margin:0}h2{font:24px Georgia}p{color:#bac1ce;max-width:90ch;line-height:1.6}section{background:#20283a;padding:20px;border-radius:12px;margin:20px 0}label{display:inline-block;margin:8px 20px 8px 0}input,select,button{padding:8px;background:#303b52;color:white;border:1px solid #59657c;border-radius:5px}table{border-collapse:collapse;width:100%}td,th{padding:10px;text-align:left;border-bottom:1px solid #414b60}svg{width:100%;background:#fff;border-radius:8px}img{max-width:100%}.warn{color:#efbb77}a{color:#b8dbff}.pair{display:grid;grid-template-columns:1fr 1fr;gap:18px}@media(max-width:800px){.pair{grid-template-columns:1fr}}small{color:#acb6c6}</style>
+<main><h1>Geometry lab</h1><p>War Memorial Opera House · compare evidence before changing the model. Distances below use the existing curtain-line convention. This audit does not certify the hall geometry.</p><a href="index.html">Open seat model</a>
+<section><h2>1. Camera-depth audit</h2><p id="summary"></p><p class="warn">Sensitivity ranges describe changes in the pitch assumption, not statistical confidence intervals. Small angular error alone does not prove correct geometry.</p><table><thead><tr><th>Camera</th><th>Depth / height (ft)</th><th>Depth range (ft)</th><th>Opposite lip sign: depth</th></tr></thead><tbody id="cameras"></tbody></table></section>
+<section><h2>2. Measured versus projected landmarks</h2><label>Camera <select id="camera"></select></label><label>Fit <select id="fit"><option value="baseline">Baseline</option><option value="positive_lip_z_test">Opposite stage-lip sign</option><option value="held_out_lip">Stage lip excluded from fit</option></select></label><p>Gold crosses are the legacy observations; blue circles are model projections. Connecting lines show disagreement. This compares angles, not verified panorama pixels. Pilaster observations constrain azimuth only.</p><svg id="angles" viewBox="0 0 1000 400"></svg><div id="errors"></div></section>
+<section><h2>3. Section registration</h2><p>Align the drawing using its scale bar and a confirmed datum. The overlay is the current model's center section: box floor (red), Grand Tier / Dress Circle (blue), upper tier (green). Starting alignment is approximate; changing these controls does not edit production geometry.</p>
+<label>Pixels per foot <input id="scale" type="number" value="7.98" step=".01"></label><label>Curtain x (px) <input id="ox" type="number" value="1470"></label><label>Floor y (px) <input id="oy" type="number" value="780"></label><label>Overlay <input id="opacity" type="range" min="0" max="1" step=".05" value=".8"></label><button id="save">Export alignment</button><p id="sectionReport"></p><p>Magenta markers are manually picked section features. Dashed magenta lines connect the interpreted section profiles. The plan edges and section landmarks are not yet confirmed as equivalent. These discrepancies must not be applied as tier translations.</p><svg id="section" viewBox="0 0 1990 1312"><image href="../sources/research/beranek1996/p159_section_zoom.png" width="1990" height="1312"/><g id="traces"></g></svg></section>
+<section><h2>4. Original panorama evidence</h2><p>These are complete equirectangular images. Camera IDs from the old solver are deliberately not attached: that mapping and the pixel longitude origin need verification before photographic overlays can be trusted.</p><select id="pano"></select><label>Landmark name <input id="landmark" placeholder="e.g. box rail center"></label><button id="exportPoints">Export pixel observations</button><p>Enter a feature name, then click its position in the panorama. Reuse that name in other views. Coordinates are saved at the original image resolution.</p><div id="pointStatus" aria-live="polite"></div><img id="panorama" alt="Original auditorium panorama"><p><small>No geometry is inferred automatically from this image preview.</small></p></section></main>
+<script>
+Promise.all([fetch('../data/calibration_audit.json').then(r=>r.json()),fetch('../data/seats.json').then(r=>r.json()),fetch('../data/section_registration.json').then(r=>r.json())]).then(([audit,data,registration])=>{
+const $=id=>document.getElementById(id),fmt=x=>x.toFixed(2),ns='http://www.w3.org/2000/svg';
+function add(root,type,attrs){const el=document.createElementNS(ns,type);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);root.append(el);return el}
+$('summary').textContent=`Baseline angular RMS: ${fmt(audit.baseline.rms_deg)}°. Opposite stage-lip sign: ${fmt(audit.positive_lip_z_test.rms_deg)}°. Both use the same legacy observations; neither resolves the datum by itself.`;
+for(const [name,c] of Object.entries(audit.baseline.cameras)){
+ const ds=[c[2],...Object.values(audit.pitch_sensitivity).map(v=>v.cameras[name][2])];
+ $('cameras').insertAdjacentHTML('beforeend',`<tr><td>${name}</td><td>${fmt(c[2])} / ${fmt(c[1])}</td><td>${fmt(Math.min(...ds))}–${fmt(Math.max(...ds))}</td><td>${fmt(audit.positive_lip_z_test.cameras[name][2])}</td></tr>`);
+ $('camera').add(new Option(name,name));
+}
+function angles(){const root=$('angles');root.replaceChildren();const records=audit[$('fit').value].observations.filter(r=>r.camera===$('camera').value);const x=a=>500+a*7,y=e=>320-e*4;
+ for(let a=-60;a<=60;a+=20){add(root,'line',{x1:x(a),x2:x(a),y1:15,y2:365,stroke:'#ddd'});add(root,'text',{x:x(a),y:390,fill:'#444'}).textContent=a+'°';}
+ for(const r of records){const a=r.observed[0],e=r.observed[1]??0,pa=r.predicted[0],pe=r.predicted[1]??0;add(root,'line',{x1:x(a),y1:y(e),x2:x(pa),y2:y(pe),stroke:'#bf4e35','stroke-width':2});add(root,'path',{d:`M${x(a)-5},${y(e)}h10 M${x(a)},${y(e)-5}v10`,stroke:'#a47a14','stroke-width':2});add(root,'circle',{cx:x(pa),cy:y(pe),r:4,fill:'#256cb0'});add(root,'text',{x:x(a)+7,y:y(e)-7,fill:'#222','font-size':13}).textContent=r.feature+(r.observed[1]===null?' (az only)':'')+(r.held_out?' · held out':'');}
+ $('errors').textContent=records.map(r=>r.feature+': '+r.error_deg.filter(v=>v!==null).map(fmt).join('°, ')+'°').join(' · ');
+} $('camera').onchange=angles;$('fit').onchange=angles;angles();
+$('scale').value=registration.pixels_per_foot;
+$('ox').value=registration.curtain_candidate_pixel_x;
+$('oy').value=registration.floor_origin_pixel_y;
+$('sectionReport').textContent=Object.entries(registration.comparison).map(([k,v])=>k.replaceAll('_',' ')+': model is '+v.depth_difference_ft.toFixed(1)+' ft farther back than section candidate').join(' · ');
+function section(){const root=$('traces');root.replaceChildren();root.setAttribute('opacity',$('opacity').value);const sc=+$('scale').value,ox=+$('ox').value,oy=+$('oy').value;function line(points,color){add(root,'polyline',{points:points.map(([z,y])=>`${ox-z*sc},${oy-y*sc}`).join(' '),fill:'none',stroke:color,'stroke-width':4});}
+ const b=data.shell.boxes;const z=b.rail.reduce((best,p)=>Math.abs(p[0])<Math.abs(best[0])?p:best)[1];line([[z,b.floor_y],[z+9,b.floor_y]],'#d33');
+ data.shell.tiers.forEach((t,i)=>line([[t.rail.z,t.rail.y],...t.rows.map(r=>[r.z,r.y])],i?'#188348':'#1563ce'));
+ for(const points of Object.values(registration.profiles))add(root,'polyline',{points:points.map(p=>p.join(',')).join(' '),fill:'none',stroke:'#bc2188','stroke-width':3,'stroke-dasharray':'8 6'});
+ for(const [name,f] of Object.entries(registration.features)){add(root,'circle',{cx:f.pixel[0],cy:f.pixel[1],r:6,fill:'#bc2188'});add(root,'text',{x:f.pixel[0]+9,y:f.pixel[1]-9,fill:'#8d0060','font-size':18}).textContent=name.replaceAll('_',' ');}
+ line([[0,0],[161,0]],'#777');line([[0,0],[0,90]],'#777');
+}for(const id of ['scale','ox','oy','opacity'])$(id).oninput=section;section();
+$('save').onclick=()=>{const a=document.createElement('a'),blob=new Blob([JSON.stringify({source:'beranek1996/p159_section_zoom.png',status:'manual alignment; not validated',pixels_per_foot:+$('scale').value,curtain_x:+$('ox').value,floor_y:+$('oy').value},null,2)],{type:'application/json'});a.href=URL.createObjectURL(blob);a.download='section-registration.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+const panos=['orchestra_row_A_centre_13k','box_north_side_13k','grand_tier_rail_centre_13k','dress_circle_cross_aisle_13k','balcony_row_L_centre_13k'];panos.forEach(n=>$('pano').add(new Option(n.replaceAll('_',' '),n)));$('pano').onchange=()=>{$('panorama').src='../sources/panoramas/auditorium/'+$('pano').value+'.jpg'};$('pano').onchange();
+const storageKey='opera-landmarks-v1';let points=[];
+try{points=JSON.parse(localStorage.getItem(storageKey)||'[]')}catch{}
+$('pointStatus').textContent=points.length+' saved observations';
+$('panorama').onclick=e=>{
+ const feature=$('landmark').value.trim(),im=$('panorama');if(!feature){$('pointStatus').textContent='Enter a landmark name first.';return}
+ const r=im.getBoundingClientRect(),u=(e.clientX-r.left)/r.width,v=(e.clientY-r.top)/r.height;
+ const record={feature,source:$('pano').value+'.jpg',pixel:[u*im.naturalWidth,v*im.naturalHeight],image_size:[im.naturalWidth,im.naturalHeight],normalized:[u,v],status:'manual pick; unverified',timestamp:new Date().toISOString()};
+ points.push(record);try{localStorage.setItem(storageKey,JSON.stringify(points))}catch{}
+ $('pointStatus').textContent=points.length+' observations · last: '+feature+' at '+record.pixel.map(Math.round).join(', ');
+};
+$('exportPoints').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({version:1,projection:'equirectangular; longitude origin unregistered',observations:points},null,2)],{type:'application/json'}));a.download='hall-landmarks.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+
+}).catch(e=>document.querySelector('main').append('Could not load audit: '+e.message));
+</script></html>

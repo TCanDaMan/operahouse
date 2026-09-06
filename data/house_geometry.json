@@ -202,6 +202,11 @@
       "value": 13.0,
       "confidence": "low",
       "source": "2023 tour panorama from orchestra row A (P1), elevation angles to the side-wall rails with the solved camera pose \u2014 leg rail top 17-19 ft along the wall (floor ~14-16), soffit ~13; side rear-orchestra seat photos show the arch clipped"
+    },
+    "parapet_height_ft": {
+      "value": 2.2,
+      "confidence": "low",
+      "source": "Illustrative low box parapet fitted to tour photo; not a measured dimension."
     }
   },
   "upper_tier": {
@@ -358,6 +363,61 @@
       "value": [
         [
           0,
+          80.1
+        ],
+        [
+          10,
+          80.36
+        ],
+        [
+          20,
+          80.75
+        ],
+        [
+          26,
+          80.68
+        ],
+        [
+          30,
+          80.16
+        ],
+        [
+          36,
+          83.87
+        ],
+        [
+          38,
+          83.94
+        ],
+        [
+          40,
+          70.6
+        ],
+        [
+          42,
+          55.4
+        ],
+        [
+          46,
+          48.0
+        ],
+        [
+          50,
+          41.1
+        ],
+        [
+          52,
+          30.0
+        ],
+        [
+          53,
+          15.0
+        ]
+      ],
+      "confidence": "low",
+      "previous_value": [
+        [
+          0,
           97.1
         ],
         [
@@ -409,7 +469,7 @@
           15.0
         ]
       ],
-      "confidence": "medium"
+      "source": "2026-09-05 provisional section alignment: Beranek p159 shows rear box and Grand Tier fronts nearly aligned in depth. Previous rear-box trace was 17.9 ft behind the Grand Tier. Shift rear center forward 17 ft, tapering to zero at |x|=40; preserve side legs. Requires registration against original plans."
     },
     "grand_tier_front": {
       "value": [

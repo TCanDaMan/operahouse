@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "projection": "equirectangular",
+  "longitude_origin": "unregistered",
+  "observations": [
+    {
+      "source": "sources/panoramas/auditorium/orchestra_row_A_centre_13k.jpg",
+      "image_size": [
+        13060,
+        6530
+      ],
+      "feature": "curtain_bottom_center",
+      "pixel": [
+        8201,
+        3409
+      ],
+      "estimated_pick_uncertainty_px": 35,
+      "method": "manual pick on full-panorama browser preview; native pixel coordinates recorded by UI",
+      "status": "seed observation; verify at full-resolution crop before fitting"
+    },
+    {
+      "source": "sources/panoramas/auditorium/orchestra_row_A_centre_13k.jpg",
+      "image_size": [
+        13060,
+        6530
+      ],
+      "feature": "supertitle_screen_center",
+      "pixel": [
+        8201,
+        1658
+      ],
+      "estimated_pick_uncertainty_px": 35,
+      "method": "manual pick on full-panorama browser preview; native pixel coordinates recorded by UI",
+      "status": "seed observation; verify at full-resolution crop before fitting"
+    }
+  ]
+}

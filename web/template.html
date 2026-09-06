@@ -1,5 +1,6 @@
 <title>War Memorial Seat Finder</title>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Seat-by-seat 3D model of the War Memorial Opera House with sightline, overhang and pit metrics for pricing a Walküre ticket.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
@@ -126,6 +127,7 @@
   <aside id="rail">
     <div>
       <h1><small>San Francisco · Die Walküre reference</small>War Memorial Seat Finder</h1>
+      <p class="note">Work in progress: tier depths are being checked against the drawings. Unverified side galleries are excluded from both the model and sightline scores.</p>
       <p class="lede">Every seat in the house, placed in 3D from the seat charts and the published hall dimensions, with what sits above you and what you can see.</p>
     </div>
 
@@ -135,7 +137,9 @@
     </div>
 
     <div>
-      <p class="label">Color seats by</p>
+      <p class="label">Appearance</p>
+      <select id="appearance" aria-label="Model appearance"><option value="house">House materials</option><option value="analysis">Seat analysis colors</option></select>
+      <p class="label" style="margin-top:12px">Color seats by</p>
       <select id="metric"></select>
     </div>
 
@@ -184,7 +188,7 @@
   </main>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="vendor/three.min.js"></script>
 <script>
 const DATA = /*__SEATS_JSON__*/null;
 const SEATS = DATA.seats, SHELL = DATA.shell;
@@ -244,6 +248,11 @@ const view = { recolor(){}, mark(){}, markCompare(){}, sit(){}, focus(){}, setVi
 
 function init3D(){
   const renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.25;
+  renderer.localClippingEnabled = true;
+  const cutPlane = new THREE.Plane(new THREE.Vector3(-1,0,0), 0);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   stageEl.appendChild(renderer.domElement);
   const scene = new THREE.Scene();
@@ -253,13 +262,13 @@ function init3D(){
   const hex = h => new THREE.Color(h);
 
   const M = {
-    floor: new THREE.MeshStandardMaterial({color:0x2b3350, roughness:.95, side:THREE.DoubleSide}),
-    tier:  new THREE.MeshStandardMaterial({color:0x3a4470, roughness:.9, side:THREE.DoubleSide}),
+    floor: new THREE.MeshStandardMaterial({color:0x743e2e, roughness:.95, side:THREE.DoubleSide}),
+    tier:  new THREE.MeshStandardMaterial({color:0xc6a779, roughness:.9, side:THREE.DoubleSide}),
     rail:  new THREE.MeshStandardMaterial({color:0xc9a45c, roughness:.4, metalness:.5, side:THREE.DoubleSide}),
     stage: new THREE.MeshStandardMaterial({color:0x4a3c2e, roughness:.9}),
     prosc: new THREE.MeshStandardMaterial({color:0xc9a45c, roughness:.5, metalness:.4}),
     wall:  new THREE.MeshStandardMaterial({color:0x22283d, roughness:1, side:THREE.BackSide, transparent:true, opacity:.55}),
-    pwall: new THREE.MeshStandardMaterial({color:0x1b2036, roughness:1, side:THREE.DoubleSide}),
+    pwall: new THREE.MeshStandardMaterial({color:0xcbb68e, roughness:1, side:THREE.DoubleSide}),
     pit:   new THREE.MeshStandardMaterial({color:0x1a1e2e, roughness:1, side:THREE.DoubleSide}),
     rock:  new THREE.MeshStandardMaterial({color:0x5b5a63, roughness:1, flatShading:true}),
     fire:  new THREE.MeshStandardMaterial({color:0xff7a2a, emissive:0xff5a10, emissiveIntensity:1.2, roughness:.6}),
@@ -304,17 +313,44 @@ function init3D(){
   }
   const addMesh = (g, m) => { const mesh = new THREE.Mesh(g, m); scene.add(mesh); return mesh; };
 
+  function molding(arc, y, radius=.16, material=M.rail){
+    const points = arc.map(p=>new THREE.Vector3(p[0],y,p[1]));
+    const path = new THREE.CatmullRomCurve3(points, false, 'centripetal');
+    addMesh(new THREE.TubeGeometry(path, Math.max(80,arc.length*2), radius, 6, false), material);
+  }
   function buildHouse(){
     const st = SHELL.stage, pit = SHELL.pit;
     addMesh(stripFromRows(SHELL.orchestra.rows, r=>r.y - 0.05, SHELL.depth_orchestra - SHELL.orchestra.rows[SHELL.orchestra.rows.length-1].z), M.floor);
     for (const t of SHELL.tiers){
-      addMesh(stripFromRows([t.rail, ...t.rows], r=>r.y, 6), M.tier);
+      // Row coordinates are chair centers. Put each riser ahead of the
+      // chair footprint, keeping both supports on the same horizontal tread.
+      const starts=t.rows.map(r=>({...r,arc:r.arc.map(([x,z])=>[x,z-1.05])}));
+      addMesh(stripFromRows([t.rail,starts[0]],r=>r.y),M.floor);
+      for(let i=0;i<starts.length;i++){
+        const a=starts[i];
+        const next=starts[i+1] || {...a,arc:a.arc.map(([x,z])=>[x,z+4])};
+        addMesh(stripFromRows([a,{arc:next.arc,y:a.y}],r=>r.y),M.floor);
+        if(i+1<starts.length) addMesh(wallFromArc(next.arc,a.y,next.y),M.tier);
+      }
+      const underside = [t.rail,...t.rows].map(r=>({...r,y:t.soffit_lip_y+t.slope*(r.z-t.rail.z)}));
+      addMesh(stripFromRows(underside,r=>r.y,4),M.tier);
+      for (const offset of [0,2.65,3.05]) molding(t.front||t.rail.arc,t.rail.y+offset);
       // the front rail follows the full plan curve: crescent plus the side slips
       addMesh(wallFromArc(t.front || t.rail.arc, t.soffit_lip_y, t.rail.y + 3.0), M.rail);
     }
     const b = SHELL.boxes;
+    const paddedRail=new THREE.MeshStandardMaterial({color:0x8b2639,roughness:1});
+    molding(b.rail,b.floor_y+b.parapet_height+.05,.23,paddedRail);
+    // Separate box bays, as visible in the owner's close-up tour references.
+    // Bay spacing and profiles remain illustrative until individually traced.
+    for(const arc of b.partitions){
+      addMesh(wallFromArc(arc,b.floor_y,b.floor_y+b.parapet_height),M.tier);
+      molding(arc,b.floor_y+b.parapet_height+.05,.18,paddedRail);
+    }
+    molding(b.rail,b.floor_y);
+    addMesh(stripFromRows([{arc:b.rail,y:b.soffit_y},{arc:b.outer,y:b.soffit_y}],r=>r.y),M.tier);
     addMesh(stripFromRows([{arc:b.rail, y:b.floor_y},{arc:b.outer, y:b.floor_y+1}], r=>r.y), M.tier);
-    addMesh(wallFromArc(b.rail, b.soffit_y, b.floor_y + 3.0), M.rail);
+    addMesh(wallFromArc(b.rail, b.soffit_y, b.floor_y + b.parapet_height), M.rail);
     // Grand Tier side slips: slab between the traced front curve and the wall
     const sl = SHELL.side_slips;
     if (sl && sl.path){
@@ -328,24 +364,9 @@ function init3D(){
         addMesh(wallFromArc(side, sl.soffit_y, sl.floor_y + 3.0), M.rail);
       }
     }
-    // Balcony side sweeps: upper galleries descending from the Balcony front to the organ lofts
-    const sw = SHELL.balcony_sweep;
-    if (sw && sw.path){
-      const W = SHELL.half_breadth;
-      for (const sgn of [-1,1]){
-        const pos = [];
-        for (let j=0;j<sw.path.length-1;j++){
-          const [x1,z1,y1] = sw.path[j], [x2,z2,y2] = sw.path[j+1];
-          const a=[sgn*x1,y1,z1], b2=[sgn*x2,y2,z2], c=[sgn*W,y1,z1], d=[sgn*W,y2,z2];
-          pos.push(...a,...c,...b2, ...b2,...c,...d);                       // floor strip to the wall
-          const s1=y1-sw.soffit_drop, s2=y2-sw.soffit_drop;
-          pos.push(sgn*x1,s1,z1, sgn*x1,y1+3,z1, sgn*x2,s2,z2, sgn*x2,s2,z2, sgn*x1,y1+3,z1, sgn*x2,y2+3,z2); // rail face
-        }
-        const g = new THREE.BufferGeometry();
-        g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); g.computeVertexNormals();
-        addMesh(g, M.tier);
-      }
-    }
+    // The legacy balcony_sweep trace intrudes into the proscenium opening.
+    // It is not supported by the tour photographs; omit this uncalibrated
+    // solid rather than presenting it as an architectural feature.
     const stageDepth = -st.back_wall_z;
     const stageMesh = new THREE.Mesh(new THREE.BoxGeometry(SHELL.half_breadth*2+10, st.y, stageDepth), M.stage);
     stageMesh.position.set(0, st.y/2, -stageDepth/2); scene.add(stageMesh);
@@ -394,21 +415,40 @@ function init3D(){
     edges.position.copy(box.position); scene.add(edges);
   }
 
-  // seats
-  const seatMat = new THREE.MeshStandardMaterial({roughness:.8});
-  const seatMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1.45, 1.0, 1.4), seatMat, SEATS.length);
-  const tmp = new THREE.Object3D();
-  SEATS.forEach((s,i)=>{ tmp.position.set(s.x, s.floor_y + 1.3, s.z); tmp.rotation.y = Math.atan2(s.x, s.z + 45); tmp.updateMatrix(); seatMesh.setMatrixAt(i, tmp.matrix); });
-  seatMesh.instanceMatrix.needsUpdate = true;
-  scene.add(seatMesh);
-  const colorTmp = new THREE.Color();
+  // Instanced upholstered chairs: local -Z faces the stage.
+  const seatMat = new THREE.MeshStandardMaterial({roughness:.93});
+  const woodMat = new THREE.MeshStandardMaterial({color:0x38261b,roughness:.65});
+  const parts = [
+    [new THREE.BoxGeometry(1.45,.35,1.35),seatMat,0,1.25,0,0],
+    [new THREE.BoxGeometry(1.48,1.65,.26),seatMat,0,2.05,.59,-.10],
+    [new THREE.BoxGeometry(.13,.16,1.5),woodMat,-.82,1.8,0,0],
+    [new THREE.BoxGeometry(.13,.16,1.5),woodMat,.82,1.8,0,0],
+    [new THREE.BoxGeometry(.16,1.2,.65),woodMat,-.6,.6,.1,0],
+    [new THREE.BoxGeometry(.16,1.2,.65),woodMat,.6,.6,.1,0]
+  ];
+  const seatMeshes=parts.map(([g,m])=>{const mesh=new THREE.InstancedMesh(g,m,SEATS.length);scene.add(mesh);return mesh;});
+  const seatMesh=seatMeshes[0], tmp=new THREE.Object3D(), part=new THREE.Object3D();
+  const matrix=new THREE.Matrix4(), colorTmp=new THREE.Color();
   function recolor(){
-    const dim = hex(css("--ground"));
+    renderer.clippingPlanes=cutaway?[cutPlane]:[];
+    seatMat.needsUpdate=true;
+    const analysis=document.getElementById('appearance').value==='analysis';
     SEATS.forEach((s,i)=>{
-      if (visible(s)){ const [r,g,b] = rampRgb(seatT(s, currentMetric)); colorTmp.setRGB(r/255,g/255,b/255); seatMesh.setColorAt(i, colorTmp); }
-      else seatMesh.setColorAt(i, dim);
+      tmp.position.set(s.x,s.floor_y,s.z);
+      tmp.rotation.y=Math.atan2(s.x,s.z+45);
+      tmp.scale.setScalar(visible(s)?1:0); tmp.updateMatrix();
+      parts.forEach((p,j)=>{
+        part.position.set(p[2],p[3],p[4]);part.rotation.x=p[5];part.updateMatrix();
+        matrix.multiplyMatrices(tmp.matrix,part.matrix);seatMeshes[j].setMatrixAt(i,matrix);
+        if(j<2){
+          if(analysis){const [r,g,b]=rampRgb(seatT(s,currentMetric));colorTmp.setRGB(r/255,g/255,b/255).convertSRGBToLinear();}
+          else colorTmp.setHex(0xa84f2e);
+          seatMeshes[j].setColorAt(i,colorTmp);
+        }
+      });
     });
-    seatMesh.instanceColor.needsUpdate = true;
+    seatMeshes.forEach(m=>{m.instanceMatrix.needsUpdate=true;if(m.instanceColor)m.instanceColor.needsUpdate=true;});
+    document.getElementById('legend').style.display=analysis?'block':'none';
   }
   const markGeo = new THREE.SphereGeometry(1.4, 12, 12);
   const selMark = new THREE.Mesh(markGeo, new THREE.MeshStandardMaterial({color:0xe3c584, emissive:0xc9a45c, emissiveIntensity:.8}));
@@ -436,7 +476,7 @@ function init3D(){
     overview:  {target:[0,22,70], theta:0.55, phi:1.05, r:270},
     top:       {target:[0,20,75], theta:0.0, phi:0.06, r:260},
     section:   {target:[0,30,70], theta:Math.PI/2, phi:Math.PI/2-0.02, r:280},
-    stagefront:{target:[0,30,80], theta:Math.PI, phi:1.25, r:150},
+    stagefront:{target:[0,32,85], theta:Math.PI, phi:1.72, r:78},
   };
   function setView(name){
     const v = VIEWS[name]; if (!v) return;
@@ -444,6 +484,7 @@ function init3D(){
     ctl.target.set(...v.target); ctl.theta=v.theta; ctl.phi=v.phi; ctl.r=v.r; updateCamera();
   }
   function sitHere(s){
+    selMark.visible=false; sight.visible=false;
     ctl.firstPerson=true; camera.fov=58; camera.updateProjectionMatrix();
     fp.pos.set(s.x, s.y, s.z);
     const sg = SHELL.stage.singer; const dx = sg[0]-s.x, dy = sg[1]-s.y, dz = sg[2]-s.z;
@@ -473,7 +514,7 @@ function init3D(){
   function hitSeat(e){
     const r = el.getBoundingClientRect(); ptr.x = ((e.clientX-r.left)/r.width)*2-1; ptr.y = -((e.clientY-r.top)/r.height)*2+1;
     ray.setFromCamera(ptr, camera);
-    for (const h of ray.intersectObject(seatMesh)){ const s = SEATS[h.instanceId]; if (visible(s)) return s; }
+    for (const h of ray.intersectObjects(seatMeshes)){ const s = SEATS[h.instanceId]; if (visible(s)) return s; }
     return null;
   }
   const hoverEl = document.getElementById("hover");
@@ -502,14 +543,15 @@ if (HAS3D) init3D();
 else {
   const msg = document.createElement("p");
   msg.className = "empty"; msg.style.cssText = "position:absolute;inset:0;display:grid;place-items:center;margin:0;padding:24px;text-align:center";
-  msg.textContent = "The 3D view needs the three.js library from cdnjs, which did not load here. The seat data, lookup, comparison and value list still work.";
+  msg.textContent = "The local Three.js library did not load. Keep the vendor folder beside index.html. The seat data, lookup, comparison and value list still work.";
   stageEl.appendChild(msg);
 }
 
 function applyTheme(){ RAMP = null; view.theme(); view.recolor(); updateLegend(); }
 
 // ------------------------------------------------------------ panel
-const fmtFt = v => v.toFixed(0)+" ft";
+const fmtFt = v => v == null ? "Not modeled" : v.toFixed(0)+" ft";
+const reflectionLabel = v => v == null ? "Not modeled" : v ? "yes" : "blocked";
 function verdict(s){
   const bits=[]; let cls="good";
   if (s.overhang==="none"){
@@ -538,8 +580,8 @@ function metricsList(s){
     ["Proscenium visible", s.visible_prosc_height_ft.toFixed(1)+" / 31.5 ft"], ["Stage width visible", (s.stage_width_visible*100).toFixed(0)+"%"],
     ["Pit floor visible", (s.pit_visible*100).toFixed(0)+"%"],
     ["hdr","Sound (geometric)"],
-    ["Direct level vs row A", s.direct_level_db.toFixed(1)+" dB"], ["Ceiling reflection, voice", s.ceiling_reflection_singer?"yes":"blocked"],
-    ["Ceiling reflection, pit", s.ceiling_reflection_pit?"yes":"blocked"],
+    ["Direct level vs row A", s.direct_level_db.toFixed(1)+" dB"], ["Ceiling reflection, voice", reflectionLabel(s.ceiling_reflection_singer)],
+    ["Ceiling reflection, pit", reflectionLabel(s.ceiling_reflection_pit)],
     ["hdr","Score"], ["View score", s.score.toFixed(0)+" / 100"], ["Score per $100", (s.score/s.price*100).toFixed(0)],
   ];
   return `<dl class="metrics">${rows.map(([a,b])=> a==="hdr" ? `<dt class="hdr label">${b}</dt>` : `<dt>${a}</dt><dd class="mono">${b}</dd>`).join("")}</dl>`;
@@ -569,7 +611,7 @@ function renderCompare(){
     ["Distance", s=>fmtFt(s.dist_singer_ft)], ["Off-axis", s=>s.horiz_angle_deg.toFixed(0)+"°"],
     ["Overhang", s=>s.overhang==="none"?"none":s.overhang.replace("_"," ")], ["Opening angle", s=>s.opening_angle_deg.toFixed(0)+"°"],
     ["Proscenium visible", s=>s.visible_prosc_height_ft.toFixed(1)+" ft"], ["Stage width", s=>(s.stage_width_visible*100).toFixed(0)+"%"],
-    ["Pit visible", s=>(s.pit_visible*100).toFixed(0)+"%"], ["Ceiling reflection", s=>s.ceiling_reflection_singer?"yes":"no"],
+    ["Pit visible", s=>(s.pit_visible*100).toFixed(0)+"%"], ["Ceiling reflection", s=>reflectionLabel(s.ceiling_reflection_singer)],
   ];
   body.innerHTML = `<table><thead><tr><th></th><th>${name(a)}</th><th>${name(b)}</th></tr></thead><tbody>${rows.map(([l,f])=>`<tr><td>${l}</td><td class="mono">${a?f(a):"–"}</td><td class="mono">${b?f(b):"–"}</td></tr>`).join("")}</tbody></table>`;
 }
@@ -593,7 +635,8 @@ LEVELS.forEach(([k,n])=>{ const b=document.createElement("button"); b.className=
 // metric select
 const metricSel = document.getElementById("metric");
 Object.entries(METRICS).forEach(([k,m])=>{ const o=document.createElement("option"); o.value=k; o.textContent=m.label; metricSel.appendChild(o); });
-metricSel.addEventListener("change", ()=>{ currentMetric=metricSel.value; view.recolor(); updateLegend(); });
+document.getElementById("appearance").addEventListener("change",()=>view.recolor());
+metricSel.addEventListener("change", ()=>{ document.getElementById("appearance").value="analysis"; currentMetric=metricSel.value; view.recolor(); updateLegend(); });
 
 // views + cutaway
 document.querySelectorAll("#views [data-view]").forEach(b=>b.addEventListener("click", ()=>view.setView(b.dataset.view)));

@@ -215,18 +215,23 @@ def _sweep(x, z):
     sx, fy = sw
     return fy if abs(x) > sx else None
 
-def _upper_contains(x, z):
+def upper_deck_bounds(x):
+    """Same clamped front and rear extent exported for the rendered upper deck."""
     t = TIERS["upper_tier"]
-    if abs(x) <= t.x_end and z > t.lip_z(x):
-        return True
-    return _sweep(x, z) is not None
+    front = t.row_z(t.rail_z, x)
+    rear = t.row_z(t.rows[-1][0], x) + 4
+    return front, rear
+
+def _upper_contains(x, z):
+    if abs(x) > HALF_BREADTH:
+        return False
+    front, rear = upper_deck_bounds(x)
+    return front < z <= rear
 
 def _upper_soffit(x, z):
     t = TIERS["upper_tier"]
-    fy = _sweep(x, z)
-    if abs(x) <= t.x_end and z > t.lip_z(x):
-        return t.soffit_lip_y + t.slope * (z - t.lip_z(x))
-    return fy - G["upper_tier"]["soffit_drop_ft"]["value"]
+    front, _ = upper_deck_bounds(x)
+    return t.soffit_lip_y + t.slope * (z - front)
 
 OVERHANGS = [
     Overhang("boxes", _box_contains, _box_soffit, lambda x, z: orch_floor_y(z)),
@@ -340,6 +345,10 @@ def stage_width_fraction(eye):
     return max(0.0, (hi - lo) / PROSC_W)
 
 def ceiling_reflection_ok(eye, src):
+    # The rear balcony rises beyond the simplified main-dome plane.
+    # A ray to a ceiling below the listener is not a valid reflection model.
+    if eye[1] >= CEILING_Y or src[1] >= CEILING_Y:
+        return None
     img = (src[0], 2 * CEILING_Y - src[1], src[2])
     t = (CEILING_Y - img[1]) / (eye[1] - img[1])
     refl = (img[0] + t * (eye[0] - img[0]), CEILING_Y, img[2] + t * (eye[2] - img[2]))
@@ -355,7 +364,7 @@ def view_score(m):
         s -= max(0.0, 25 - m["opening_angle_deg"]) * 1.0
         s -= (PROSC_H - m["visible_prosc_height_ft"]) * 2
         s -= max(0.0, 6 - m["headroom_ft"]) * 2.0      # a ceiling right over your head
-        if not m["ceiling_reflection_singer"]:
+        if m["ceiling_reflection_singer"] is False:
             s -= 6
     s += m["pit_visible"] * 8
     if m["elev_to_singer_deg"] < -30:
@@ -394,7 +403,7 @@ def metrics(eye):
         m["overhang_depth_ft"] = 0.0
         m["overhang_opening_ft"] = None
         m["overhang_d_over_h"] = 0.0
-        m["headroom_ft"] = round(CEILING_Y - eye[1], 1)
+        m["headroom_ft"] = round(CEILING_Y - eye[1], 1) if eye[1] < CEILING_Y else None
         m["lip_elev_deg"] = None
         m["opening_angle_deg"] = round(90.0 - m["elev_to_singer_deg"], 1)
         m["prosc_top_clipped"] = False
@@ -573,14 +582,19 @@ def front_polyline(curve, x_max, n=40):
     return pts
 
 def tier_shell(tier, half_w):
-    xe = min(tier.x_end, half_w)
+    # Seat placement clamps the front curve at the side-slip junction, then
+    # continues laterally. The supporting deck must use that same function.
+    xe = HALF_BREADTH
+    deck_front = [[round(-xe + 2 * xe * k / 80, 3),
+                   tier.row_z(tier.rail_z, -xe + 2 * xe * k / 80)]
+                  for k in range(81)]
     rows = [{"z": round(z, 2), "y": round(y, 2),
-             "arc": [[x, round(zz + (z - tier.rail_z), 2)] for x, zz in front_polyline(tier.front, xe)]}
+             "arc": [[x, round(zz + (z - tier.rail_z), 2)] for x, zz in deck_front]}
             for z, y in tier.rows]
-    rail = {"z": round(tier.rail_z, 2), "y": round(tier.rows[0][1], 2), "arc": front_polyline(tier.front, xe)}
+    rail = {"z": round(tier.rail_z, 2), "y": round(tier.rows[0][1], 2), "arc": deck_front}
     full = front_polyline(tier.front, tier.front[-1][0], 80)
     return {"name": tier.name, "rows": rows, "rail": rail, "front": full,
-            "soffit_lip_y": tier.soffit_lip_y, "x_end": xe}
+            "soffit_lip_y": tier.soffit_lip_y, "slope": tier.slope, "x_end": xe}
 
 shell = {
     "ceiling_y": CEILING_Y,
@@ -597,7 +611,10 @@ shell = {
                              "arc": [[round(x, 2), round(orch_row_z(ORCH_A_Z + i * PITCH, x), 2)]
                                      for x in [-48 + 96 * k / 24 for k in range(25)]]}
                             for i in range(len(S.ORCH_ROWS))]},
-    "boxes": {"floor_y": BOX_Y, "soffit_y": BOX_SOFFIT,
+    "boxes": {"partitions": [[list(box_path_point(k / len(S.BOX_LETTERS))[:2]),
+                    [box_path_point(k / len(S.BOX_LETTERS))[0] + box_path_point(k / len(S.BOX_LETTERS))[2][0] * 9,
+                     box_path_point(k / len(S.BOX_LETTERS))[1] + box_path_point(k / len(S.BOX_LETTERS))[2][1] * 9]]
+                   for k in range(len(S.BOX_LETTERS)+1)], "parapet_height": P("boxes", "parapet_height_ft"), "floor_y": BOX_Y, "soffit_y": BOX_SOFFIT,
               "rail": [[round(v, 2) for v in box_path_point(t / 60)[:2]] for t in range(61)],
               "outer": [[round(box_path_point(t / 60)[0] + box_path_point(t / 60)[2][0] * 9, 2),
                          round(box_path_point(t / 60)[1] + box_path_point(t / 60)[2][1] * 9, 2)] for t in range(61)]},
@@ -605,7 +622,7 @@ shell = {
     "side_slips": {"inner_x": TIERS["lower_tier"].x_end, "front_z": GT_FRONT[-1][1],
                    "path": front_polyline(GT_FRONT, GT_FRONT[-1][0], 80),
                    "floor_y": P("lower_tier", "side_slip_floor_y_ft"), "soffit_y": SLIP_SOFFIT},
-    "balcony_sweep": {"path": [[round(x, 2), round(z, 2), round(y, 2)] for z, x, y in sorted(BAL_SWEEP)],
+    "balcony_sweep": {"enabled": False, "reason": "Unverified trace excluded from rendering and sightlines", "path": [],
                       "soffit_drop": P("upper_tier", "soffit_drop_ft")},
 }
 
@@ -625,7 +642,7 @@ fields = ["id", "level", "section", "row", "seat", "zone", "price", "x", "y", "z
           "pit_visible", "stage_width_visible", "ceiling_reflection_singer",
           "ceiling_reflection_pit", "direct_level_db", "score"]
 with open(os.path.join(ROOT, "data", "seats.csv"), "w", newline="") as f:
-    w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
+    w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore", lineterminator="\n")
     w.writeheader()
     for s in seats:
         w.writerow(s)

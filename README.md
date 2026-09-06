@@ -1,3 +1,5 @@
+> **Current status:** Start with [HANDOFF.md](HANDOFF.md). Historical seat conclusions below predate the latest geometry corrections and are not validated. The model remains a reconstruction in progress.
+
 # War Memorial Opera House seat model
 
 A seat-by-seat 3D model of the War Memorial Opera House (San Francisco) built
@@ -147,3 +149,48 @@ hall's reverberation is the same for everyone. Heads in the row in front are
 not modelled because the row-to-row rise is not published. The ceiling is a
 flat plane at the dome height; the lower cove over the rear Balcony rows is
 not drawn.
+
+## Viewer pass, 2026-09-05
+
+The viewer now includes instanced chairs with cushions, backs, arms and supports;
+reference-inspired warm house materials with a separate analysis-color mode;
+stepped tier treads and risers; tier soffits using the metric model's slope;
+brass rail moldings; and a true structural half-house clipping plane. The
+stagefront camera is inside the proscenium. Three.js r128 is bundled in
+`web/vendor/` (with its MIT license), so the 3D scene no longer needs a CDN.
+Keep that directory alongside `index.html`; the viewer is no longer a single-file artifact.
+
+This is an architectural visualization, not a photogrammetric reconstruction.
+Chair details and molding profiles are illustrative. The existing 3,006 seat
+records and metrics are unchanged. Side-slip seating, the ceiling/cove, box
+soffit variation, and discrepancies between the older conclusions above and
+current generated metrics still need calibration. Do not treat the improved
+materials as additional evidence of geometric accuracy.
+
+Validation: regenerated the viewer; verified all seat records against the
+previous revision; checked JavaScript syntax; visually checked stagefront and
+structural clipping in a live browser.
+
+### Floor support and unsupported sweep correction
+
+Tier decks now span the auditorium width and use the same clamped plan curve
+as seat placement, instead of stopping at the crescent/side-slip junction.
+Risers start 1.05 ft ahead of row centers, so chair supports sit on the tread.
+The oversized solid balcony sweeps have been omitted from the visualization:
+the legacy trace reaches inside the proscenium width and is not validated by
+the tour photographs. This is removal of unsupported geometry, not a calibrated
+replacement for the side-wall architecture. The legacy sweep remains in the
+metric calculations pending recalibration; those results can therefore disagree
+with the displayed shell and should be treated as provisional.
+
+### Rear box alignment, 2026-09-05
+
+The previous center box rail was at z=97.1 ft versus Grand Tier z=79.2 ft.
+A provisional section-based correction moves the center to z=80.1 ft,
+tapering the adjustment to zero at |x|=40 ft to retain the side legs.
+The Beranek section supports nearly aligned center fronts, not a claim that
+all boxes project ahead of Grand Tier. The previous trace is retained in
+`house_geometry.json` with the replacement explicitly marked low confidence.
+The illustrative box parapet is reduced from 3 to 2.2 ft. Seat positions and
+sightline outputs were regenerated together; the inventory remains 192 box
+seats and 3,006 total. Stagefront rendering was checked in the browser.
