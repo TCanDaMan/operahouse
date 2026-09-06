@@ -563,9 +563,9 @@ function verdict(s){
   } else {
     const what = {boxes:"the box ring", grand_tier:"the Grand Tier", dress_circle:"the Dress Circle", upper_tier:"the Balcony Circle / Balcony"}[s.overhang];
     bits.push(`Under ${what}: lip ${s.overhang_depth_ft.toFixed(0)} ft in front, ${s.headroom_ft.toFixed(0)} ft over your head.`);
-    if (s.opening_angle_deg < 15){ cls="bad"; bits.push(`Only ${s.opening_angle_deg.toFixed(0)}° of open air between the singer and the lip; the room above is cut off.`); }
-    else if (s.opening_angle_deg < 30){ cls="warn"; bits.push(`${s.opening_angle_deg.toFixed(0)}° of opening; ceiling reflections are mostly gone.`); }
-    else bits.push(`${s.opening_angle_deg.toFixed(0)}° of opening; the lip is not in the way.`);
+    if (s.opening_angle_deg < 15){ cls="bad"; bits.push(`Only ${s.opening_angle_deg.toFixed(0)}° between the singer and the overhang edge in this model.`); }
+    else if (s.opening_angle_deg < 30){ cls="warn"; bits.push(`${s.opening_angle_deg.toFixed(0)}° of opening beneath the overhang. This does not establish how the seat sounds.`); }
+    else bits.push(`${s.opening_angle_deg.toFixed(0)}° of opening beneath the overhang in this model.`);
     if (s.prosc_top_clipped){ cls="bad"; bits.push(`The lip clips the top ${(31.5-s.visible_prosc_height_ft).toFixed(1)} ft of the proscenium: projections and the Valkyrie rock summit are at risk.`); }
   }
   if (s.stage_width_visible < 0.85) { if (cls==="good") cls="warn"; bits.push(`The proscenium edge hides ${((1-s.stage_width_visible)*100).toFixed(0)}% of the stage width at 25 ft upstage.`); }

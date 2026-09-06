@@ -109,3 +109,7 @@ The source exports deck_rows so rendering consumes the same floor elevations.
 data/geometry_conflicts.json records their IDs. Do not squeeze them inward:
 register the actual wall outline and box layout first. The rectangular enclosure
 is a visualization approximation, not a confirmed interior wall footprint.
+
+Viewer copy no longer claims that ceiling reflections are "mostly gone" based
+only on the opening angle. That was an unsupported acoustic conclusion from a
+geometric measurement. It now describes the opening without claiming sound quality.
