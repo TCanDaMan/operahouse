@@ -140,7 +140,10 @@ def _build_surfaces():
 
 def _dome_surfaces(c):
     """Bounded triangle approximation of the displayed spherical cap.
-    First-order only: avoid pretending this coarse mesh resolves dome focusing."""
+    First-order only: avoid pretending this coarse mesh resolves dome focusing.
+    Material is acoustic plaster: Beranek 1996 p160 reports the centre domed
+    section as acoustic plaster, and Swan 1932 says focusing surfaces were
+    deliberately avoided, so the dome returns little energy."""
     radius, rise = c["dome_radius"], c["dome_rise"]
     sphere = (radius*radius + rise*rise)/(2*rise)
     def point(r, a):
@@ -156,7 +159,7 @@ def _dome_surfaces(c):
             s=(vv*dot(w,u)-uv*dot(w,v))/d; t=(uu*dot(w,v)-uv*dot(w,u))/d
             # Half-open seams avoid double counting shared edges.
             return s>=0 and t>=0 and s+t<1
-        SURFACES.append(Plane("main dome", "C", a,n,"plaster",inside,order2=False))
+        SURFACES.append(Plane("main dome", "C", a,n,"acoustic_plaster",inside,order2=False))
     for i in range(12):
         j=(i+1)%12
         triangle(rings[0][i],rings[1][i],rings[1][j])

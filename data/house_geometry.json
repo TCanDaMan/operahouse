@@ -681,13 +681,21 @@
     },
     "rt_occupied_s": {
       "value": {
-        "125": 1.9,
-        "500": 1.55,
-        "2k": 1.4,
-        "4k": 1.15
+        "125": 1.59,
+        "500": 1.53,
+        "2k": 1.39,
+        "4k": 1.26
       },
-      "confidence": "low",
-      "source": "Assumed. Beranek 1996 p157 describes the liveness as greater than La Scala (1.2 s) or the Vienna Staatsoper (1.3 s) and remarks on fullness of bass; 1.5 s mid-frequency occupied with a bass rise is consistent with that and with a 20,900 m3 plaster house. No measured RT for this hall is in the repository."
+      "value_all_bands_s": {
+        "125": 1.59,
+        "250": 1.58,
+        "500": 1.53,
+        "1k": 1.46,
+        "2k": 1.39,
+        "4k": 1.26
+      },
+      "confidence": "high",
+      "source": "Beranek 2004, Concert Halls and Opera Houses, Appendix 3 p. 592: occupied RT measured by Beranek from stopped chords in 2001, 125 Hz-4 kHz. RT_mid 1.50 s, bass ratio 1.06. Replaces the earlier assumed 1.9/1.55/1.4/1.15. Only published measurement for this hall; no EDT, C80, G or IACC have been published (Hidaka & Beranek 2000 list WMOH as questionnaire-only)."
     },
     "absorption": {
       "value": {
@@ -714,10 +722,16 @@
           0.5,
           0.65,
           0.7
+        ],
+        "acoustic_plaster": [
+          0.25,
+          0.5,
+          0.6,
+          0.6
         ]
       },
       "confidence": "medium",
-      "source": "Textbook octave-band coefficients (125 Hz, 500 Hz, 2 kHz, 4 kHz) for plaster on lath, fully occupied upholstered seating, wood floor over air space, and heavy velvet; Beranek p160 gives the materials"
+      "source": "Textbook octave-band coefficients (125 Hz, 500 Hz, 2 kHz, 4 kHz) for plaster on lath, fully occupied upholstered seating, wood floor over air space, and heavy velvet; Beranek p160 gives the materials; acoustic_plaster: textbook sprayed/porous acoustical plaster, used for the centre dome which Beranek 1996 p160 reports the architect described as acoustic plaster"
     },
     "air_absorption_db_per_100ft": {
       "value": [
@@ -733,6 +747,22 @@
       "value": -12,
       "confidence": "medium",
       "source": "Singing-voice directivity: roughly -6 dB at 90 degrees and -12 dB behind the singer in the 1-4 kHz range; pattern -12*(1-cos)/2 dB"
+    },
+    "areas_beranek_ft2": {
+      "value": {
+        "S_a_audience": 16500,
+        "S_A_audience_plus_aisles": 21240,
+        "S_T_total_acoustical": 24500,
+        "S_o_pit": 760,
+        "S_p_stage": 2500
+      },
+      "confidence": "high",
+      "source": "Beranek 1996 p160 technical details (sources/research/beranek1996/p160.png); identical in Beranek 2004 p141"
+    },
+    "ceiling_materials": {
+      "value": "plaster except centre domed section, acoustic plaster; floors fully carpeted except upper part of top balcony; main-floor seats fully upholstered, balcony seats hard backs; velvet on pit rails and cross-aisle rails",
+      "confidence": "high",
+      "source": "Beranek 1996 p160 Architectural and structural details, verified by the author 1993; Swan 1932 (Architect and Engineer, Nov 1932) says concave focusing surfaces were deliberately avoided in the design"
     }
   },
   "interior_ceiling": {
