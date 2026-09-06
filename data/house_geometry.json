@@ -623,5 +623,43 @@
       "confidence": "low",
       "note": "[z, |x|, floor_y]; heights from the row-A panorama lighting-rail reads (44-65 ft along it, descending toward the stage) and the Commons photo"
     }
+  },
+  "ceiling_profile": {
+    "value": [
+      [
+        8.7,
+        71.0
+      ],
+      [
+        36.05,
+        76.35
+      ],
+      [
+        73.96,
+        75.1
+      ],
+      [
+        87.64,
+        71.37
+      ],
+      [
+        105.66,
+        79.33
+      ],
+      [
+        123.07,
+        85.79
+      ],
+      [
+        142.96,
+        89.15
+      ],
+      [
+        157.87,
+        89.15
+      ]
+    ],
+    "confidence": "low",
+    "source": "Candidate longitudinal envelope from section_registration.json source-pixel ceiling picks; follows outer section outline, not a measured interior soffit. Display-only; transverse dome shape and wall outline unresolved."
   }
 }

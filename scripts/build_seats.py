@@ -598,6 +598,7 @@ def tier_shell(tier, half_w):
 
 shell = {
     "ceiling_y": CEILING_Y,
+    "ceiling_profile": G["ceiling_profile"],
     "half_breadth": HALF_BREADTH,
     "depth_orchestra": P("published", "depth_orchestra_level_ft"),
     "depth_balcony": P("published", "depth_balcony_level_ft"),

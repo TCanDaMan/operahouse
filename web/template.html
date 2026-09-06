@@ -107,7 +107,7 @@
   #valueList .p { color: var(--ink-2); }
   #stage { position: relative; background: var(--scene); }
   canvas { display: block; width: 100%; height: 100%; }
-  #views { position: absolute; top: 14px; left: 14px; display: flex; gap: 6px; flex-wrap: wrap; }
+  #views { position: absolute; top: 14px; left: 14px; right: 175px; display: flex; gap: 6px; flex-wrap: wrap; }
   #views button, #cut { background: color-mix(in srgb, var(--panel) 85%, transparent); backdrop-filter: blur(6px); }
   #cut { position: absolute; top: 14px; right: 14px; }
   #legend {
@@ -412,11 +412,22 @@ function init3D(){
       const s = new THREE.Mesh(new THREE.CylinderGeometry(0.9,0.9,5.8,8), M.singer);
       s.position.set(x, st.y+2.9, z); scene.add(s);
     }
-    const hb = SHELL.half_breadth, D = SHELL.depth_balcony, H = SHELL.ceiling_y;
-    const box = new THREE.Mesh(new THREE.BoxGeometry(hb*2, H, D), M.wall);
-    box.position.set(0, H/2, D/2); scene.add(box);
-    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(hb*2, H, D)), M.line);
-    edges.position.copy(box.position); scene.add(edges);
+    // A section-derived envelope replaces the misleading constant-height box.
+    // Wireframe only: this is not a surveyed interior roof or acoustic surface.
+    const hb=SHELL.half_breadth, profile=SHELL.ceiling_profile.value;
+    const envelope=new THREE.Group();scene.add(envelope);
+    const envelopeMat=new THREE.LineBasicMaterial({color:0x9ba9bd,transparent:true,opacity:.45});
+    function envelopeLine(points){const g=new THREE.BufferGeometry().setFromPoints(points.map(p=>new THREE.Vector3(...p)));envelope.add(new THREE.Line(g,envelopeMat));}
+    for(const x of [-hb,0,hb]) envelopeLine(profile.map(([z,y])=>[x,y,z]));
+    for(const [z,y] of profile) envelopeLine([[-hb,y,z],[hb,y,z]]);
+    const [backZ,backY]=profile[profile.length-1];
+    for(const x of [-hb,hb]) envelopeLine([[x,0,0],[x,0,backZ],[x,backY,backZ]]);
+    const envelopeToggle=document.createElement('button');envelopeToggle.className='act';
+    envelopeToggle.textContent='Section envelope';envelopeToggle.setAttribute('aria-pressed','true');
+    envelopeToggle.title='Approximate outer section profile; not the interior ceiling';
+    document.getElementById('views').append(envelopeToggle);
+    envelopeToggle.onclick=()=>{envelope.visible=!envelope.visible;envelopeToggle.setAttribute('aria-pressed',String(envelope.visible));};
+
   }
 
   // Instanced upholstered chairs: local -Z faces the stage.

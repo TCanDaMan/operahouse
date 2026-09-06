@@ -113,3 +113,14 @@ is a visualization approximation, not a confirmed interior wall footprint.
 Viewer copy no longer claims that ceiling reflections are "mostly gone" based
 only on the opening angle. That was an unsupported acoustic conclusion from a
 geometric measurement. It now describes the opening without claiming sound quality.
+
+## Follow-up: section envelope
+
+Replaced the constant-height rectangular wire enclosure with a switchable
+section-derived wire envelope (Section envelope button). Its candidate outer
+profile rises from ~71–76 ft over the main room to ~89 ft at the rear. Source
+pixels and uncertainties are preserved in section_registration.json; copied
+profile is in house_geometry.json > ceiling_profile. It is NOT an interior
+ceiling, transverse dome, wall footprint or acoustic reflection surface.
+The 224 unknown rear-ceiling results remain unknown. Browser checked overview;
+upper-surface regressions passed. Controls wrap to avoid covering the cutaway.
