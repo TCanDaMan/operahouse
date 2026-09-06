@@ -611,7 +611,11 @@ shell = {
                              "arc": [[round(x, 2), round(orch_row_z(ORCH_A_Z + i * PITCH, x), 2)]
                                      for x in [-48 + 96 * k / 24 for k in range(25)]]}
                             for i in range(len(S.ORCH_ROWS))]},
-    "boxes": {"partitions": [[list(box_path_point(k / len(S.BOX_LETTERS))[:2]),
+    "boxes": {"deck_rows": [{"depth": d, "y": y,
+                    "arc": [[round(box_path_point(k/120)[0]+box_path_point(k/120)[2][0]*d,3),
+                             round(box_path_point(k/120)[1]+box_path_point(k/120)[2][1]*d,3)] for k in range(121)]}
+                   for d,y in [(0,BOX_Y),(1.5+BOX_PITCH-1.05,BOX_Y+.5),
+                               (1.5+2*BOX_PITCH-1.05,BOX_Y+1),(9,BOX_Y+1)]], "partitions": [[list(box_path_point(k / len(S.BOX_LETTERS))[:2]),
                     [box_path_point(k / len(S.BOX_LETTERS))[0] + box_path_point(k / len(S.BOX_LETTERS))[2][0] * 9,
                      box_path_point(k / len(S.BOX_LETTERS))[1] + box_path_point(k / len(S.BOX_LETTERS))[2][1] * 9]]
                    for k in range(len(S.BOX_LETTERS)+1)], "parapet_height": P("boxes", "parapet_height_ft"), "floor_y": BOX_Y, "soffit_y": BOX_SOFFIT,

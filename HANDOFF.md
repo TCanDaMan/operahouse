@@ -99,3 +99,13 @@ Seven latest user tour screenshots saved as sources/calibration/user-tour-2026-0
 01–07.png, with an index README. Original panoramas, 1932 sections, 1993 plans,
 Beranek section, and SmartSeat seat photos already live under sources/.
 No external messages sent. No merge or deployment performed in this checkpoint.
+
+## Follow-up: box-floor consistency
+
+Box decks now have three horizontal elevations matching the existing chair
+floor heights, replacing the former continuous ramp. No seat positions changed.
+The source exports deck_rows so rendering consumes the same floor elevations.
+14 box seat centers lie beyond the rectangular hall half-width of 56.5 ft;
+data/geometry_conflicts.json records their IDs. Do not squeeze them inward:
+register the actual wall outline and box layout first. The rectangular enclosure
+is a visualization approximation, not a confirmed interior wall footprint.

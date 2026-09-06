@@ -1,0 +1,75 @@
+{
+  "status": "Requires box-plan and wall-footprint registration; do not clamp seat positions to conceal conflicts",
+  "box_seats_outside_rectangular_wall": [
+    {
+      "id": "boxes:A:4",
+      "x": -57.32,
+      "wall_half_width_ft": 56.5
+    },
+    {
+      "id": "boxes:A:5",
+      "x": -57.2,
+      "wall_half_width_ft": 56.5
+    },
+    {
+      "id": "boxes:A:6",
+      "x": -57.07,
+      "wall_half_width_ft": 56.5
+    },
+    {
+      "id": "boxes:B:4",
+      "x": -56.73,
+      "wall_half_width_ft": 56.5
+    },
+    {
+      "id": "boxes:B:5",
+      "x": -56.61,
+      "wall_half_width_ft": 56.5
+    },
+    {
+      "id": "boxes:C:7",
+      "x": -57.82,
+      "wall_half_width_ft": 56.5
+    },
+    {
+      "id": "boxes:C:8",
+      "x": -58.43,
+      "wall_half_width_ft": 56.5
+    },
+    {
+      "id": "boxes:X:7",
+      "x": 58.43,
+      "wall_half_width_ft": 56.5
+    },
+    {
+      "id": "boxes:X:8",
+      "x": 57.82,
+      "wall_half_width_ft": 56.5
+    },
+    {
+      "id": "boxes:Y:5",
+      "x": 56.61,
+      "wall_half_width_ft": 56.5
+    },
+    {
+      "id": "boxes:Y:6",
+      "x": 56.73,
+      "wall_half_width_ft": 56.5
+    },
+    {
+      "id": "boxes:Z:4",
+      "x": 57.07,
+      "wall_half_width_ft": 56.5
+    },
+    {
+      "id": "boxes:Z:5",
+      "x": 57.2,
+      "wall_half_width_ft": 56.5
+    },
+    {
+      "id": "boxes:Z:6",
+      "x": 57.32,
+      "wall_half_width_ft": 56.5
+    }
+  ]
+}

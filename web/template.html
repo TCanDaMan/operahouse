@@ -349,7 +349,11 @@ function init3D(){
     }
     molding(b.rail,b.floor_y);
     addMesh(stripFromRows([{arc:b.rail,y:b.soffit_y},{arc:b.outer,y:b.soffit_y}],r=>r.y),M.tier);
-    addMesh(stripFromRows([{arc:b.rail, y:b.floor_y},{arc:b.outer, y:b.floor_y+1}], r=>r.y), M.tier);
+    for(let i=0;i<b.deck_rows.length-1;i++){
+      const a=b.deck_rows[i], next=b.deck_rows[i+1];
+      addMesh(stripFromRows([a,{...next,y:a.y}],r=>r.y),M.floor);
+      if(next.y>a.y) addMesh(wallFromArc(next.arc,a.y,next.y),M.tier);
+    }
     addMesh(wallFromArc(b.rail, b.soffit_y, b.floor_y + b.parapet_height), M.rail);
     // Grand Tier side slips: slab between the traced front curve and the wall
     const sl = SHELL.side_slips;
