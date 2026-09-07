@@ -450,9 +450,9 @@ AC.configure(
          lambda p: _upper.rows[-1][1], lambda p: AC.ceiling_y_at(p[2]), "plaster"),
     ],
     tier_fronts=[
-        ("box front", RING[0][1], BOX_SOFFIT, BOX_Y + P("boxes", "parapet_height_ft"), 30),
-        ("grand tier front", GT_FRONT[0][1], _lower.soffit_lip_y, _lower.rows[0][1] + 3, 40),
-        ("balcony front", BAL_FRONT[0][1], _upper.soffit_lip_y, _upper.rows[0][1] + 3, 40),
+        ("box front", RING, BOX_SOFFIT, BOX_Y + P("boxes", "parapet_height_ft")),
+        ("grand tier front", GT_FRONT, _lower.soffit_lip_y, _lower.rows[0][1] + 3),
+        ("balcony front", BAL_FRONT, _upper.soffit_lip_y, _upper.rows[0][1] + 3),
     ],
     overhangs=[
         (OVERHANGS[0], lambda x, z: box_floor_at(z)),

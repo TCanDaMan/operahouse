@@ -20,6 +20,7 @@ import math
 C_FT = 1125.3                    # speed of sound, ft/s
 FT = 0.3048
 BANDS = ("125", "500", "2k", "4k")
+BAND_HZ = (125.0, 500.0, 2000.0, 4000.0)
 MID = (1, 2)                     # 500 Hz and 2 kHz columns
 HI = 3
 EARLY_MS = 80.0
@@ -74,10 +75,11 @@ def length(a): return math.sqrt(dot(a, a))
 class Plane:
     """A bounded planar reflector. inside(p) says whether a point on the
     plane is within the surface; material picks the absorption row."""
-    def __init__(self, name, code, point, normal, material, inside, order2=True):
+    def __init__(self, name, code, point, normal, material, inside, order2=True, dims=None):
         self.name, self.code, self.p0 = name, code, point
         self.n = norm(normal)
         self.material, self.inside, self.order2 = material, inside, order2
+        self.dims = dims     # (height, width) in ft for finite reflectors; None = effectively infinite
     def mirror(self, p):
         d = dot(sub(p, self.p0), self.n)
         return sub(p, mul(self.n, 2 * d))
@@ -141,10 +143,28 @@ def _build_surfaces():
     for name, z, ylo, yhi, mat in K["rear_walls"]:
         SURFACES.append(Plane(name, "R", (0.0, 0.0, z), (0.0, 0.0, -1.0), mat,
                               lambda p, ylo=ylo, yhi=yhi, hb=hb: ylo(p) <= p[1] <= yhi(p) and abs(p[0]) <= hb, order2=False))
-    # tier fronts (vertical faces toward the stage), centre portion only
-    for name, z, ylo, yhi, xmax in K["tier_fronts"]:
-        SURFACES.append(Plane(name, "T", (0.0, 0.0, z), (0.0, 0.0, -1.0), "plaster",
-                              lambda p, ylo=ylo, yhi=yhi, xmax=xmax: ylo <= p[1] <= yhi and abs(p[0]) <= xmax, order2=False))
+    # tier fronts: the traced horseshoe curves as vertical planar segments,
+    # each facing into the house. The side runs face inward and give the
+    # main floor and boxes lateral reflections the rectangular walls cannot
+    # (Hidaka & Beranek 2000 on parapets in horseshoe houses). Fascia
+    # heights are small, so each carries Rindel's finite-reflector cut-off.
+    for name, curve, ylo, yhi in K["tier_fronts"]:
+        h = yhi - ylo
+        for sgn in (1, -1):
+            pts = [(sgn * x, z) for x, z in curve]
+            for (xa, za), (xb, zb) in zip(pts, pts[1:]):
+                dx, dz = xb - xa, zb - za
+                w = math.hypot(dx, dz)
+                if w < 1.0:
+                    continue
+                n = (dz, 0.0, -dx)
+                mid = ((xa + xb) / 2, (ylo + yhi) / 2, (za + zb) / 2)
+                if dot(sub((0.0, mid[1], 40.0), mid), n) < 0:
+                    n = mul(n, -1)
+                def inside(p, xa=xa, za=za, dx=dx, dz=dz, w=w, ylo=ylo, yhi=yhi):
+                    t = ((p[0] - xa) * dx + (p[2] - za) * dz) / (w * w)
+                    return ylo <= p[1] <= yhi and -0.02 <= t <= 1.02
+                SURFACES.append(Plane(name, "T", mid, n, "plaster", inside, order2=False, dims=(h, w)))
     # stage floor (wood) and orchestra floor (audience)
     st = K["stage"]
     SURFACES.append(Plane("stage floor", "F", (0.0, st["y"], 0.0), (0.0, 1.0, 0.0), "wood",
@@ -221,11 +241,28 @@ def path_amplitude(src, forward, points, surfaces, listener):
     pts = [src] + points + [listener]
     L = sum(length(sub(b, a)) for a, b in zip(pts, pts[1:]))
     d_db = directivity_db(src, forward, pts[1])
+    # Rindel finite-reflector cut-off for each bounded panel: below
+    # f_g = c a* / (2 S cos(theta)), a* = 2 a1 a2 / (a1 + a2), the reflection
+    # falls at 6 dB/octave. S is taken as the smaller dimension squared, the
+    # conservative reading for long thin fascias. Big walls and ceilings carry
+    # no dims and are treated as infinite.
+    cut = []
+    for i, s in enumerate(surfaces):
+        if not s.dims:
+            continue
+        a1, a2 = length(sub(pts[i + 1], pts[i])) * FT, length(sub(pts[i + 2], pts[i + 1])) * FT
+        a_star = 2 * a1 * a2 / max(a1 + a2, 1e-6)
+        inc = norm(sub(pts[i + 1], pts[i]))
+        cos_t = max(0.2, abs(dot(inc, s.n)))
+        S = (min(s.dims) * FT) ** 2
+        cut.append(343.0 * a_star / (2 * S * cos_t))
     amps = []
     for b in range(4):
         g = 10 ** (d_db * (0.15, 0.5, 1.0, 1.2)[b] / 20) / max(L, 0.1)
         for s in surfaces:
             g *= math.sqrt(max(0.0, 1 - K["alpha"][s.material][b]))
+        for f_g in cut:
+            g *= min(1.0, BAND_HZ[b] / f_g)
         g *= 10 ** (-K["air"][b] * L / 100 / 20)
         amps.append(g)
     return L, amps
@@ -422,12 +459,14 @@ def sound_score(m):
     """0-100 listening score. Weights are opinions, like view_score. Centred on
     the occupied opera-house ranges from Hidaka & Beranek 2000 and Barron:
     strength G about 0 dB (-1.5..+1.5), stage-source C80 +2..+4 dB."""
-    s = 100.0
+    s = 94.0
     s -= max(0.0, 0.0 - m["strength_db"]) * 5            # weak, distant sound
+    s += min(2.0, max(0.0, m["strength_db"])) * 1.5      # presence: up to +3 for G of +2 dB
     s -= max(0.0, abs(m["c80_db"] - 2.5) - 2.0) * 6      # muddy or dry
     if m["itdg_ms"] is not None:
-        s -= min(20.0, max(0.0, m["itdg_ms"] - 35) * 0.5)  # a long gap before the room answers
-    s += min(m["lateral_fraction"], 0.30) * 40 - 6        # envelopment: LF 0.15 is neutral
+        # Hidaka & Beranek 2000 recommend t_I <= 20 ms; their 19 measured houses span 14-41 ms
+        s -= min(15.0, max(0.0, m["itdg_ms"] - 20) * 0.35)
+    s += min(m["lateral_fraction"], 0.30) * 40 - 4        # envelopment: LF 0.10 is neutral, 0.30 earns +8
     s -= max(0.0, m["reverb_vs_direct_db"] - 12) * 1.5    # the room swamps the voice: distant
     s -= max(0.0, -m["voice_over_pit_db"] - 2) * 3       # the pit covers the voice
     s -= min(8.0, 0.5 * m.get("seat_dip_db", 0.0))       # direct sound thinned by grazing the audience

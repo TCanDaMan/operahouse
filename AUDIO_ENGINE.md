@@ -93,6 +93,24 @@ main-floor centre ITDG 52-55 ms (measured 51). Dress Circle and Balcony G sit at
 the low edge. Next geometry job: enrich the explicit reflector set (box fronts,
 proscenium splays, side-wall segments) so it carries 35-50% of reflected energy.
 
+## Follow-up 2026-09-06 (Fable, evening): horseshoe fronts and finite reflectors
+
+- The three tier fronts are now the traced HSR 1993 horseshoe curves as vertical
+  planar segments facing into the house (both sides), replacing three flat
+  centre planes. Every bounded panel carries Rindel's finite-reflector cut-off
+  (Plane.dims; 6 dB/octave below f_g = c a*/(2 S cos theta), S = smaller
+  dimension squared), so a 3-4 ft fascia returns 2-4 kHz but little at 125 Hz.
+- Effect: tier seats gain lateral energy (Grand Tier LF 0.17 to 0.26; the Grand
+  Tier front is the first reflection for 186 seats). The main floor is
+  unchanged: with a low source and a low listener the specular point on a
+  vertical fascia lies below it, so parapets cannot serve the stalls. The
+  Orchestra's 13% explicit share is a ceiling/side-wall question.
+- sound_score: ITDG penalty now from 20 ms (Hidaka & Beranek recommend <= 20;
+  measured houses 14-41), base 94 with a presence bonus for G up to +2 dB, so
+  the top no longer saturates at 100 (404 seats had been pinned there).
+- Level medians unchanged within 0.3 dB: C80 +1.3..+3.0, G -2.4..+1.0,
+  main-floor centre ITDG 55 ms.
+
 ## Run / validation
 
 ```sh
