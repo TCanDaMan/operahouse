@@ -135,10 +135,28 @@ def _build_surfaces():
         SURFACES.append(Plane("main dome (acoustic plaster patch)", "C", (0.0, y0, z0), n, "acoustic_plaster",
                               lambda p, z0=z0, z1=z1, hb=hb: z0 - 0.01 <= p[2] <= z1 + 0.01 and abs(p[0]) <= hb and in_dome(p),
                               order2=False))
-    # side walls
+    # side walls. Above the box zone the upper walls fan out from the
+    # proscenium (HSR 1993 balcony and attic plans; tour photos show the
+    # three organ-loft arches converging on the proscenium). Those bays are
+    # open grilles with heavy curtains behind, so the splays are partly
+    # absorptive ("arch_wall"). Below the box zone and behind the splay the
+    # walls stay at the published half breadth.
+    sw = K["side_wall_plan"]          # [[z, half_width], ...] from the proscenium outward
+    y_splay = K["splay_bottom_y"]
+    z_full = sw[-1][0]
     for sgn in (-1, 1):
         SURFACES.append(Plane("side wall " + ("L" if sgn < 0 else "R"), "W", (sgn*hb, 0.0, 0.0), (-sgn, 0.0, 0.0), "plaster",
-                              lambda p: 0 <= p[2] <= depth and 0 <= p[1] <= ceiling_y_at(p[2])))
+                              lambda p, z_full=z_full, y_splay=y_splay: 0 <= p[2] <= depth and 0 <= p[1] <= ceiling_y_at(p[2])
+                              and (p[2] >= z_full or p[1] <= y_splay)))
+        for (z0, w0), (z1, w1) in zip(sw, sw[1:]):
+            dz, dw = z1 - z0, w1 - w0
+            n = (-sgn * dz, 0.0, sgn * dw)          # inward-facing normal of the splayed bay
+            n = norm(n)
+            if n[0] * sgn > 0: n = mul(n, -1)
+            p0 = (sgn * w0, 0.0, z0)
+            def inside(p, z0=z0, z1=z1, y_splay=y_splay):
+                return z0 - 0.01 <= p[2] <= z1 + 0.01 and y_splay <= p[1] <= ceiling_y_at(p[2])
+            SURFACES.append(Plane(f"side wall splay {'L' if sgn < 0 else 'R'} {z0:.0f}-{z1:.0f}", "W", p0, n, "arch_wall", inside))
     # rear walls, one per level
     for name, z, ylo, yhi, mat in K["rear_walls"]:
         SURFACES.append(Plane(name, "R", (0.0, 0.0, z), (0.0, 0.0, -1.0), mat,

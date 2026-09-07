@@ -111,6 +111,32 @@ proscenium splays, side-wall segments) so it carries 35-50% of reflected energy.
 - Level medians unchanged within 0.3 dB: C80 +1.3..+3.0, G -2.4..+1.0,
   main-floor centre ITDG 55 ms.
 
+## Follow-up 2026-09-07 (Fable): ceiling oval and splayed upper side walls from the 1993 plans
+
+The HSR 1993 attic plan (p139) shows the auditorium ceiling from above and the
+upper balcony plan (p137) the walls at that level; Beranek's p159 section and tour
+photos 01/05 corroborate. Traced with stage house 135 ft / breadth 113 ft as scale
+anchors (sheets differ by up to 8%, so +/-4 ft):
+
+- Recessed oval: about 73 ft across the house, 51-60 ft along it, centre about
+  47 ft behind the proscenium, rise about 5 ft. interior_ceiling is now
+  dome_radius 36.5, aspect 0.75, dome_z 47, rise 5 (was illustrative 26/0.85/46/7).
+  Still an acoustic-plaster patch acoustically; the chandelier is 25-27 ft.
+- Upper side walls fan out from the proscenium: half-width about 29 ft at the
+  proscenium wall, 49 ft at 37 ft back, full 56.5 ft by about 75 ft. Above the
+  box zone (y > 22 ft) the engine now has two splayed bays per side with a mixed
+  plaster/curtain coefficient (arch_wall), because the three organ-loft arches on
+  those bays are open grilles with heavy curtains behind. The viewer draws the
+  same splay (shell.side_wall_plan) with the arches on the splayed bays.
+- Effect: Grand Tier ITDG 39 -> 27 ms (splay is its first reflection for 102
+  seats), Balcony Circle gains splay reflections; main-floor centre ITDG stays
+  55 ms because the splays sit above a low listener's specular point, consistent
+  with the measured 51 ms. Level C80/G medians unchanged.
+- Conflict recorded (data/geometry_conflicts.json > box_ring_width_vs_plan): the
+  mezzanine plan (p107) shows the box-front void only 37-40 ft from centre, not
+  the traced 51-53 ft. Seat positions were NOT moved; the ring needs re-tracing
+  with its own scale anchor. The 14 out-of-wall box seats are likely this.
+
 ## Run / validation
 
 ```sh

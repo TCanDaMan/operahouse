@@ -71,5 +71,10 @@
       "x": 57.32,
       "wall_half_width_ft": 56.5
     }
-  ]
+  ],
+  "box_ring_width_vs_plan": {
+    "finding": "The traced box_ring_rail puts the ring legs 51-53 ft from centre near the stage. On the HSR 1993 mezzanine plan (p107) the void between the side box fronts measures about 550 px, i.e. 74-80 ft wide (37-40 ft half) at 6.8-7.4 px/ft; the earlier trace recorded 46 ft. The upper balcony plan (p137) shows the walls above the boxes only 29 ft from centre at the proscenium, widening to 49 ft at 37 ft back. The 14 seats listed above are probably a symptom of the ring being traced too wide, not of the wall being too narrow.",
+    "action": "Register p107 with its own scale anchor (proscenium 52 ft on p099 does not transfer; sheets differ by up to 8%), re-trace the ring rail and the box rear wall, then rebuild seats and shell together. Seat positions are NOT changed here.",
+    "date": "2026-09-07"
+  }
 }

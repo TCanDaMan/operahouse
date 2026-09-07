@@ -441,6 +441,7 @@ AC.configure(
     stage={"y": STAGE_Y, "prosc_w": PROSC_W, "prosc_h": PROSC_H,
            "back_wall_z": -P("published", "curtain_to_back_wall_ft")},
     pit_front_z=PIT_FRONT_Z, pit_back_z=PIT_BACK_Z, singer=SINGER, pit_src=PIT_SRC,
+    side_wall_plan=G["side_wall_plan"]["value"], splay_bottom_y=G["side_wall_plan"]["bottom_y_ft"],
     rear_walls=[
         ("rear wall, orchestra", P("published", "depth_orchestra_level_ft"),
          lambda p: orch_floor_y(p[2]), lambda p: BOX_SOFFIT, "plaster"),
@@ -682,6 +683,7 @@ shell = {
     "ceiling_y": CEILING_Y,
     "ceiling_profile": G["ceiling_profile"],
     "interior_ceiling": G["interior_ceiling"],
+    "side_wall_plan": G["side_wall_plan"],
     "half_breadth": HALF_BREADTH,
     "depth_orchestra": P("published", "depth_orchestra_level_ft"),
     "depth_balcony": P("published", "depth_balcony_level_ft"),

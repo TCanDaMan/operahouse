@@ -728,10 +728,16 @@
           0.5,
           0.6,
           0.6
+        ],
+        "arch_wall": [
+          0.14,
+          0.23,
+          0.28,
+          0.31
         ]
       },
       "confidence": "medium",
-      "source": "Textbook octave-band coefficients (125 Hz, 500 Hz, 2 kHz, 4 kHz) for plaster on lath, fully occupied upholstered seating, wood floor over air space, and heavy velvet; Beranek p160 gives the materials; acoustic_plaster: textbook sprayed/porous acoustical plaster, used for the centre dome which Beranek 1996 p160 reports the architect described as acoustic plaster"
+      "source": "Textbook octave-band coefficients (125 Hz, 500 Hz, 2 kHz, 4 kHz) for plaster on lath, fully occupied upholstered seating, wood floor over air space, and heavy velvet; Beranek p160 gives the materials; acoustic_plaster: textbook sprayed/porous acoustical plaster, used for the centre dome which Beranek 1996 p160 reports the architect described as acoustic plaster; arch_wall: 60% plaster + 40% heavy curtain over open grilles, for the splayed organ-loft bays"
     },
     "air_absorption_db_per_100ft": {
       "value": [
@@ -779,12 +785,31 @@
     "value": {
       "main_end": 88,
       "main_y": 75,
-      "dome_radius": 26,
-      "dome_rise": 7,
-      "dome_z": 46,
-      "dome_aspect": 0.85
+      "dome_radius": 36.5,
+      "dome_rise": 5,
+      "dome_z": 47,
+      "dome_aspect": 0.75
     },
-    "confidence": "low",
-    "source": "Shared illustrative interior ceiling from Fable visual rebuild. Rear uses candidate section outline. Not a surveyed interior; dome uses bounded facets for first-order acoustic reflection only. | Carey & Co. Historic Structure Report 1993 (sources/research/hsr1993/HSR_1993_text.txt): the orchestra ceiling has a large recessed oval bounded by a gilded cornice, sunburst chandelier 27 ft in diameter (25 ft per SFGATE/SFCV); ceilings over the balconies flat plaster with recessed octagonal fixtures. No source gives the oval's diameter, depth or the ceiling height beyond Beranek H = 73 ft; dome_radius/rise remain illustrative."
+    "confidence": "medium",
+    "source": "Recessed oval traced on the HSR 1993 attic plan (p139): about 73 ft across the house and 51 ft along it (Beranek 1996 p159 section shows the cove chord nearer 60 ft along; 55 +/- 5 used via aspect 0.75), centre about 47 ft behind the proscenium wall on both drawings; rise about 5 ft from the Beranek section at 8 px/ft. Acoustic plaster per Beranek 1996 p160. Chandelier 25-27 ft (HSR 1993 / SFGATE). Scale uncertainty +/-7%. | Shared illustrative interior ceiling from Fable visual rebuild. Rear uses candidate section outline. Not a surveyed interior; dome uses bounded facets for first-order acoustic reflection only. | Carey & Co. Historic Structure Report 1993 (sources/research/hsr1993/HSR_1993_text.txt): the orchestra ceiling has a large recessed oval bounded by a gilded cornice, sunburst chandelier 27 ft in diameter (25 ft per SFGATE/SFCV); ceilings over the balconies flat plaster with recessed octagonal fixtures. No source gives the oval's diameter, depth or the ceiling height beyond Beranek H = 73 ft; dome_radius/rise remain illustrative."
+  },
+  "side_wall_plan": {
+    "value": [
+      [
+        0,
+        29.0
+      ],
+      [
+        37,
+        49.0
+      ],
+      [
+        75,
+        56.5
+      ]
+    ],
+    "bottom_y_ft": 22.0,
+    "confidence": "medium",
+    "source": "HSR 1993 upper balcony plan (sources/research/hsr1993/HSR_p137_plan_balcony_upper.png) and attic plan (p139): the void between the side walls is about 57 ft wide at the proscenium wall, about 98 ft at 37 ft back and reaches the full breadth near 75 ft; scale 6.8-7.4 px/ft depending on the anchor (stage house 135 ft; house breadth 113 ft), so +/-4 ft. Tour photos 01 and 05 show the three organ-loft arch bays converging on the proscenium; the 1993 HSR and 1965 report describe the arches as balustrade, plaster screen and heavy curtains (unused organ lofts, converted to restrooms 1997). Applies above the box zone (bottom_y_ft); the walls at box and orchestra level near the stage are not yet traced."
   }
 }
