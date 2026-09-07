@@ -998,7 +998,7 @@ function metricsList(s){
     ["Direct level vs row A", fmtDb(s.direct_level_db)],
     ["First reflection", s.itdg_ms==null?"none":s.itdg_ms.toFixed(0)+" ms"],
     ["Early reflections", String(s.early_reflections)],
-    ["Clarity C80", fmtDb(s.c80_db)], ["Strength G", fmtDb(s.strength_db)],
+    ["Clarity C80 (±1.5 dB)", fmtDb(s.c80_db)], ["Strength G (±1.5 dB)", fmtDb(s.strength_db)],
     ["Lateral fraction", s.lateral_fraction.toFixed(2)], ["Reverb over direct", fmtDb(s.reverb_vs_direct_db)],
     ["Voice over pit (equal source power)", fmtDb(s.voice_over_pit_db)],
     ["Ceiling reflection, voice", reflectionLabel(s.ceiling_reflection_singer)],

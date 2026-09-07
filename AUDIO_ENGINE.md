@@ -137,6 +137,30 @@ anchors (sheets differ by up to 8%, so +/-4 ft):
   the traced 51-53 ft. Seat positions were NOT moved; the ring needs re-tracing
   with its own scale anchor. The 14 out-of-wall box seats are likely this.
 
+## Follow-up 2026-09-07 (Fable, later): box ring registered
+
+The mezzanine plan p107 was registered on its own scale (7.12 px/ft from the
+rear stair-tower spacing; sheets differ ~4%) and the void boundary auto-traced:
+box rail legs 38-40 ft from centre for z 10-52, rear centre 72-73 ft. SmartSeat's
+own plan independently gives boxes/orchestra width 0.98 (old model 1.28, new
+1.04). plan_curves.box_ring_rail replaced; old traces kept as previous_value.
+Effects: 192 box seats move ~11 ft inward and the rear ring ~7 ft forward; no
+box seat is outside the wall any more; 506 rear-Orchestra seats are now under
+the box ring (was 274 boxes + 94 Grand Tier), matching listener reports of low
+ceilings from about row T; boxes G -0.9 -> +1.1, ITDG 8.5 -> 24 ms. Level C80
+medians unchanged (+1.7..+2.5); main-floor centre ITDG 55 ms.
+
+## Note on the pit source and uncertainty (2026-09-07)
+
+The pit source sits at z = +14 ft, inside the house volume in front of the
+proscenium, so Barron & Lee's fore-stage condition holds for it at least as
+well as for the singer (z = -8 ft, just upstage of the proscenium line). The
+pit well's shielding is handled by pit_visible (-5 dB when the pit is hidden).
+Pit figures still assume equal source power with the singer. Following the
+methods review, the viewer now labels C80 and G with +/-1.5 dB: the best
+analytic models reach 1.0-1.4 dB rms against measured halls, and C80's JND is
+1 dB, so seat-to-seat differences under about 1.5 dB should not drive a choice.
+
 ## Run / validation
 
 ```sh

@@ -164,10 +164,11 @@
       "previous_value": 13.0
     },
     "rail_radius_x_ft": {
-      "value": 51,
-      "source": "HSR 1993 plans (sources/research/hsr1993), scaled 6.83 px/ft from the 52 ft proscenium; curtain line and centreline registered on the orchestra plan \u2014 ring legs 51 ft from centre (boxes ~5.5 ft deep to the wall)",
+      "value": 40,
+      "source": "HSR 1993 p107 registered on its own scale (see plan_curves.box_ring_rail); boxes about 9 ft deep to the rear wall on the plan",
       "confidence": "medium",
-      "previous_value": 46
+      "previous_value": 46,
+      "previous_value_2026_09_05": 51
     },
     "rail_radius_z_ft": {
       "value": 39.6,
@@ -363,58 +364,58 @@
       "value": [
         [
           0,
-          80.1
+          73.0
         ],
         [
           10,
-          80.36
+          71.5
+        ],
+        [
+          15,
+          69.5
         ],
         [
           20,
-          80.75
+          67.5
         ],
         [
-          26,
-          80.68
+          25,
+          65.5
         ],
         [
           30,
-          80.16
+          62.0
         ],
         [
-          36,
-          83.87
+          34,
+          57.0
         ],
         [
-          38,
-          83.94
+          37,
+          53.0
         ],
         [
-          40,
-          70.6
+          38.5,
+          45.0
         ],
         [
-          42,
-          55.4
+          39.5,
+          37.0
         ],
         [
-          46,
-          48.0
+          40.0,
+          29.0
         ],
         [
-          50,
-          41.1
+          40.5,
+          21.0
         ],
         [
-          52,
-          30.0
-        ],
-        [
-          53,
-          15.0
+          41.0,
+          12.0
         ]
       ],
-      "confidence": "low",
+      "confidence": "medium",
       "previous_value": [
         [
           0,
@@ -469,7 +470,61 @@
           15.0
         ]
       ],
-      "source": "2026-09-05 provisional section alignment: Beranek p159 shows rear box and Grand Tier fronts nearly aligned in depth. Previous rear-box trace was 17.9 ft behind the Grand Tier. Shift rear center forward 17 ft, tapering to zero at |x|=40; preserve side legs. Requires registration against original plans."
+      "source": "2026-09-07 registration of the HSR 1993 mezzanine (box) plan p107 on its own scale: 7.12 px/ft from the rear stair-tower spacing relative to the orchestra sheet's 6.83 (sheets differ by ~4%); origin at the proscenium wall's house face (x=1265) and the void centreline (y=1007). Void boundary auto-traced column by column: legs 38-40 ft from centre for z 10-52, rear centre 72 ft; rounded and made monotonic in |x|; +/-2 ft scale, +/-2 ft origin (curtain line vs wall face). Independent check: SmartSeat's plan (sources/smartseat/seats_plan.csv) has the boxes spanning 0.98 of the orchestra width; the old 51-53 ft ring gave 1.28. The old trace probably followed the box rear wall or corridor line. Old values kept in previous_value fields.",
+      "previous_value_2026_09_05": [
+        [
+          0,
+          80.1
+        ],
+        [
+          10,
+          80.36
+        ],
+        [
+          20,
+          80.75
+        ],
+        [
+          26,
+          80.68
+        ],
+        [
+          30,
+          80.16
+        ],
+        [
+          36,
+          83.87
+        ],
+        [
+          38,
+          83.94
+        ],
+        [
+          40,
+          70.6
+        ],
+        [
+          42,
+          55.4
+        ],
+        [
+          46,
+          48.0
+        ],
+        [
+          50,
+          41.1
+        ],
+        [
+          52,
+          30.0
+        ],
+        [
+          53,
+          15.0
+        ]
+      ]
     },
     "grand_tier_front": {
       "value": [

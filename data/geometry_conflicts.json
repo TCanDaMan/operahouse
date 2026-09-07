@@ -1,80 +1,10 @@
 {
-  "status": "Requires box-plan and wall-footprint registration; do not clamp seat positions to conceal conflicts",
-  "box_seats_outside_rectangular_wall": [
-    {
-      "id": "boxes:A:4",
-      "x": -57.32,
-      "wall_half_width_ft": 56.5
-    },
-    {
-      "id": "boxes:A:5",
-      "x": -57.2,
-      "wall_half_width_ft": 56.5
-    },
-    {
-      "id": "boxes:A:6",
-      "x": -57.07,
-      "wall_half_width_ft": 56.5
-    },
-    {
-      "id": "boxes:B:4",
-      "x": -56.73,
-      "wall_half_width_ft": 56.5
-    },
-    {
-      "id": "boxes:B:5",
-      "x": -56.61,
-      "wall_half_width_ft": 56.5
-    },
-    {
-      "id": "boxes:C:7",
-      "x": -57.82,
-      "wall_half_width_ft": 56.5
-    },
-    {
-      "id": "boxes:C:8",
-      "x": -58.43,
-      "wall_half_width_ft": 56.5
-    },
-    {
-      "id": "boxes:X:7",
-      "x": 58.43,
-      "wall_half_width_ft": 56.5
-    },
-    {
-      "id": "boxes:X:8",
-      "x": 57.82,
-      "wall_half_width_ft": 56.5
-    },
-    {
-      "id": "boxes:Y:5",
-      "x": 56.61,
-      "wall_half_width_ft": 56.5
-    },
-    {
-      "id": "boxes:Y:6",
-      "x": 56.73,
-      "wall_half_width_ft": 56.5
-    },
-    {
-      "id": "boxes:Z:4",
-      "x": 57.07,
-      "wall_half_width_ft": 56.5
-    },
-    {
-      "id": "boxes:Z:5",
-      "x": 57.2,
-      "wall_half_width_ft": 56.5
-    },
-    {
-      "id": "boxes:Z:6",
-      "x": 57.32,
-      "wall_half_width_ft": 56.5
-    }
-  ],
+  "status": "2026-09-07: box ring re-traced from HSR 1993 p107 on its own scale (legs 38-40 ft, rear centre 73 ft); no box seat lies outside the 56.5 ft half breadth any more. Remaining: register the box rear wall and the orchestra-level side walls near the stage.",
+  "box_seats_outside_rectangular_wall": [],
   "box_ring_width_vs_plan": {
     "finding": "The traced box_ring_rail puts the ring legs 51-53 ft from centre near the stage. On the HSR 1993 mezzanine plan (p107) the void between the side box fronts measures about 550 px, i.e. 74-80 ft wide (37-40 ft half) at 6.8-7.4 px/ft; the earlier trace recorded 46 ft. The upper balcony plan (p137) shows the walls above the boxes only 29 ft from centre at the proscenium, widening to 49 ft at 37 ft back. The 14 seats listed above are probably a symptom of the ring being traced too wide, not of the wall being too narrow.",
     "action": "Register p107 with its own scale anchor (proscenium 52 ft on p099 does not transfer; sheets differ by up to 8%), re-trace the ring rail and the box rear wall, then rebuild seats and shell together. Seat positions are NOT changed here.",
-    "date": "2026-09-07"
+    "date": "2026-09-07",
+    "resolution": "Applied 2026-09-07: plan_curves.box_ring_rail replaced (old values kept as previous_value fields); model box span / orchestra span 1.04 vs SmartSeat 0.98."
   }
 }

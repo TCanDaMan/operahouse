@@ -26,8 +26,10 @@ follow-up in AUDIO_ENGINE.md for numbers and the open items.
 2026-09-07 (Fable): ceiling oval (73 x ~55 ft, acoustic plaster) and splayed upper
 side walls traced from the HSR 1993 attic and balcony plans; engine and viewer
 updated together. Box ring probably traced too wide (37-40 ft on p107 vs 51-53):
-recorded in geometry_conflicts.json, seats not moved. Next: register p107 with its
-own scale and re-trace the ring + box rear wall; then rebuild seats and shell.
+recorded in geometry_conflicts.json, seats not moved. Later that day the ring WAS re-traced
+from p107 (legs 38-40 ft, rear 73 ft; SmartSeat corroborates) and seats/shell
+rebuilt together; the 14 out-of-wall box seats are resolved. Next: box rear
+wall and orchestra-level side walls near the stage; pit-source validity.
 
 ---
 
