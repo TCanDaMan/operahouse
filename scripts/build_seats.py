@@ -433,7 +433,7 @@ import acoustics as AC  # noqa: E402
 
 _lower, _upper = TIERS["lower_tier"], TIERS["upper_tier"]
 _lower_rear_z = _lower.rows[-1][0] + 4
-_box_rear_z = RING[0][1] + 9
+_box_rear_z = RING[0][1] + G["side_wall_plan"]["box_depth_ft"]
 AC.configure(
     G=G, half_breadth=HALF_BREADTH, ceiling_profile=G["ceiling_profile"]["value"],
     depth_balcony=P("published", "depth_balcony_level_ft"),
@@ -441,7 +441,7 @@ AC.configure(
     stage={"y": STAGE_Y, "prosc_w": PROSC_W, "prosc_h": PROSC_H,
            "back_wall_z": -P("published", "curtain_to_back_wall_ft")},
     pit_front_z=PIT_FRONT_Z, pit_back_z=PIT_BACK_Z, singer=SINGER, pit_src=PIT_SRC,
-    side_wall_plan=G["side_wall_plan"]["value"], splay_bottom_y=G["side_wall_plan"]["bottom_y_ft"],
+    side_wall_plan=G["side_wall_plan"],
     rear_walls=[
         ("rear wall, orchestra", P("published", "depth_orchestra_level_ft"),
          lambda p: orch_floor_y(p[2]), lambda p: BOX_SOFFIT, "plaster"),
@@ -499,7 +499,10 @@ def add(level, section, row, number, x, floor_y, z, zone, flags=None):
     rec.update(m)
     # late sound under an overhang: the seat sees a wedge of the room. A 60
     # degree opening keeps it all; below that it falls off, never under 30%.
-    oh = 1.0 if m["overhang"] == "none" else max(0.3, min(1.0, m["opening_angle_deg"] / 60.0))
+    # Barron 1995 (JASA 98, 2580): overhangs cut late sound by about 2.5 dB on
+    # average, early sound haphazardly, total G by about 1.3 dB; deep, low
+    # overhangs more. Floor at 0.45 (-3.5 dB) rather than the earlier 0.3.
+    oh = 1.0 if m["overhang"] == "none" else max(0.45, min(1.0, m["opening_angle_deg"] / 50.0))
     lip = None
     if m["overhang"] != "none":
         o = overhang_for(eye[0], eye[1], eye[2])

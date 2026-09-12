@@ -731,8 +731,8 @@
     },
     "itdg_main_floor_ms": {
       "value": 51,
-      "confidence": "high",
-      "source": "Beranek 1996 p160, t_I = 51 msec, measured at the centre of the main floor; used as a validation target, not an input"
+      "confidence": "medium",
+      "source": "Beranek 1996 p160, t_I = 51 msec, measured at the centre of the main floor; used as a validation target, not an input | 2026-09-12 note: Beranek's t_I values are in many cases calculated from drawings; parallel walls at the nominal 104 ft width give 50-55 ms at the centre seat in this model, matching 51 almost exactly, whereas the splayed lower walls traced from the 1993 plans give about 31 ms. Treated as a drawing-derived figure, not a hard measurement, until an impulse response exists."
     },
     "rt_occupied_s": {
       "value": {
@@ -863,8 +863,53 @@
         56.5
       ]
     ],
-    "bottom_y_ft": 22.0,
+    "upper": [
+      [
+        0,
+        28.0
+      ],
+      [
+        37,
+        49.0
+      ],
+      [
+        75,
+        56.5
+      ]
+    ],
+    "lower": [
+      [
+        0,
+        29.3
+      ],
+      [
+        10,
+        36.6
+      ],
+      [
+        20.5,
+        40.3
+      ],
+      [
+        42.5,
+        44.7
+      ],
+      [
+        71.7,
+        51.2
+      ],
+      [
+        116,
+        56.5
+      ]
+    ],
+    "box_zone_y_ft": [
+      16.0,
+      24.0
+    ],
+    "box_depth_ft": 10.0,
+    "bottom_y_ft": 24.0,
     "confidence": "medium",
-    "source": "HSR 1993 upper balcony plan (sources/research/hsr1993/HSR_p137_plan_balcony_upper.png) and attic plan (p139): the void between the side walls is about 57 ft wide at the proscenium wall, about 98 ft at 37 ft back and reaches the full breadth near 75 ft; scale 6.8-7.4 px/ft depending on the anchor (stage house 135 ft; house breadth 113 ft), so +/-4 ft. Tour photos 01 and 05 show the three organ-loft arch bays converging on the proscenium; the 1993 HSR and 1965 report describe the arches as balustrade, plaster screen and heavy curtains (unused organ lofts, converted to restrooms 1997). Applies above the box zone (bottom_y_ft); the walls at box and orchestra level near the stage are not yet traced."
+    "source": "HSR 1993 upper balcony plan (sources/research/hsr1993/HSR_p137_plan_balcony_upper.png) and attic plan (p139): the void between the side walls is about 57 ft wide at the proscenium wall, about 98 ft at 37 ft back and reaches the full breadth near 75 ft; scale 6.8-7.4 px/ft depending on the anchor (stage house 135 ft; house breadth 113 ft), so +/-4 ft. Tour photos 01 and 05 show the three organ-loft arch bays converging on the proscenium; the 1993 HSR and 1965 report describe the arches as balustrade, plaster screen and heavy curtains (unused organ lofts, converted to restrooms 1997). Applies above the box zone (bottom_y_ft); the walls at box and orchestra level near the stage are not yet traced. | 2026-09-12: orchestra plan p099 (origin x=1110 curtain line, y=1040 centreline, 6.83 px/ft) shows the orchestra-level walls also fanning from the proscenium corner: half-width 29 ft at z=0, 37 at 10, 40 at 20, 45 at 42, 51 at 72 ('lower'). Grand Tier (p115) and Dress Circle (p121) plans show the same splay above the boxes with the organ-loft chambers (rooms 233/234, 323/324) behind the splayed walls, so the arch bays open into deep chambers. Between 16 and 24 ft (box zone) the boundary is the box ring with its rear wall about 10 ft behind the rail (p107)."
   }
 }

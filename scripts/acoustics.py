@@ -40,6 +40,11 @@ TAIL_RISE_S = 0.002
 BARRON_K = 31200.0
 BARRON_DECAY = 0.04
 TAIL_FLOOR = 0.25   # the tail never drops below this fraction of Barron's total
+# Grazing (seat-dip) attenuation applied to early reflections whose last leg
+# skims the main-floor audience, as a fraction of the direct-sound filter.
+# Lateral arrivals cross seat backs side-on, so less than the full row-wise
+# figure; 0.5 keeps rear-Orchestra G near Barron's under-balcony -1..-3 dB.
+REFL_DIP_SCALE = float(__import__('os').environ.get('REFL_DIP_SCALE', '0.5'))
 
 # --------------------------------------------------------------- context
 K = {}   # filled by configure(): geometry callables and constants
@@ -135,28 +140,37 @@ def _build_surfaces():
         SURFACES.append(Plane("main dome (acoustic plaster patch)", "C", (0.0, y0, z0), n, "acoustic_plaster",
                               lambda p, z0=z0, z1=z1, hb=hb: z0 - 0.01 <= p[2] <= z1 + 0.01 and abs(p[0]) <= hb and in_dome(p),
                               order2=False))
-    # side walls. Above the box zone the upper walls fan out from the
-    # proscenium (HSR 1993 balcony and attic plans; tour photos show the
-    # three organ-loft arches converging on the proscenium). Those bays are
-    # open grilles with heavy curtains behind, so the splays are partly
-    # absorptive ("arch_wall"). Below the box zone and behind the splay the
-    # walls stay at the published half breadth.
-    sw = K["side_wall_plan"]          # [[z, half_width], ...] from the proscenium outward
-    y_splay = K["splay_bottom_y"]
-    z_full = sw[-1][0]
+    # side walls in three height bands, all fanning out from the proscenium
+    # (HSR 1993 plans p099/p107/p115/p121/p137/p139; tour photos): the
+    # orchestra-level wall (plaster), the box zone bounded by the box ring's
+    # rear wall about 10 ft behind the rail (drape: curtained doorways and
+    # upholstery), and the upper walls carrying the organ-loft arch bays,
+    # which are open grilles with curtains and chambers behind (arch_wall).
+    # Beyond each polyline's end the wall sits at the published half breadth.
+    swp = K["side_wall_plan"]
+    yb0, yb1 = swp["box_zone_y_ft"]
+    def polyline_w(pts, z):
+        if z >= pts[-1][0]: return hb
+        for (z0, w0), (z1, w1) in zip(pts, pts[1:]):
+            if z <= z1: return w0 + (w1 - w0) * (z - z0) / (z1 - z0)
+        return hb
+    box_pts = [[z, min(hb, w + swp["box_depth_ft"])] for z, w in swp["lower"]]
+    bands = [("orchestra level", swp["lower"], "plaster", lambda p: 0 <= p[1] < yb0),
+             ("box zone", box_pts, "drape", lambda p: yb0 <= p[1] < yb1),
+             ("upper", swp["upper"], "arch_wall", lambda p: yb1 <= p[1] <= ceiling_y_at(p[2]))]
     for sgn in (-1, 1):
-        SURFACES.append(Plane("side wall " + ("L" if sgn < 0 else "R"), "W", (sgn*hb, 0.0, 0.0), (-sgn, 0.0, 0.0), "plaster",
-                              lambda p, z_full=z_full, y_splay=y_splay: 0 <= p[2] <= depth and 0 <= p[1] <= ceiling_y_at(p[2])
-                              and (p[2] >= z_full or p[1] <= y_splay)))
-        for (z0, w0), (z1, w1) in zip(sw, sw[1:]):
-            dz, dw = z1 - z0, w1 - w0
-            n = (-sgn * dz, 0.0, sgn * dw)          # inward-facing normal of the splayed bay
-            n = norm(n)
-            if n[0] * sgn > 0: n = mul(n, -1)
-            p0 = (sgn * w0, 0.0, z0)
-            def inside(p, z0=z0, z1=z1, y_splay=y_splay):
-                return z0 - 0.01 <= p[2] <= z1 + 0.01 and y_splay <= p[1] <= ceiling_y_at(p[2])
-            SURFACES.append(Plane(f"side wall splay {'L' if sgn < 0 else 'R'} {z0:.0f}-{z1:.0f}", "W", p0, n, "arch_wall", inside))
+        side = "L" if sgn < 0 else "R"
+        for bname, pts, mat, in_band in bands:
+            z_end = pts[-1][0]
+            SURFACES.append(Plane(f"side wall {side}", "W", (sgn*hb, 0.0, 0.0), (-sgn, 0.0, 0.0), "plaster",
+                                  lambda p, z_end=z_end, in_band=in_band: z_end <= p[2] <= depth and in_band(p)))
+            for (z0, w0), (z1, w1) in zip(pts, pts[1:]):
+                dz, dw = z1 - z0, w1 - w0
+                n = norm((-sgn * dz, 0.0, sgn * dw))
+                if n[0] * sgn > 0: n = mul(n, -1)
+                def inside(p, z0=z0, z1=z1, in_band=in_band):
+                    return z0 - 0.01 <= p[2] <= z1 + 0.01 and in_band(p)
+                SURFACES.append(Plane(f"side wall {bname} {side} {z0:.0f}-{z1:.0f}", "W", (sgn * w0, 0.0, z0), n, mat, inside))
     # rear walls, one per level
     for name, z, ylo, yhi, mat in K["rear_walls"]:
         SURFACES.append(Plane(name, "R", (0.0, 0.0, z), (0.0, 0.0, -1.0), mat,
@@ -374,7 +388,15 @@ def seat_acoustics(eye, direct_blocked_fn, soffit_planes_fn, pit_visible, grazin
         for p in paths:
             t = p["L"] / C_FT * 1000 - t0
             az, el = arrival_angles(eye, look, p["pts"][-1])
-            taps.append({"t": t, "amps": p["amps"], "az": az, "el": el,
+            amps = p["amps"]
+            if grazing:
+                # a reflection whose last leg skims the seated audience is
+                # thinned like the direct sound (Kahle 2025; Round Robin 1)
+                last = p["pts"][-1]
+                horiz = math.hypot(last[0] - eye[0], last[2] - eye[2]) * FT
+                gd = seat_dip_db(max(el, 0.0), min(horiz, grazing[1]))
+                amps = [a_ * 10 ** (-REFL_DIP_SCALE * d / 20) for a_, d in zip(amps, gd)]
+            taps.append({"t": t, "amps": amps, "az": az, "el": el,
                          "code": "".join(s.code for s in p["surf"]),
                          "pt": p["pts"], "surf": [s.name for s in p["surf"]]})
         if lip is not None and segment_clear(src, lip) and segment_clear(lip, eye, skip_start=3.0):

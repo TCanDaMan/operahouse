@@ -28,8 +28,10 @@ side walls traced from the HSR 1993 attic and balcony plans; engine and viewer
 updated together. Box ring probably traced too wide (37-40 ft on p107 vs 51-53):
 recorded in geometry_conflicts.json, seats not moved. Later that day the ring WAS re-traced
 from p107 (legs 38-40 ft, rear 73 ft; SmartSeat corroborates) and seats/shell
-rebuilt together; the 14 out-of-wall box seats are resolved. Next: box rear
-wall and orchestra-level side walls near the stage; pit-source validity.
+rebuilt together; the 14 out-of-wall box seats are resolved. 2026-09-12: side walls
+splayed at every level (three height bands), box rear wall 10 ft behind the rail,
+reflection grazing filter, softer overhang factor; Beranek's 51 ms ITDG reinterpreted
+as drawing-derived. Remaining: Paoletti RT data, Bancroft drawings, measured IRs.
 
 ---
 

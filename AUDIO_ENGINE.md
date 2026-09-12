@@ -161,6 +161,29 @@ methods review, the viewer now labels C80 and G with +/-1.5 dB: the best
 analytic models reach 1.0-1.4 dB rms against measured halls, and C80's JND is
 1 dB, so seat-to-seat differences under about 1.5 dB should not drive a choice.
 
+## Follow-up 2026-09-12 (Fable): side walls at every level, box rear wall, ITDG provenance
+
+- All four HSR 1993 plan levels (p099 orchestra, p107 boxes, p115 Grand Tier,
+  p121 Dress Circle, plus p137/p139) show the side walls fanning out from the
+  proscenium. side_wall_plan now has three height bands: orchestra level
+  (plaster; 29 ft half-width at z=0, 40 at 20, 45 at 42, 51 at 72, 56.5 at 116),
+  the box zone 16-24 ft bounded by the box ring with its rear wall 10 ft behind
+  the rail (drape), and the upper walls (arch_wall) whose splayed bays carry the
+  organ-loft arches; the GT and DC plans show the loft chambers (rooms 233/234,
+  323/324) behind those bays, so the arches open into chambers. The viewer
+  draws the same three bands with ledges between.
+- Reflections whose last leg skims the main-floor audience now carry half of
+  the seat-dip filter (REFL_DIP_SCALE 0.5); the overhang late-energy factor
+  floors at 0.45 with a 50-degree scale (Barron 1995) instead of 0.3/60.
+- Main-floor centre ITDG is now 31 ms (was 55). Beranek's 51 ms matches
+  parallel walls at the nominal 104 ft width almost exactly (50-55 ms in this
+  model), and his t_I values were often calculated from drawings, so the
+  figure is downgraded to a drawing-derived estimate (house_geometry.json >
+  acoustics.itdg_main_floor_ms) and no longer treated as a hard constraint.
+  An impulse response at the centre seat would settle it.
+- Level medians: C80 +1.6..+2.5, G -2.1..+1.1 (rear Orchestra -3.6 under the
+  box ring); Orchestra LF 0.23, Grand Tier ITDG 27 ms. All checks pass.
+
 ## Run / validation
 
 ```sh
